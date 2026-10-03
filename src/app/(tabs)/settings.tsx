@@ -1,7 +1,8 @@
 import SafeView from '@/components/safe-view';
 import { useAuth } from '@clerk/expo';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 
 export default function Settings() {
   const { signOut } = useAuth();
@@ -19,6 +20,8 @@ export default function Settings() {
 
   return (
     <SafeView className='flex-1 bg-amber-50 p-4'>
+      <StatusBar style='dark' />
+
       <View className='flex-1 justify-between'>
         <View className='gap-4'>
           <Text className='text-3xl font-bold text-neutral-900'>Settings</Text>

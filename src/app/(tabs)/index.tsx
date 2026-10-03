@@ -1,9 +1,13 @@
 import SafeView from '@/components/safe-view';
 import { Text } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import React from 'react';
 
 export default function Home() {
   return (
     <SafeView className='flex-1 items-center justify-center bg-amber-50'>
+      <StatusBar style='dark' />
+
       <Text className='text-2xl font-bold text-blue-500'>Home</Text>
     </SafeView>
   );

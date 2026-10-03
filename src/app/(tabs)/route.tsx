@@ -1,4 +1,4 @@
-import {
+import React, {
   useCallback,
   useEffect,
   useRef,
@@ -18,6 +18,7 @@ import useLocationPermission from '@/hooks/useLocationPermission';
 import { useRouteCalculation } from '@/hooks/useRouteCalculation';
 import RouteControlPanel from '@/components/route/route-control-panel';
 import { DEFAULT_LOOP_OPTIONS, INITIAL_REGION } from '@/constants/map';
+import { StatusBar } from 'expo-status-bar';
 
 export default function RouteScreen() {
   const { granted, visibility, onAllow, onLater } = useLocationPermission();
@@ -88,6 +89,8 @@ export default function RouteScreen() {
 
   return (
     <View className='flex-1'>
+      <StatusBar style='light' />
+
       <LocationModal
         visible={visibility}
         onAllow={onAllow}

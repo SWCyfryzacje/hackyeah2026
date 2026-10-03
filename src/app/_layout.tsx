@@ -1,6 +1,5 @@
 import { SplashScreen, Stack } from 'expo-router';
 import '@/global.css';
-import { StatusBar } from 'expo-status-bar';
 import { ClerkProvider, useAuth } from '@clerk/expo';
 import { tokenCache } from '@clerk/expo/token-cache';
 import LoadingScreen from '@/components/loading-screen';
@@ -20,7 +19,6 @@ function RootLayoutContent() {
 
   return (
     <>
-      <StatusBar style='dark' />
       <Stack
         initialRouteName='(auth)'
         screenOptions={{ headerShown: false }}>

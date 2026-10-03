@@ -7,6 +7,7 @@ import SafeView from '@/components/safe-view';
 import LocationModal from '@/components/location-modal';
 import useLocationPermission from '@/hooks/useLocationPermission';
 import MapView from '@/components/map-view';
+import { StatusBar } from 'expo-status-bar';
 
 export default function Map() {
   const { granted, visibility, onAllow, onLater } = useLocationPermission();
@@ -26,6 +27,8 @@ export default function Map() {
 
   return (
     <SafeView className='flex-1 items-center justify-center bg-amber-50'>
+      <StatusBar style='light' />
+
       <LocationModal
         visible={visibility}
         onAllow={onAllow}
