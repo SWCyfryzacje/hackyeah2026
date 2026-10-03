@@ -71,10 +71,10 @@ Pliki:
 
 | ID | Task | Kryterium ukończenia | Status |
 |---|---|---|---|
-| T3.1 | Zakładka „Razem”: Moje / Publiczne, dołącz kodem, pull-to-refresh | lista z `list_group_routes()` | 🔄 |
-| T3.2 | Przycisk w Route + formularz `new.tsx` (zod, Dziś/Jutro + HH:MM, koniec opc., publiczna/prywatna, wydarzenie) | utworzenie trasy → przejście do szczegółów | 🔄 |
-| T3.3 | Szczegóły `[id]`: mapa + geometria + `LiveLocationMarker`, status (realtime), uczestnicy, kod, akcje wg roli/statusu, zgoda przed startem, `useLocationSharing`, link do czatu | pełny cykl scheduled→live→finished z UI | 🔄 |
-| T3.4 | `join/[code].tsx` — deeplink → join → redirect do szczegółów | link `njord://group-routes/join/KOD` działa | 🔄 |
+| T3.1 | Zakładka „Razem”: Moje / Publiczne, dołącz kodem, pull-to-refresh | lista z `list_group_routes()` | ✅ `494807a`, `668185a` |
+| T3.2 | Przycisk w Route + formularz `new.tsx` (zod, Dziś/Jutro + HH:MM, koniec opc., publiczna/prywatna, wydarzenie) | utworzenie trasy → przejście do szczegółów | ✅ `494807a`, `668185a` |
+| T3.3 | Szczegóły `[id]`: mapa + geometria + `LiveLocationMarker`, status (realtime), uczestnicy, kod, akcje wg roli/statusu, zgoda przed startem, `useLocationSharing`, link do czatu | pełny cykl scheduled→live→finished z UI | ✅ `494807a`, `668185a` |
+| T3.4 | `join/[code].tsx` — deeplink → join → redirect do szczegółów | link `njord://group-routes/join/KOD` działa | ✅ `494807a`, `668185a` |
 
 ### T4 — Weryfikacja RLS (teammate `qa`)
 Pliki:
