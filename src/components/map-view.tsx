@@ -1,31 +1,41 @@
-import MV, { type Region } from 'react-native-maps';
+import MV, { type MapViewProps, type Region } from 'react-native-maps';
 import { StyleSheet } from 'react-native';
-import { Ref } from 'react';
+import { forwardRef, type ReactNode } from 'react';
+import { INITIAL_REGION } from '@/constants/map';
 
-type Props = {
-  permission: boolean;
-  ref?: Ref<MV>;
-};
-
-// Kraków
-const INITIAL_REGION: Region = {
-  latitude: 50.0614,
-  longitude: 19.9366,
-  latitudeDelta: 0.1,
-  longitudeDelta: 0.1,
+export type MapViewWrapperProps = Omit<MapViewProps, 'initialRegion'> & {
+  permission?: boolean;
+  children?: ReactNode;
+  initialRegion?: Region;
 };
 
 // Default provider: Google Maps on Android, Apple Maps on iOS — both work in Expo Go.
-export default function MapView({ permission, ref }: Props) {
+const MapView = forwardRef<MV, MapViewWrapperProps>(function MapView(
+  {
+    permission = false,
+    children,
+    initialRegion = INITIAL_REGION,
+    style = StyleSheet.absoluteFill,
+    showsMyLocationButton = false,
+    showsCompass = true,
+    mapPadding = { top: 60, right: 5, bottom: 10, left: 5 },
+    ...rest
+  },
+  ref
+) {
   return (
     <MV
       ref={ref}
-      style={StyleSheet.absoluteFill}
-      initialRegion={INITIAL_REGION}
+      style={style}
+      initialRegion={initialRegion}
       showsUserLocation={permission}
-      showsMyLocationButton={false}
-      showsCompass
-      mapPadding={{ top: 60, right: 5, bottom: 10, left: 5 }}
-    />
+      showsMyLocationButton={showsMyLocationButton}
+      showsCompass={showsCompass}
+      mapPadding={mapPadding}
+      {...rest}>
+      {children}
+    </MV>
   );
-}
+});
+
+export default MapView;

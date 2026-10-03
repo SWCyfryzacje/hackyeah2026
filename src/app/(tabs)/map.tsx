@@ -1,38 +1,28 @@
-import SafeView from '@/components/safe-view';
-import useLocationPermission, {
-  LocationModal,
-} from '@/hooks/useLocationPermission';
+import React, { useRef } from 'react';
 import { Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import React, { useEffect } from 'react';
 import RNMapView from 'react-native-maps';
+import SafeView from '@/components/safe-view';
+import LocationModal from '@/components/location-modal';
+import useLocationPermission from '@/hooks/useLocationPermission';
 import MapView from '@/components/map-view';
 
 export default function Map() {
-  const { granted, visibility, showModal, grantPermission, onAllow, onLater } =
-    useLocationPermission();
-
-  const mapRef = React.useRef<RNMapView>(null);
+  const { granted, visibility, onAllow, onLater } = useLocationPermission();
+  const mapRef = useRef<RNMapView>(null);
 
   const goToMe = async () => {
-    const { coords } = await Location.getCurrentPositionAsync({});
-    mapRef.current?.animateCamera({
-      center: { latitude: coords.latitude, longitude: coords.longitude },
-      zoom: 16,
-    });
+    try {
+      const { coords } = await Location.getCurrentPositionAsync({});
+      mapRef.current?.animateCamera({
+        center: { latitude: coords.latitude, longitude: coords.longitude },
+        zoom: 16,
+      });
+    } catch (e) {
+      console.warn('Location error:', e instanceof Error ? e.message : e);
+    }
   };
-
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        showModal();
-      } else {
-        grantPermission();
-      }
-    })();
-  }, [grantPermission, showModal]);
 
   return (
     <SafeView className='flex-1 items-center justify-center bg-amber-50'>

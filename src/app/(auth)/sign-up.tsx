@@ -1,12 +1,10 @@
 import {
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
-  Text,
   View,
 } from 'react-native';
-import { Href, Link, router } from 'expo-router';
+import { Href, router } from 'expo-router';
 import SafeView from '@/components/safe-view';
 import { useForm } from 'react-hook-form';
 import {
@@ -21,6 +19,8 @@ import SignVerify from '@/components/sign-verify';
 import { useEffect, useState } from 'react';
 import SignForm from '@/components/sign-form';
 import LoadingScreen from '@/components/loading-screen';
+import AuthHeader from '@/components/auth/auth-header';
+import AuthFooterLink from '@/components/auth/auth-footer-link';
 
 export default function SignUp() {
   const form = useForm<SignFormData>({ resolver: zodResolver(SignFormSchema) });
@@ -119,14 +119,10 @@ export default function SignUp() {
           keyboardShouldPersistTaps='handled'
           showsVerticalScrollIndicator={false}>
           <View className='mx-auto w-full max-w-md gap-6'>
-            <View className='items-center gap-2'>
-              <Text className='text-center text-3xl font-bold text-neutral-900'>
-                Create your Account
-              </Text>
-              <Text className='text-center text-sm text-neutral-600'>
-                Sign up to start
-              </Text>
-            </View>
+            <AuthHeader
+              title='Create your Account'
+              subtitle='Sign up to start'
+            />
 
             <SignForm
               form={form}
@@ -137,20 +133,11 @@ export default function SignUp() {
               type='sign-up'
             />
 
-            <View className='flex-row items-center justify-center gap-1.5'>
-              <Text className='text-sm text-neutral-600'>
-                Already have an account?
-              </Text>
-              <Link
-                href='/(auth)/sign-in'
-                asChild>
-                <Pressable>
-                  <Text className='text-sm font-semibold text-blue-600'>
-                    Sign In
-                  </Text>
-                </Pressable>
-              </Link>
-            </View>
+            <AuthFooterLink
+              promptText='Already have an account?'
+              linkText='Sign In'
+              href='/(auth)/sign-in'
+            />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

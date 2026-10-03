@@ -1,12 +1,10 @@
 import {
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
-  Text,
   View,
 } from 'react-native';
-import { Href, Link, router } from 'expo-router';
+import { Href, router } from 'expo-router';
 import SafeView from '@/components/safe-view';
 import { useForm } from 'react-hook-form';
 import {
@@ -21,6 +19,8 @@ import SignVerify from '@/components/sign-verify';
 import { useEffect, useState } from 'react';
 import SignForm from '@/components/sign-form';
 import LoadingScreen from '@/components/loading-screen';
+import AuthHeader from '@/components/auth/auth-header';
+import AuthFooterLink from '@/components/auth/auth-footer-link';
 
 export default function SignIn() {
   const form = useForm<SignFormData>({ resolver: zodResolver(SignFormSchema) });
@@ -134,14 +134,10 @@ export default function SignIn() {
           keyboardShouldPersistTaps='handled'
           showsVerticalScrollIndicator={false}>
           <View className='mx-auto w-full max-w-md gap-6'>
-            <View className='items-center gap-2'>
-              <Text className='text-center text-3xl font-bold text-neutral-900'>
-                Welcome back
-              </Text>
-              <Text className='text-center text-sm text-neutral-600'>
-                Sign in to continue
-              </Text>
-            </View>
+            <AuthHeader
+              title='Welcome back'
+              subtitle='Sign in to continue'
+            />
 
             <SignForm
               form={form}
@@ -152,20 +148,11 @@ export default function SignIn() {
               type='sign-in'
             />
 
-            <View className='flex-row items-center justify-center gap-1.5'>
-              <Text className='text-sm text-neutral-600'>
-                {"Don't have an account?"}
-              </Text>
-              <Link
-                href='/(auth)/sign-up'
-                asChild>
-                <Pressable>
-                  <Text className='text-sm font-semibold text-blue-600'>
-                    Create Account
-                  </Text>
-                </Pressable>
-              </Link>
-            </View>
+            <AuthFooterLink
+              promptText="Don't have an account?"
+              linkText='Create Account'
+              href='/(auth)/sign-up'
+            />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

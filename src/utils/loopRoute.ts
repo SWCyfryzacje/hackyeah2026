@@ -84,10 +84,12 @@ export async function loopOfLength({
     );
 
     let route: Route;
+
     try {
       route = await routeBetween([start, ...ring, start], signal);
     } catch (e) {
       if (signal?.aborted) throw e;
+
       if (isNoRoad(e)) {
         radius *= 0.8; // a waypoint had no road nearby, try a smaller circle
         continue;
