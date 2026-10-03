@@ -2,22 +2,26 @@ import { useEffect, useMemo, useState } from 'react';
 import type { LatLng } from 'react-native-maps';
 import { useSupabase } from '@/lib/supabase';
 import { fetchMonumentsAlongRoute, type Monument } from '@/utils/monuments';
-import type { Route } from '@/utils/routeThrough';
+import type { Route } from '@/utils/oneWayRoute';
 
 // How far from the route (meters) a monument may be to be suggested
 const SUGGESTION_BUFFER_M = 300;
+
+const NO_STOPS: LatLng[] = [];
 
 /**
  * Monuments near the route that the user can add as stops.
  *
  * Suggestions are fetched once per set of waypoints, from the first route
  * computed for them (no stops yet), so they don't shift when stops are added.
- * `stops` are the selected monuments in the order they appear along the route;
- * insert them before the destination when computing the route.
+ * Selecting a monument calls `onStopsChange` with the selected monuments in
+ * the order they appear along the route; pass those as route stops.
+ * Call `clear()` when the route is reset.
  */
 export default function useMonumentSuggestions(
   route: Route | null,
-  waypoints: LatLng[]
+  waypoints: LatLng[],
+  onStopsChange: (stops: LatLng[]) => void
 ) {
   const supabase = useSupabase();
   const key = JSON.stringify(waypoints);
@@ -32,15 +36,6 @@ export default function useMonumentSuggestions(
   const selectedIds = useMemo(
     () => new Set(selection?.key === key ? selection.ids : []),
     [selection, key]
-  );
-
-  const stops = useMemo<LatLng[]>(
-    () =>
-      suggestions
-        .filter((m) => selectedIds.has(m.id))
-        .sort((a, b) => (a.routeFraction ?? 0) - (b.routeFraction ?? 0))
-        .map((m) => ({ latitude: m.latitude, longitude: m.longitude })),
-    [suggestions, selectedIds]
   );
 
   useEffect(() => {
@@ -62,9 +57,20 @@ export default function useMonumentSuggestions(
       ? [...selectedIds].filter((x) => x !== id)
       : [...selectedIds, id];
     setSelection({ key, ids });
+    onStopsChange(
+      suggestions
+        .filter((m) => ids.includes(m.id))
+        .sort((a, b) => (a.routeFraction ?? 0) - (b.routeFraction ?? 0))
+        .map((m) => ({ latitude: m.latitude, longitude: m.longitude }))
+    );
   };
 
-  return { suggestions, selectedIds, stops, toggle };
+  const clear = () => {
+    setSelection(undefined);
+    onStopsChange(NO_STOPS);
+  };
+
+  return { suggestions, selectedIds, toggle, clear };
 }
 
 export type MonumentSuggestions = ReturnType<typeof useMonumentSuggestions>;

@@ -1,18 +1,22 @@
 import { LatLng } from 'react-native-maps';
 
-export type RouteProfile = 'driving' | 'foot';
-
-// The public OSRM demo server only has the car profile; FOSSGIS hosts foot.
-const BASE: Record<RouteProfile, string> = {
-  driving: 'https://router.project-osrm.org',
-  foot: 'https://routing.openstreetmap.de/routed-foot',
-};
+const BASE = 'https://router.project-osrm.org';
 
 export type Route = {
   coords: LatLng[];
   distance: number; // meters
   duration: number; // seconds
 };
+
+export class OsrmError extends Error {
+  readonly code: string;
+
+  constructor(code: string, message?: string) {
+    super(message || code || 'Route calculation failed');
+    this.name = 'OsrmError';
+    this.code = code;
+  }
+}
 
 type OsrmResponse = {
   code: string; // 'Ok' | 'NoRoute' | 'NoSegment' | ...
@@ -24,10 +28,9 @@ type OsrmResponse = {
   }[];
 };
 
-export async function routeThrough(
+export async function routeBetween(
   points: LatLng[],
-  signal?: AbortSignal,
-  profile: RouteProfile = 'driving'
+  signal?: AbortSignal
 ): Promise<Route> {
   if (points.length < 2) {
     throw new Error('At least 2 points are required to calculate a route.');
@@ -35,7 +38,7 @@ export async function routeThrough(
 
   const coords = points.map((p) => `${p.longitude},${p.latitude}`).join(';');
   const res = await fetch(
-    `${BASE[profile]}/route/v1/driving/${coords}?overview=full&geometries=geojson`,
+    `${BASE}/route/v1/driving/${coords}?overview=full&geometries=geojson&continue_straight=true`,
     { signal }
   );
 
@@ -44,8 +47,12 @@ export async function routeThrough(
   }
 
   const json: OsrmResponse = await res.json();
-  if (json.code !== 'Ok' || !json.routes?.length)
-    throw new Error(json.message || json.code || 'Route calculation failed');
+  if (json.code !== 'Ok' || !json.routes?.length) {
+    throw new OsrmError(
+      json.code,
+      json.message || `Route calculation failed with code: ${json.code}`
+    );
+  }
 
   const r = json.routes[0];
   return {
@@ -57,3 +64,5 @@ export async function routeThrough(
     duration: r.duration,
   };
 }
+
+export const routeThrough = routeBetween;

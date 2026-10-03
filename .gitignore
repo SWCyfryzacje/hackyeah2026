@@ -50,6 +50,7 @@ example
 
 .claude
 .agents
+.junie
 
 # supabase backend (not part of the app)
 supabase/

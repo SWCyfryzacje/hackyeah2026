@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { LatLng } from 'react-native-maps';
-import type { Route } from '@/utils/routeThrough';
+import type { Route } from '@/utils/oneWayRoute';
 
 // Max points sent to monuments_along_route; OSRM overview=full can return thousands.
 const MAX_ROUTE_POINTS = 300;
