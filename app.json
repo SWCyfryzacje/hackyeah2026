@@ -8,9 +8,11 @@
     "scheme": "expotemplate",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "pl.overdance.tripplanner",
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "pl.overdance.tripplanner",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
