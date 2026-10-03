@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "expo-template",
+    "name": "njord",
     "slug": "expo-template",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "expotemplate",
+    "scheme": "njord",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "pl.overdance.tripplanner",
+      "bundleIdentifier": "pl.swc.njord",
       "icon": "./assets/expo.icon"
     },
     "android": {
-      "package": "pl.overdance.tripplanner",
+      "package": "pl.swc.njord",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -20,7 +20,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.expotemplate"
+      "package": "pl.swc.njord"
     },
     "web": {
       "output": "static",

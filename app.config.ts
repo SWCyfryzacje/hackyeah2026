@@ -1,12 +1,15 @@
 import { ConfigContext, ExpoConfig } from 'expo/config';
 
 // Maps use PROVIDER_GOOGLE, which on iOS needs the Google Maps SDK.
-// Keys come from .env (see .env.example).
+// Keys come from .env (see .env).
 const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
-const GOOGLE_MAPS_IOS_API_KEY = process.env.GOOGLE_MAPS_IOS_API_KEY ?? GOOGLE_MAPS_API_KEY;
+const GOOGLE_MAPS_IOS_API_KEY =
+  process.env.GOOGLE_MAPS_IOS_API_KEY ?? GOOGLE_MAPS_API_KEY;
 
 if (!GOOGLE_MAPS_API_KEY) {
-  console.warn('[app.config] Missing GOOGLE_MAPS_API_KEY — the map will not work.');
+  console.warn(
+    '[app.config] Missing GOOGLE_MAPS_API_KEY — the map will not work.'
+  );
 }
 
 export default ({ config }: ConfigContext): ExpoConfig => ({

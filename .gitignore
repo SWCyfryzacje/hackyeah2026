@@ -47,5 +47,3 @@ example
 
 # env files (hold API keys)
 .env
-.env.*
-!.env.example
