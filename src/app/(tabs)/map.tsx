@@ -5,12 +5,13 @@ import useLocationPermission, {
 import { Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import React from 'react';
+import React, { useEffect } from 'react';
 import RNMapView from 'react-native-maps';
 import MapView from '@/components/map-view';
 
 export default function Map() {
-  const { granted, showModal, onAllow, onLater } = useLocationPermission();
+  const { granted, visibility, showModal, grantPermission, onAllow, onLater } =
+    useLocationPermission();
 
   const mapRef = React.useRef<RNMapView>(null);
 
@@ -22,10 +23,21 @@ export default function Map() {
     });
   };
 
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        showModal();
+      } else {
+        grantPermission();
+      }
+    })();
+  }, []);
+
   return (
     <SafeView className='flex-1 items-center justify-center bg-amber-50'>
       <LocationModal
-        visible={showModal}
+        visible={visibility}
         onAllow={onAllow}
         onLater={onLater}
       />
