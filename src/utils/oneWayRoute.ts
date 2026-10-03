@@ -38,7 +38,7 @@ export async function routeBetween(
 
   const coords = points.map((p) => `${p.longitude},${p.latitude}`).join(';');
   const res = await fetch(
-    `${BASE}/route/v1/driving/${coords}?overview=full&geometries=geojson`,
+    `${BASE}/route/v1/driving/${coords}?overview=full&geometries=geojson&continue_straight=true`,
     { signal }
   );
 
