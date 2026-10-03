@@ -17,15 +17,13 @@ export default function RootLayout() {
     <ClerkProvider
       publishableKey={publishableKey}
       tokenCache={tokenCache}>
-      <>
-        <StatusBar style='dark' />
-        <Stack
-          screenOptions={{ headerShown: false }}
-          initialRouteName='(tabs)'>
-          <Stack.Screen name='(auth)' />
-          <Stack.Screen name='(tabs)' />
-        </Stack>
-      </>
+      <StatusBar style='light' />
+      <Stack
+        screenOptions={{ headerShown: false }}
+        initialRouteName='(tabs)'>
+        <Stack.Screen name='(auth)' />
+        <Stack.Screen name='(tabs)' />
+      </Stack>
     </ClerkProvider>
   );
 }

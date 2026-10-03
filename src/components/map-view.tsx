@@ -1,5 +1,11 @@
-import MapView, { type Region } from 'react-native-maps';
+import MV, { type Region } from 'react-native-maps';
 import { StyleSheet } from 'react-native';
+import { Ref } from 'react';
+
+type Props = {
+  permission: boolean;
+  ref?: Ref<MV>;
+};
 
 // Kraków
 const INITIAL_REGION: Region = {
@@ -10,13 +16,16 @@ const INITIAL_REGION: Region = {
 };
 
 // Default provider: Google Maps on Android, Apple Maps on iOS — both work in Expo Go.
-export default function TripMap() {
+export default function MapView({ permission, ref }: Props) {
   return (
-    <MapView
+    <MV
+      ref={ref}
       style={StyleSheet.absoluteFill}
       initialRegion={INITIAL_REGION}
-      showsUserLocation={false}
+      showsUserLocation={permission}
+      showsMyLocationButton={false}
       showsCompass
+      mapPadding={{ top: 60, right: 5, bottom: 10, left: 5 }}
     />
   );
 }
