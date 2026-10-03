@@ -3,6 +3,7 @@ import '@/global.css';
 import { ClerkProvider, useAuth } from '@clerk/expo';
 import { tokenCache } from '@clerk/expo/token-cache';
 import LoadingScreen from '@/components/loading-screen';
+import useProfileSync from '@/hooks/useProfileSync';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -14,6 +15,7 @@ if (!publishableKey) {
 
 function RootLayoutContent() {
   const { isLoaded: authLoaded } = useAuth();
+  useProfileSync();
 
   if (!authLoaded) return <LoadingScreen />;
 
