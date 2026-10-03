@@ -19,10 +19,19 @@ Definicja ukończenia każdego taska (DoD): spełnione kryteria taska, `npx tsc 
 ## Faza 2a — fundament (sekwencyjnie, przed teammates)
 | ID | Task | Właściciel | Zależy od | Kryterium ukończenia | Status |
 |---|---|---|---|---|---|
-| T0.1 | Migracja `20261004090000_group_routes.sql` (tabele, helpery, RLS, RPC, publikacja realtime) | lider | P1 | SQL idempotentny gdzie się da; **wklejony przez użytkownika**; `get_advisors` (security) bez nowych ostrzeżeń dla tych tabel | ⬜ |
-| T0.2 | Migracja `20261004090100_group_routes_cron.sql` (auto-finish co 5 min, purge 02:45 UTC) | lider | T0.1 | joby widoczne w `cron.job` | ⬜ |
-| T0.3 | `src/types/group-routes.ts`, `src/lib/group-routes.ts`, `src/lib/group-route-draft.ts` | lider | T0.1 | wszystkie RPC z ARCHITECTURE §2 mają typowane wrappery | ⬜ |
-| T0.4 | Stuby wszystkich plików z kontraktów + ekranów (zwracają placeholder) | lider | T0.3 | `tsc` i `lint` przechodzą; commit bazowy dla teammates | ⬜ |
+| T0.1 | Migracja `20261004090000_group_routes.sql` (tabele, helpery, RLS, RPC, publikacja realtime) | lider | P1 | SQL idempotentny gdzie się da; **wklejony przez użytkownika**; `get_advisors` (security) bez nowych ostrzeżeń dla tych tabel | 🔄 SQL gotowy, czeka na wklejenie |
+| T0.2 | Migracja `20261004090100_group_routes_cron.sql` (auto-finish co 5 min, purge 02:45 UTC) | lider | T0.1 | joby widoczne w `cron.job` | 🔄 SQL gotowy, czeka na wklejenie |
+| T0.3 | `src/types/group-routes.ts`, `src/lib/group-routes.ts`, `src/lib/group-route-draft.ts` | lider | T0.1 | wszystkie RPC z ARCHITECTURE §2 mają typowane wrappery | ✅ |
+| T0.4 | Stuby wszystkich plików z kontraktów + ekranów (zwracają placeholder) | lider | T0.3 | `tsc` i `lint` przechodzą; commit bazowy dla teammates | ✅ |
+
+Baseline `tsc`: 1 zastany błąd na `merged-1` (`src/app/_layout.tsx:2` — brak typów dla `@/global.css`,
+bo `expo-env.d.ts` jest generowany przez `expo start`). DoD = brak **nowych** błędów.
+
+Ryzyka sprawdzone przed T0:
+- Realtime + Clerk: supabase-js 2.117 przekazuje `accessToken` do Realtime i odświeża token przy
+  każdym heartbeacie (~25 s); docs Supabase potwierdzają RLS dla Realtime przy Clerk third-party auth
+  (wymaga claimu `role: authenticated` — działa, bo `profiles` zapisuje się przez politykę `to authenticated`).
+- DELETE w `postgres_changes` nie jest filtrowany RLS → domyślne replica identity (tylko PK).
 
 ## Faza 2b — teammates (równolegle, od commita T0.4)
 
