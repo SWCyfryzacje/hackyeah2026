@@ -10,6 +10,7 @@ import MapView from '@/components/map-view';
 import { StatusBar } from 'expo-status-bar';
 import useNearbyMonuments from '@/hooks/useNearbyMonuments';
 import { MonumentMarkers } from '@/components/monument-marker';
+import MonumentLevelPicker from '@/components/monument-level-picker';
 
 export default function Map() {
   const { granted, visibility, onAllow, onLater } = useLocationPermission();
@@ -37,6 +38,7 @@ export default function Map() {
         onAllow={onAllow}
         onLater={onLater}
       />
+      <MonumentLevelPicker className='absolute top-4 right-4 left-4 z-10' />
       <Pressable
         onPress={goToMe}
         className='absolute right-4 bottom-8 z-10 h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg'>

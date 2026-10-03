@@ -2,6 +2,7 @@ import { Pressable, ScrollView, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import MonumentMarker, { formatDistance } from '@/components/monument-marker';
 import type { MonumentSuggestions } from '@/hooks/useMonumentSuggestions';
+import MonumentLevelPicker from '@/components/monument-level-picker';
 
 const SELECTED_COLOR = '#16a34a';
 const SUGGESTED_COLOR = '#d97706';
@@ -25,10 +26,11 @@ export function MonumentSuggestionMarkers({
 /** Checklist of suggested monuments for the route panel. */
 export function MonumentSuggestionList({
   suggestions,
+  total,
   selectedIds,
   toggle,
 }: MonumentSuggestions) {
-  if (suggestions.length === 0) return null;
+  if (total === 0) return null;
 
   return (
     <>
@@ -36,6 +38,12 @@ export function MonumentSuggestionList({
         Monuments along the way
         {selectedIds.size > 0 ? ` · ${selectedIds.size} added` : ' — tap to add'}
       </Text>
+      <MonumentLevelPicker />
+      {suggestions.length === 0 && (
+        <Text className='text-xs text-neutral-500'>
+          None at this level — try a broader one
+        </Text>
+      )}
       <ScrollView className='max-h-40'>
         {suggestions.map((m) => {
           const selected = selectedIds.has(m.id);

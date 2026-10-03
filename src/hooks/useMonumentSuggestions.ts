@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { LatLng } from 'react-native-maps';
 import { useSupabase } from '@/lib/supabase';
+import useMonumentLevel from '@/hooks/useMonumentLevel';
 import { fetchMonumentsAlongRoute, type Monument } from '@/utils/monuments';
 import type { Route } from '@/utils/oneWayRoute';
 
@@ -29,13 +30,19 @@ export default function useMonumentSuggestions(
   const [found, setFound] = useState<{ key: string; items: Monument[] }>();
   const [selection, setSelection] = useState<{ key: string; ids: number[] }>();
 
-  const suggestions = useMemo(
-    () => (found?.key === key ? found.items : []),
-    [found, key]
-  );
+  const [minScore] = useMonumentLevel();
+
   const selectedIds = useMemo(
     () => new Set(selection?.key === key ? selection.ids : []),
     [selection, key]
+  );
+  // Filtered by the chosen level; already selected stops stay visible
+  const suggestions = useMemo(
+    () =>
+      (found?.key === key ? found.items : []).filter(
+        (m) => m.score >= minScore || selectedIds.has(m.id)
+      ),
+    [found, key, minScore, selectedIds]
   );
 
   useEffect(() => {
@@ -70,7 +77,10 @@ export default function useMonumentSuggestions(
     onStopsChange(NO_STOPS);
   };
 
-  return { suggestions, selectedIds, toggle, clear };
+  // Monuments near the route at any level (0 = nothing to suggest)
+  const total = found?.key === key ? found.items.length : 0;
+
+  return { suggestions, total, selectedIds, toggle, clear };
 }
 
 export type MonumentSuggestions = ReturnType<typeof useMonumentSuggestions>;

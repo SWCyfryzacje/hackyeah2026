@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Region } from 'react-native-maps';
 import { useSupabase } from '@/lib/supabase';
+import useMonumentLevel from '@/hooks/useMonumentLevel';
 import {
   fetchMonumentsNear,
   regionRadiusM,
@@ -23,6 +24,7 @@ const DEFAULT_REGION: Region = {
  */
 export default function useNearbyMonuments() {
   const supabase = useSupabase();
+  const [minScore] = useMonumentLevel();
   const [region, setRegion] = useState<Region>(DEFAULT_REGION);
   const [monuments, setMonuments] = useState<Monument[]>([]);
 
@@ -33,6 +35,7 @@ export default function useNearbyMonuments() {
         supabase,
         region,
         regionRadiusM(region.latitudeDelta),
+        minScore,
         ctrl.signal
       )
         .then(setMonuments)
@@ -46,7 +49,7 @@ export default function useNearbyMonuments() {
       clearTimeout(timer);
       ctrl.abort();
     };
-  }, [region, supabase]);
+  }, [region, minScore, supabase]);
 
   return { monuments, onRegionChangeComplete: setRegion };
 }

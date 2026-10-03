@@ -48,12 +48,14 @@ export async function fetchMonumentsNear(
   supabase: SupabaseClient,
   center: LatLng,
   radiusM = 2000,
+  minScore = 0,
   signal?: AbortSignal
 ): Promise<Monument[]> {
   let query = supabase.rpc('monuments_near', {
     lat: center.latitude,
     lon: center.longitude,
     radius_m: Math.round(radiusM),
+    min_score: minScore,
   });
   if (signal) query = query.abortSignal(signal);
 
@@ -79,6 +81,8 @@ export async function fetchMonumentsAlongRoute(
       coordinates: coords.map((c) => [c.longitude, c.latitude]),
     }),
     buffer_m: bufferM,
+    // Most popular first; the app filters these by the chosen level
+    max_count: 30,
   });
   if (signal) query = query.abortSignal(signal);
 
