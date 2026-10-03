@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import * as Location from 'expo-location';
 import { Linking, Modal, Pressable, Text, View } from 'react-native';
 
