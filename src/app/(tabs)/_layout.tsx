@@ -74,6 +74,19 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name='together'
+        options={{
+          title: 'Razem',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon
+              name={focused ? 'people' : 'people-outline'}
+              color={color}
+              focused={focused}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name='settings'
         options={{
           title: 'Settings',

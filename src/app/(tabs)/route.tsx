@@ -24,6 +24,7 @@ import {
   MonumentSuggestionList,
   MonumentSuggestionMarkers,
 } from '@/components/monument-suggestions';
+import CreateGroupRouteButton from '@/components/group-routes/create-group-route-button';
 
 export default function RouteScreen() {
   const { granted, visibility, onAllow, onLater } = useLocationPermission();
@@ -43,6 +44,7 @@ export default function RouteScreen() {
     waypoints,
     route,
     loop,
+    activeRoute,
     error,
     loading,
     statusText,
@@ -153,6 +155,10 @@ export default function RouteScreen() {
           resetRoute();
         }}>
         <MonumentSuggestionList {...monuments} />
+        <CreateGroupRouteButton
+          route={activeRoute}
+          stops={monumentStops}
+        />
       </RouteControlPanel>
     </View>
   );
