@@ -44,3 +44,8 @@ example
 
 # ide
 .idea
+
+# env files (hold API keys)
+.env
+.env.*
+!.env.example
