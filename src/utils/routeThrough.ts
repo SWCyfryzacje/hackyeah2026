@@ -1,6 +1,12 @@
 import { LatLng } from 'react-native-maps';
 
-const BASE = 'https://router.project-osrm.org';
+export type RouteProfile = 'driving' | 'foot';
+
+// The public OSRM demo server only has the car profile; FOSSGIS hosts foot.
+const BASE: Record<RouteProfile, string> = {
+  driving: 'https://router.project-osrm.org',
+  foot: 'https://routing.openstreetmap.de/routed-foot',
+};
 
 export type Route = {
   coords: LatLng[];
@@ -20,7 +26,8 @@ type OsrmResponse = {
 
 export async function routeThrough(
   points: LatLng[],
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  profile: RouteProfile = 'driving'
 ): Promise<Route> {
   if (points.length < 2) {
     throw new Error('At least 2 points are required to calculate a route.');
@@ -28,7 +35,7 @@ export async function routeThrough(
 
   const coords = points.map((p) => `${p.longitude},${p.latitude}`).join(';');
   const res = await fetch(
-    `${BASE}/route/v1/driving/${coords}?overview=full&geometries=geojson`,
+    `${BASE[profile]}/route/v1/driving/${coords}?overview=full&geometries=geojson`,
     { signal }
   );
 
