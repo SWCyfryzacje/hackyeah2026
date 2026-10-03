@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ComponentProps } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import MapView, {
   Marker,
   Polyline,
@@ -8,25 +8,24 @@ import MapView, {
   type Region,
 } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { Ionicons } from '@expo/vector-icons';
 import {
   routeThrough,
   type Route,
   type RouteProfile,
 } from '@/utils/routeThrough';
-import { fetchMonumentsAlongRoute, type Monument } from '@/utils/monuments';
-import MonumentMarker, { formatDistance } from '@/components/monument-marker';
-import { useSupabase } from '@/lib/supabase';
 import useLocationPermission, {
   LocationModal,
 } from '@/hooks/useLocationPermission';
+import RouteProfileToggle from '@/components/route-profile-toggle';
+import useMonumentSuggestions from '@/hooks/useMonumentSuggestions';
+import {
+  MonumentSuggestionList,
+  MonumentSuggestionMarkers,
+} from '@/components/monument-suggestions';
 
 // Configuration: easy to change start behavior in the future
 const USE_USER_LOCATION_AS_START = true;
 const MAX_WAYPOINTS = USE_USER_LOCATION_AS_START ? 1 : 2;
-
-// How far from the route (meters) a monument may be to be suggested
-const SUGGESTION_BUFFER_M = 300;
 
 const INITIAL_REGION: Region = {
   latitude: 50.0614,
@@ -35,28 +34,17 @@ const INITIAL_REGION: Region = {
   longitudeDelta: 0.1,
 };
 
-const isAbort = (e: unknown) => e instanceof Error && e.name === 'AbortError';
-
 export default function RouteScreen() {
   const { granted, visibility, showModal, grantPermission, onAllow, onLater } =
     useLocationPermission();
-  const supabase = useSupabase();
 
   const mapRef = useRef<MapView>(null);
   const [start, setStart] = useState<LatLng | null>(null);
   const [waypoints, setWaypoints] = useState<LatLng[]>([]);
+  const [route, setRoute] = useState<Route | null>(null);
+  const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<RouteProfile>('foot');
-  // Async results are stored together with the input they were computed for,
-  // so stale results are ignored instead of being reset inside effects.
-  // The base route goes through the user's points only; suggestions come from
-  // it so they don't shift when monuments get added as stops.
-  const [base, setBase] = useState<{ key: string; route: Route | null }>();
-  const [found, setFound] = useState<{ base: Route; items: Monument[] }>();
-  const [selection, setSelection] = useState<{ base: Route; ids: number[] }>();
-  const [withStops, setWithStops] = useState<{
-    key: string;
-    route: Route | null;
-  }>();
+  const monuments = useMonumentSuggestions(route, waypoints);
 
   useEffect(() => {
     (async () => {
@@ -99,118 +87,57 @@ export default function RouteScreen() {
     };
   }, [granted]);
 
-  const basePoints: LatLng[] = [];
-  if (USE_USER_LOCATION_AS_START && start) basePoints.push(start);
-  basePoints.push(...waypoints);
-
-  const baseKey =
-    basePoints.length >= 2 ? `${profile}|${JSON.stringify(basePoints)}` : null;
-  const baseRoute = baseKey && base?.key === baseKey ? base.route : null;
-
-  const suggestions =
-    baseRoute && found?.base === baseRoute ? found.items : [];
-  const selectedIds = new Set(
-    baseRoute && selection?.base === baseRoute ? selection.ids : []
-  );
-
-  // Selected monuments go before the destination, in the order they appear
-  // along the base route.
-  const stops = suggestions
-    .filter((m) => selectedIds.has(m.id))
-    .sort((a, b) => (a.routeFraction ?? 0) - (b.routeFraction ?? 0))
-    .map((m) => ({ latitude: m.latitude, longitude: m.longitude }));
-  const stopsKey =
-    baseKey && stops.length > 0 ? `${baseKey}|${JSON.stringify(stops)}` : null;
-
-  const route =
-    (stopsKey && withStops?.key === stopsKey && withStops.route) || baseRoute;
-  const loading =
-    (baseKey !== null && base?.key !== baseKey) ||
-    (stopsKey !== null && withStops?.key !== stopsKey);
-
-  // 1. Base route through the user's points.
   useEffect(() => {
-    if (!baseKey) return;
+    const points: LatLng[] = [];
+
+    if (USE_USER_LOCATION_AS_START) {
+      if (start) {
+        points.push(start);
+      }
+      points.push(...waypoints);
+    } else {
+      points.push(...waypoints);
+    }
+
+    // Selected monuments become stops before the destination
+    points.splice(points.length - 1, 0, ...monuments.stops);
+
+    if (points.length < 2) {
+      setRoute(null);
+      return;
+    }
 
     const ctrl = new AbortController();
-    routeThrough(basePoints, ctrl.signal, profile)
-      .then((r) => setBase({ key: baseKey, route: r }))
-      .catch((e: unknown) => {
-        if (isAbort(e)) return;
-        console.warn('Route error:', e instanceof Error ? e.message : e);
-        setBase({ key: baseKey, route: null });
-      });
+    setLoading(true);
 
-    return () => ctrl.abort();
-  }, [baseKey]);
-
-  // 2. Monuments near the base route.
-  useEffect(() => {
-    if (!baseRoute) return;
-
-    const ctrl = new AbortController();
-    fetchMonumentsAlongRoute(
-      supabase,
-      baseRoute,
-      SUGGESTION_BUFFER_M,
-      ctrl.signal
-    )
-      .then((items) => setFound({ base: baseRoute, items }))
-      .catch((e: unknown) => {
-        if (ctrl.signal.aborted) return;
-        console.warn('Monuments error:', e instanceof Error ? e.message : e);
-      });
-
-    return () => ctrl.abort();
-  }, [baseRoute, supabase]);
-
-  // 3. Route through the selected monuments.
-  useEffect(() => {
-    if (!stopsKey) return;
-
-    const points = [
-      ...basePoints.slice(0, -1),
-      ...stops,
-      basePoints[basePoints.length - 1],
-    ];
-
-    const ctrl = new AbortController();
     routeThrough(points, ctrl.signal, profile)
-      .then((r) => setWithStops({ key: stopsKey, route: r }))
+      .then((r) => {
+        setRoute(r);
+        mapRef.current?.fitToCoordinates(r.coords, {
+          edgePadding: { top: 80, right: 50, bottom: 120, left: 50 },
+          animated: true,
+        });
+      })
       .catch((e: unknown) => {
-        if (isAbort(e)) return;
+        if (e instanceof Error && e.name === 'AbortError') return;
         console.warn('Route error:', e instanceof Error ? e.message : e);
-        setWithStops({ key: stopsKey, route: null });
+        setRoute(null);
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setLoading(false);
       });
 
     return () => ctrl.abort();
-  }, [stopsKey]);
-
-  useEffect(() => {
-    if (!route) return;
-    mapRef.current?.fitToCoordinates(route.coords, {
-      edgePadding: { top: 80, right: 50, bottom: 320, left: 50 },
-      animated: true,
-    });
-  }, [route]);
+  }, [start, waypoints, monuments.stops, profile]);
 
   const onMapPress: ComponentProps<typeof MapView>['onPress'] = (e) => {
-    // Taps on markers also bubble up as map presses on iOS
-    if (e.nativeEvent.action === 'marker-press') return;
     if (waypoints.length >= MAX_WAYPOINTS) return;
     setWaypoints((w) => [...w, e.nativeEvent.coordinate]);
   };
 
-  const toggleMonument = (id: number) => {
-    if (!baseRoute) return;
-    const ids = selectedIds.has(id)
-      ? [...selectedIds].filter((x) => x !== id)
-      : [...selectedIds, id];
-    setSelection({ base: baseRoute, ids });
-  };
-
   const handleReset = () => {
     setWaypoints([]);
+    setRoute(null);
   };
 
   const getStatusText = () => {
@@ -218,8 +145,7 @@ export default function RouteScreen() {
     if (route) {
       const km = (route.distance / 1000).toFixed(1);
       const min = Math.round(route.duration / 60);
-      const n = selectedIds.size;
-      return `${km} km · ${min} min${n ? ` · ${n} monument${n > 1 ? 's' : ''}` : ''}`;
+      return `${km} km · ${min} min`;
     }
     if (USE_USER_LOCATION_AS_START && !start) {
       return 'Waiting for location...';
@@ -257,14 +183,7 @@ export default function RouteScreen() {
             }
           />
         ))}
-        {suggestions.map((m) => (
-          <MonumentMarker
-            key={m.id}
-            monument={m}
-            color={selectedIds.has(m.id) ? '#16a34a' : '#d97706'}
-            onPress={() => toggleMonument(m.id)}
-          />
-        ))}
+        <MonumentSuggestionMarkers {...monuments} />
         {route && (
           <Polyline
             coordinates={route.coords}
@@ -275,57 +194,12 @@ export default function RouteScreen() {
       </MapView>
 
       <View className='absolute right-4 bottom-8 left-4 gap-2 rounded-2xl bg-white p-4 shadow-lg'>
-        <View className='flex-row items-center justify-between'>
-          <Text className='font-semibold'>{getStatusText()}</Text>
-          <View className='flex-row rounded-xl bg-neutral-200 p-1'>
-            {(['foot', 'driving'] as const).map((p) => (
-              <Pressable
-                key={p}
-                className={`rounded-lg px-2 py-1 ${profile === p ? 'bg-white' : ''}`}
-                onPress={() => setProfile(p)}>
-                <Ionicons
-                  name={p === 'foot' ? 'walk' : 'car'}
-                  size={18}
-                  color={profile === p ? '#2563eb' : '#525252'}
-                />
-              </Pressable>
-            ))}
-          </View>
-        </View>
-
-        {suggestions.length > 0 && (
-          <>
-            <Text className='text-sm text-neutral-500'>
-              Monuments along the way — tap to add
-            </Text>
-            <ScrollView className='max-h-40'>
-              {suggestions.map((m) => {
-                const selected = selectedIds.has(m.id);
-                return (
-                  <Pressable
-                    key={m.id}
-                    className='flex-row items-center gap-2 py-1.5'
-                    onPress={() => toggleMonument(m.id)}>
-                    <Ionicons
-                      name={selected ? 'checkbox' : 'square-outline'}
-                      size={20}
-                      color={selected ? '#16a34a' : '#a3a3a3'}
-                    />
-                    <Text
-                      className='flex-1'
-                      numberOfLines={1}>
-                      {m.name}
-                    </Text>
-                    <Text className='text-xs text-neutral-500'>
-                      {formatDistance(m.distanceM)} off
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-          </>
-        )}
-
+        <Text className='font-semibold'>{getStatusText()}</Text>
+        <RouteProfileToggle
+          profile={profile}
+          onChange={setProfile}
+        />
+        <MonumentSuggestionList {...monuments} />
         <Pressable
           className='items-center rounded-xl bg-neutral-200 p-2'
           onPress={handleReset}>

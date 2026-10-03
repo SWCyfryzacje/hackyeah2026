@@ -5,27 +5,18 @@ import useLocationPermission, {
 import { Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import React, { useEffect, useState } from 'react';
-import RNMapView, { type Region } from 'react-native-maps';
+import React, { useEffect } from 'react';
+import RNMapView from 'react-native-maps';
 import MapView from '@/components/map-view';
-import MonumentMarker from '@/components/monument-marker';
-import { useSupabase } from '@/lib/supabase';
-import {
-  fetchMonumentsNear,
-  regionRadiusM,
-  type Monument,
-} from '@/utils/monuments';
-
-const REGION_DEBOUNCE_MS = 500;
+import useNearbyMonuments from '@/hooks/useNearbyMonuments';
+import { MonumentMarkers } from '@/components/monument-marker';
 
 export default function Map() {
   const { granted, visibility, showModal, grantPermission, onAllow, onLater } =
     useLocationPermission();
-  const supabase = useSupabase();
 
   const mapRef = React.useRef<RNMapView>(null);
-  const [region, setRegion] = useState<Region | null>(null);
-  const [monuments, setMonuments] = useState<Monument[]>([]);
+  const nearby = useNearbyMonuments();
 
   const goToMe = async () => {
     const { coords } = await Location.getCurrentPositionAsync({});
@@ -46,35 +37,6 @@ export default function Map() {
     })();
   }, []);
 
-  // Center on the user once, which also triggers the first monuments fetch.
-  useEffect(() => {
-    if (granted) goToMe().catch(() => {});
-  }, [granted]);
-
-  useEffect(() => {
-    if (!region) return;
-
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => {
-      fetchMonumentsNear(
-        supabase,
-        region,
-        regionRadiusM(region.latitudeDelta),
-        ctrl.signal
-      )
-        .then(setMonuments)
-        .catch((e: unknown) => {
-          if (ctrl.signal.aborted) return;
-          console.warn('Monuments error:', e instanceof Error ? e.message : e);
-        });
-    }, REGION_DEBOUNCE_MS);
-
-    return () => {
-      clearTimeout(timer);
-      ctrl.abort();
-    };
-  }, [region, supabase]);
-
   return (
     <SafeView className='flex-1 items-center justify-center bg-amber-50'>
       <LocationModal
@@ -94,13 +56,8 @@ export default function Map() {
       <MapView
         ref={mapRef}
         permission={granted}
-        onRegionChangeComplete={setRegion}>
-        {monuments.map((m) => (
-          <MonumentMarker
-            key={m.id}
-            monument={m}
-          />
-        ))}
+        onRegionChangeComplete={nearby.onRegionChangeComplete}>
+        <MonumentMarkers monuments={nearby.monuments} />
       </MapView>
     </SafeView>
   );

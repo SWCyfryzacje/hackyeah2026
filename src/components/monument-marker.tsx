@@ -34,3 +34,13 @@ export default function MonumentMarker({
     />
   );
 }
+
+/** Plain markers for a list of monuments (e.g. nearby ones on the map tab). */
+export function MonumentMarkers({ monuments }: { monuments: Monument[] }) {
+  return monuments.map((m) => (
+    <MonumentMarker
+      key={m.id}
+      monument={m}
+    />
+  ));
+}
