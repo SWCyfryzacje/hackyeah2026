@@ -1,7 +1,8 @@
 # TASKS — Wspólne trasy
 
 Branch integracyjny: `teammates` (z `merged-1`). Każdy teammate pracuje w osobnym worktree
-na branchu `teammates/<tN>` utworzonym z commita T0; lider merguje do `teammates`.
+na branchu `tm-<tN>` utworzonym z commita T0 (`c8b42fd`), worktree `.claude/worktrees/<tN>`;
+lider merguje do `teammates`. Teammates nie edytują tego pliku — status prowadzi lider.
 **Pliki są rozłączne** — teammate nie edytuje plików spoza swojej listy (stuby z T0 zastępuje).
 
 Statusy: ⬜ todo · 🔄 w toku · ✅ zrobione · ⛔ zablokowane
@@ -44,10 +45,10 @@ Pliki:
 
 | ID | Task | Kryterium ukończenia | Status |
 |---|---|---|---|
-| T1.1 | `useLocationSharing` — watch + timer 5 s, tylko foreground (AppState), stop przy `enabled=false`/unmount | RPC wywoływane co ~5 s tylko gdy enabled i app aktywna | ⬜ |
-| T1.2 | `useLiveLocation` — select początkowy + kanał INSERT/UPDATE/DELETE; fallback polling | po DELETE `location = null` | ⬜ |
-| T1.3 | `LiveLocationMarker` (+ opc. „ostatnio X min temu”) | marker w `<MapView>` | ⬜ |
-| T1.4 | `LocationConsentDialog` (PL, treść wg SPEC F5) | onAccept / onCancel | ⬜ |
+| T1.1 | `useLocationSharing` — watch + timer 5 s, tylko foreground (AppState), stop przy `enabled=false`/unmount | RPC wywoływane co ~5 s tylko gdy enabled i app aktywna | ✅ `b2fdd24` |
+| T1.2 | `useLiveLocation` — select początkowy + kanał INSERT/UPDATE/DELETE; fallback polling | po DELETE `location = null` | ✅ `b2fdd24` |
+| T1.3 | `LiveLocationMarker` (+ opc. „ostatnio X min temu”) | marker w `<MapView>` | ✅ `b2fdd24` |
+| T1.4 | `LocationConsentDialog` (PL, treść wg SPEC F5) | onAccept / onCancel | ✅ `b2fdd24` |
 
 ### T2 — Czat (teammate `chat`)
 Pliki:
@@ -57,8 +58,8 @@ Pliki:
 
 | ID | Task | Kryterium ukończenia | Status |
 |---|---|---|---|
-| T2.1 | `useRouteChat` — 200 ostatnich + kanał INSERT, nicki z `get_group_route_participants` (fallback Turysta-XXXX), dedupe po id | wiadomość innego użytkownika pojawia się bez odświeżania | ⬜ |
-| T2.2 | Komponenty czatu + ekran; read-only gdy status ∉ scheduled/live; licznik 500 | po zakończeniu pole wysyłki ukryte z informacją | ⬜ |
+| T2.1 | `useRouteChat` — 200 ostatnich + kanał INSERT, nicki z `get_group_route_participants` (fallback Turysta-XXXX), dedupe po id | wiadomość innego użytkownika pojawia się bez odświeżania | 🔄 |
+| T2.2 | Komponenty czatu + ekran; read-only gdy status ∉ scheduled/live; licznik 500 | po zakończeniu pole wysyłki ukryte z informacją | 🔄 |
 
 ### T3 — Ekrany i integracja (teammate `frontend`)
 Pliki:
@@ -70,10 +71,10 @@ Pliki:
 
 | ID | Task | Kryterium ukończenia | Status |
 |---|---|---|---|
-| T3.1 | Zakładka „Razem”: Moje / Publiczne, dołącz kodem, pull-to-refresh | lista z `list_group_routes()` | ⬜ |
-| T3.2 | Przycisk w Route + formularz `new.tsx` (zod, Dziś/Jutro + HH:MM, koniec opc., publiczna/prywatna, wydarzenie) | utworzenie trasy → przejście do szczegółów | ⬜ |
-| T3.3 | Szczegóły `[id]`: mapa + geometria + `LiveLocationMarker`, status (realtime), uczestnicy, kod, akcje wg roli/statusu, zgoda przed startem, `useLocationSharing`, link do czatu | pełny cykl scheduled→live→finished z UI | ⬜ |
-| T3.4 | `join/[code].tsx` — deeplink → join → redirect do szczegółów | link `njord://group-routes/join/KOD` działa | ⬜ |
+| T3.1 | Zakładka „Razem”: Moje / Publiczne, dołącz kodem, pull-to-refresh | lista z `list_group_routes()` | 🔄 |
+| T3.2 | Przycisk w Route + formularz `new.tsx` (zod, Dziś/Jutro + HH:MM, koniec opc., publiczna/prywatna, wydarzenie) | utworzenie trasy → przejście do szczegółów | 🔄 |
+| T3.3 | Szczegóły `[id]`: mapa + geometria + `LiveLocationMarker`, status (realtime), uczestnicy, kod, akcje wg roli/statusu, zgoda przed startem, `useLocationSharing`, link do czatu | pełny cykl scheduled→live→finished z UI | 🔄 |
+| T3.4 | `join/[code].tsx` — deeplink → join → redirect do szczegółów | link `njord://group-routes/join/KOD` działa | 🔄 |
 
 ### T4 — Weryfikacja RLS (teammate `qa`)
 Pliki:
@@ -82,7 +83,7 @@ Pliki:
 
 | ID | Task | Kryterium ukończenia | Status |
 |---|---|---|---|
-| T4.1 | Skrypt testów w `begin … rollback` (symulacja 3 użytkowników przez `set local role authenticated` + `request.jwt.claims`): nie-uczestnik nie widzi pozycji/czatu/trasy prywatnej, uczestnik nie może startować/wysyłać pozycji, brak pisania po zakończeniu, limit 500 | skrypt gotowy; **uruchomienie tylko po zgodzie użytkownika** | ⬜ |
+| T4.1 | Skrypt testów w `begin … rollback` (symulacja 3 użytkowników przez `set local role authenticated` + `request.jwt.claims`): nie-uczestnik nie widzi pozycji/czatu/trasy prywatnej, uczestnik nie może startować/wysyłać pozycji, brak pisania po zakończeniu, limit 500 | skrypt gotowy; **uruchomienie tylko po zgodzie użytkownika** | 🔄 |
 
 ## Faza 2c — integracja (lider)
 | ID | Task | Zależy od | Kryterium ukończenia | Status |
