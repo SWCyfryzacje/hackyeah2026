@@ -1,5 +1,5 @@
 import type { LatLng } from 'react-native-maps';
-import { routeBetween, OsrmError, type Route } from './oneWayRoute';
+import { routeBetween, type Route } from './oneWayRoute';
 
 const EARTH_RADIUS_M = 6_371_008.8;
 const TAU = Math.PI * 2;
@@ -247,25 +247,17 @@ function createLoopWaypoints(
   radius: number,
   bearing: number,
   pointCount: number,
-  attempt: number
+  direction = 1,
+  wobbleIndex = 0
 ): LatLng[] {
   /*
-   * Alternating clockwise / counter-clockwise is useful because
-   * one-way streets and turn restrictions can make one direction
-   * substantially better.
-   */
-  const direction = attempt % 2 === 0 ? 1 : -1;
-
-  /*
-   * Slightly different ellipse on every attempt.
+   * Slightly different ellipse geometry per candidate variation.
    *
    * We deliberately avoid large random jitter because randomly
-   * putting a waypoint on a small cul-de-sac is exactly what creates
-   * many ugly out-and-back sections.
+   * putting a waypoint on a small cul-de-sac creates ugly out-and-back sections.
    */
-  const majorRadius = radius * (1.04 + 0.04 * Math.sin(attempt * 1.7));
-
-  const minorRadius = radius * (0.88 + 0.05 * Math.cos(attempt * 1.3));
+  const majorRadius = radius * (1.02 + 0.03 * Math.sin(wobbleIndex * 1.7));
+  const minorRadius = radius * (0.88 + 0.04 * Math.cos(wobbleIndex * 1.3));
 
   /*
    * Start is the rear-most point of the ellipse.
@@ -279,16 +271,14 @@ function createLoopWaypoints(
 
     /*
      * Small deterministic angular wobble.
-     *
      * Prevents every candidate from hitting almost exactly the same
      * roads while still producing a smooth loop.
      */
-    angle += 0.045 * Math.sin(i * 2.17 + attempt * 1.31);
+    angle += 0.04 * Math.sin(i * 2.17 + wobbleIndex * 1.31);
 
-    const radialWobble = 1 + 0.035 * Math.sin(i * 1.83 + attempt * 0.91);
+    const radialWobble = 1 + 0.03 * Math.sin(i * 1.83 + wobbleIndex * 0.91);
 
     const forward = majorRadius * Math.cos(angle) * radialWobble;
-
     const right = minorRadius * Math.sin(angle) * radialWobble;
 
     waypoints.push(offsetLocal(center, forward, right, bearing));
@@ -296,9 +286,6 @@ function createLoopWaypoints(
 
   return waypoints;
 }
-
-const isNoRoad = (e: unknown): boolean =>
-  e instanceof OsrmError && (e.code === 'NoRoute' || e.code === 'NoSegment');
 
 export type LoopOptions = {
   start: LatLng;
@@ -341,10 +328,10 @@ export type LoopOptions = {
   /**
    * Maximum fraction of reused/retraced route.
    *
-   * 0.10 = approximately 10%.
+   * 0.12 = approximately 12%.
    */
-
   maxOverlap?: number;
+
   /**
    * Reject extremely thin / out-and-back shapes.
    *
@@ -364,13 +351,11 @@ export async function loopOfLength({
   start,
   targetMeters,
   bearing = Math.random() * TAU,
-  points = 6,
-  tolerance = 0.08,
-  maxAttempts = 6,
-  roadFactor = 1.3,
-  maxOverlap = 0.1,
-  minAreaRatio = 0.025,
-
+  points = 5,
+  tolerance = 0.12,
+  roadFactor,
+  maxOverlap = 0.12,
+  minAreaRatio = 0.02,
   signal,
 }: LoopOptions): Promise<LoopResult> {
   if (targetMeters <= 0) {
@@ -380,76 +365,69 @@ export async function loopOfLength({
   const pointCount = Math.max(4, Math.min(points, 8));
 
   /*
-   * Initial estimate.
-   *
-   * Actual radius is corrected after every successful OSRM request,
-   * so roadFactor does not need to be extremely precise.
+   * Estimate realistic road factor based on target distance.
+   * Smaller loops in urban areas experience higher road grid winding overhead.
    */
-  let radius = targetMeters / (TAU * roadFactor);
+  const effectiveRoadFactor =
+    roadFactor ??
+    (targetMeters <= 3500 ? 2.15 : targetMeters <= 6500 ? 1.9 : 1.75);
 
-  let best: {
-    route: Route;
-    score: number;
-    bearing: number;
-    ring: LatLng[];
-  } | null = null;
+  const baseRadius = targetMeters / (TAU * effectiveRoadFactor);
 
   /*
-   * Instead of repeatedly trying the exact same orientation,
-   * move candidate loops slightly left/right.
-   *
-   * ~9°, ~18°, ~27°.
+   * Generate diverse candidate loop configurations in parallel:
+   * - Varied bearings and directions (clockwise vs counter-clockwise)
+   * - Slight radius adjustments to hit target distance across different road topologies
    */
-  const bearingOffsets = [0, 0.16, -0.16, 0.32, -0.32, 0.48, -0.48, 0.64];
+  const candidateConfigs = [
+    { bearing, direction: 1, radius: baseRadius, wobble: 0 },
+    {
+      bearing: bearing + 0.6,
+      direction: -1,
+      radius: baseRadius * 0.92,
+      wobble: 1,
+    },
+    {
+      bearing: bearing - 0.6,
+      direction: 1,
+      radius: baseRadius * 1.08,
+      wobble: 2,
+    },
+    {
+      bearing: bearing + Math.PI * 0.7,
+      direction: -1,
+      radius: baseRadius * 0.95,
+      wobble: 3,
+    },
+    {
+      bearing: bearing - Math.PI * 0.7,
+      direction: 1,
+      radius: baseRadius * 1.12,
+      wobble: 4,
+    },
+  ];
 
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const candidateBearing =
-      bearing + bearingOffsets[attempt % bearingOffsets.length];
+  type ScoredCandidate = LoopResult & {
+    score: number;
+    lengthError: number;
+    overlap: number;
+    areaRatio: number;
+  };
 
+  const candidatePromises = candidateConfigs.map(async (c) => {
     const ring = createLoopWaypoints(
       start,
-      radius,
-      candidateBearing,
+      c.radius,
+      c.bearing,
       pointCount,
-      attempt
+      c.direction,
+      c.wobble
     );
 
-    let route: Route;
-
-    try {
-      route = await routeBetween([start, ...ring, start], signal);
-    } catch (e) {
-      if (signal?.aborted) {
-        throw e;
-      }
-
-      if (isNoRoad(e)) {
-        /*
-         * One or more waypoints are probably too far from usable
-         * roads.
-         */
-        radius *= 0.88;
-        continue;
-      }
-
-      // If we already found a valid route on an earlier attempt, don't crash on a transient failure
-      if (best) {
-        continue;
-      }
-
-      // If more attempts remain, try adjusting radius and continuing
-      if (attempt < maxAttempts - 1) {
-        radius *= 0.9;
-        continue;
-      }
-
-      throw e;
-    }
+    const route = await routeBetween([start, ...ring, start], signal);
 
     const lengthError = Math.abs(route.distance - targetMeters) / targetMeters;
-
     const overlap = reusedRoadRatio(route.coords);
-
     const areaRatio = enclosedAreaRatio(route.coords, route.distance);
 
     const areaPenalty =
@@ -458,69 +436,109 @@ export async function loopOfLength({
         : 0;
 
     /*
-     * Route quality matters considerably more than hitting the exact
-     * distance.
-     *
-     * For example:
-     *
-     * 10.0 km route with 25% retracing
-     *
-     * should lose against:
-     *
-     * 9.6 km route with 1% retracing.
+     * Score combines length accuracy, low retracing/overlap, and reasonable enclosed area.
      */
-    const score = lengthError * 1.5 + overlap * 4 + areaPenalty * 0.8;
+    const score = lengthError * 1.8 + overlap * 3.5 + areaPenalty * 0.8;
 
-    if (!best || score < best.score) {
-      best = {
-        route,
-        score,
-        bearing: candidateBearing,
-        ring,
-      };
+    return {
+      ...route,
+      bearing: c.bearing,
+      ring,
+      score,
+      lengthError,
+      overlap,
+      areaRatio,
+    };
+  });
+
+  return new Promise<LoopResult>((resolve, reject) => {
+    let completedCount = 0;
+    const validResults: ScoredCandidate[] = [];
+    let graceTimer: ReturnType<typeof setTimeout> | null = null;
+    let settled = false;
+
+    const checkDone = () => {
+      if (settled) return;
+      if (validResults.length > 0) {
+        settled = true;
+        if (graceTimer) clearTimeout(graceTimer);
+        validResults.sort((a, b) => a.score - b.score);
+        const best = validResults[0];
+        resolve({
+          coords: best.coords,
+          distance: best.distance,
+          duration: best.duration,
+          bearing: best.bearing,
+          ring: best.ring,
+        });
+      } else if (completedCount === candidatePromises.length) {
+        settled = true;
+        if (graceTimer) clearTimeout(graceTimer);
+        reject(new Error('Could not generate a loop here, try again'));
+      }
+    };
+
+    if (signal) {
+      if (signal.aborted) {
+        reject(signal.reason || new Error('Aborted'));
+        return;
+      }
+      signal.addEventListener(
+        'abort',
+        () => {
+          if (!settled) {
+            settled = true;
+            if (graceTimer) clearTimeout(graceTimer);
+            reject(signal.reason || new Error('Aborted'));
+          }
+        },
+        { once: true }
+      );
     }
 
-    /*
-     * Don't stop just because distance is correct.
-     *
-     * The old algorithm could stop on a 10.0 km route even if 4 km
-     * of it was an ugly out-and-back.
-     */
-    const goodDistance = lengthError <= tolerance;
+    candidatePromises.forEach((p) => {
+      p.then((res) => {
+        completedCount++;
+        validResults.push(res);
 
-    const goodShape = overlap <= maxOverlap && areaRatio >= minAreaRatio;
+        /*
+         * Fast exit: If an excellent route arrives that satisfies tolerance and shape,
+         * return immediately without waiting for slower in-flight requests.
+         */
+        if (
+          res.lengthError <= tolerance &&
+          res.overlap <= maxOverlap &&
+          res.areaRatio >= minAreaRatio
+        ) {
+          settled = true;
+          if (graceTimer) clearTimeout(graceTimer);
+          resolve({
+            coords: res.coords,
+            distance: res.distance,
+            duration: res.duration,
+            bearing: res.bearing,
+            ring: res.ring,
+          });
+          return;
+        }
 
-    if (goodDistance && goodShape) {
-      return {
-        ...route,
-        bearing: candidateBearing,
-        ring,
-      };
-    }
+        /*
+         * Once at least one valid candidate is received, allow a brief grace period (180ms)
+         * for other fast candidate requests to complete so the best route can be selected.
+         */
+        if (validResults.length >= 1 && !graceTimer) {
+          graceTimer = setTimeout(checkDone, 180);
+        }
 
-    /*
-     * Correct the radius using the distance OSRM actually produced.
-     *
-     * Damping prevents:
-     *
-     * radius 1 km -> 3 km -> 1.2 km -> ...
-     *
-     * when road topology changes abruptly.
-     */
-    const rawCorrection = targetMeters / Math.max(route.distance, 1);
-
-    const dampedCorrection = Math.pow(rawCorrection, 0.7);
-
-    radius *= clamp(dampedCorrection, 0.72, 1.4);
-  }
-
-  if (!best) {
-    throw new Error('Could not generate a loop here, try again');
-  }
-
-  return {
-    ...best.route,
-    bearing: best.bearing,
-    ring: best.ring,
-  };
+        if (completedCount === candidatePromises.length) {
+          checkDone();
+        }
+      }).catch((err) => {
+        completedCount++;
+        if (completedCount === candidatePromises.length) {
+          checkDone();
+        }
+      });
+    });
+  });
 }
