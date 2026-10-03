@@ -12,6 +12,7 @@ export default function TabsLayout() {
     <Tabs screenOptions={{ headerShown: false }}>
       <Tabs.Screen name='index' />
       <Tabs.Screen name='map' />
+      <Tabs.Screen name='route' />
       <Tabs.Screen name='settings' />
     </Tabs>
   );
