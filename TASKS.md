@@ -58,8 +58,8 @@ Pliki:
 
 | ID | Task | Kryterium ukończenia | Status |
 |---|---|---|---|
-| T2.1 | `useRouteChat` — 200 ostatnich + kanał INSERT, nicki z `get_group_route_participants` (fallback Turysta-XXXX), dedupe po id | wiadomość innego użytkownika pojawia się bez odświeżania | 🔄 |
-| T2.2 | Komponenty czatu + ekran; read-only gdy status ∉ scheduled/live; licznik 500 | po zakończeniu pole wysyłki ukryte z informacją | 🔄 |
+| T2.1 | `useRouteChat` — 200 ostatnich + kanał INSERT, nicki z `get_group_route_participants` (fallback Turysta-XXXX), dedupe po id | wiadomość innego użytkownika pojawia się bez odświeżania | ✅ `eacf70f` |
+| T2.2 | Komponenty czatu + ekran; read-only gdy status ∉ scheduled/live; licznik 500 | po zakończeniu pole wysyłki ukryte z informacją | ✅ `eacf70f` |
 
 ### T3 — Ekrany i integracja (teammate `frontend`)
 Pliki:
