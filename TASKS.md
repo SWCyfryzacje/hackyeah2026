@@ -83,15 +83,26 @@ Pliki:
 
 | ID | Task | Kryterium ukończenia | Status |
 |---|---|---|---|
-| T4.1 | Skrypt testów w `begin … rollback` (symulacja 3 użytkowników przez `set local role authenticated` + `request.jwt.claims`): nie-uczestnik nie widzi pozycji/czatu/trasy prywatnej, uczestnik nie może startować/wysyłać pozycji, brak pisania po zakończeniu, limit 500 | skrypt gotowy; **uruchomienie tylko po zgodzie użytkownika** | 🔄 |
+| T4.1 | Skrypt testów w `begin … rollback` (symulacja 3 użytkowników przez `set local role authenticated` + `request.jwt.claims`): nie-uczestnik nie widzi pozycji/czatu/trasy prywatnej, uczestnik nie może startować/wysyłać pozycji, brak pisania po zakończeniu, limit 500 | skrypt gotowy; **uruchomienie tylko po zgodzie użytkownika** | ✅ `518a776` — uruchomiony za zgodą (rollback): **171/173 PASS**; brak danych testowych po przebiegu |
+| T4.2 | Poprawka znaleziska T4 (9.6b, 9.7b): check treści wiadomości liczył długość po `btrim()` (tylko spacje) → przechodziły wiadomości 10 001 znaków ze spacjami i same `\t\n`. Migracja `20261004090200_group_routes_message_body_check.sql` (lider) | migracja zastosowana, testy 9.6b/9.7b PASS | ⛔ czeka na zgodę użytkownika na zastosowanie |
 
 ## Faza 2c — integracja (lider)
 | ID | Task | Zależy od | Kryterium ukończenia | Status |
 |---|---|---|---|---|
-| I1 | Merge T1–T4 do `teammates`, `tsc` + `lint` | T1–T4 | czysto | ⬜ |
-| I2 | Scenariusz demo na 2 urządzeniach/kontach (tworzenie → dołączenie → start → marker → czat → koniec) | I1 | opisany wynik w tym pliku | ⬜ |
+| I1 | Merge T1–T4 do `teammates`, `tsc` + `lint` | T1–T4 | czysto | ✅ `tsc`: 0 błędów w `src/` (jedyne błędy to lokalne, nieśledzone Edge Functions Deno w `supabase/functions/`); `lint`: 0 błędów, 1 zastane ostrzeżenie (`sign-verify.tsx`) |
+| I2 | Scenariusz demo na 2 urządzeniach/kontach (tworzenie → dołączenie → start → marker → czat → koniec) | I1 | opisany wynik w tym pliku | ⬜ wymaga 2 urządzeń — do wykonania przez użytkownika (patrz niżej) |
 
-## Ryzyka
-- Realtime z JWT Clerka może nie dostarczać zdarzeń → fallback polling (T1/T2).
-- Migracje wkleja użytkownik → T0 blokuje teammates do momentu wklejenia (stuby pozwalają kodować wcześniej).
-- Czas: ~7 h do deadline'u; T4 i opcjonalne „ostatnio X min temu” tniemy jako pierwsze.
+### I2 — scenariusz demo (do przejścia na 2 urządzeniach / 2 kontach Clerk)
+1. `npx expo start --clear` (czyści typy tras i cache Metro).
+2. Konto A: Route → wyznacz pętlę → „Utwórz wspólną trasę” → formularz (publiczna, start za 30 min) → szczegóły.
+3. Konto B: zakładka „Razem” → trasa na liście „Publiczne” → „Dołącz” → widzi uczestników i kod.
+4. Oba: „Czat” → wiadomości pojawiają się u drugiej osoby bez odświeżania.
+5. A: „Rozpocznij” → dialog zgody → zgoda → zgoda systemowa na lokalizację → status „Trwa”.
+6. B: na mapie szczegółów niebieski marker twórcy, przesuwa się co ~5 s (A trzyma otwarte szczegóły trasy).
+7. A: „Zakończ” → u B marker znika, czat tylko do odczytu.
+8. Prywatna: A tworzy prywatną → „Udostępnij” kod → B wpisuje kod w „Razem” → dołącza.
+
+## Ryzyka / uwagi
+- Realtime z JWT Clerka: kod sprawdzony, ale nie zweryfikowany na urządzeniu → hooki mają fallback polling (T1/T2/T3).
+- Udostępnianie lokalizacji działa tylko, gdy twórca ma otwarte szczegóły trasy (lub czat nad nimi) — brak śledzenia w tle zgodnie ze SPEC.
+- Niskie ryzyko (T4): kod dołączenia 6 znaków z 32 (~1e9 kombinacji) bez limitu prób; publiczne trasy ujawniają kod i geometrię zalogowanym — zgodnie z projektem.

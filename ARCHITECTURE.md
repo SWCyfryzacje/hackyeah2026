@@ -45,7 +45,8 @@ group_route_messages
   id         bigint generated always as identity pk
   route_id   uuid not null references group_routes(id) on delete cascade
   user_id    text not null default (auth.jwt()->>'sub')
-  body       text not null check (char_length(btrim(body)) between 1 and 500)
+  body       text not null check (char_length(body) <= 500 and body ~ '[^[:space:]]')
+                                  -- poprawka z T4: migracja 20261004090200
   created_at timestamptz not null default now()
   idx (route_id, created_at)
 
