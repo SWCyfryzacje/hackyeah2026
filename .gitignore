@@ -47,3 +47,6 @@ example
 
 # env files (hold API keys)
 .env
+
+.claude
+.agents

@@ -1,129 +1,159 @@
-import { useSignUp } from '@clerk/expo';
-import { Link, router } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
-
 import {
-  Button,
-  Field,
-  GlobalErrors,
-  navigateAfterAuth,
-} from '@/components/auth-ui';
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native';
+import { Href, Link, router } from 'expo-router';
 import SafeView from '@/components/safe-view';
+import { useForm } from 'react-hook-form';
+import {
+  SignFormData,
+  SignFormSchema,
+  VerifyCodeData,
+  VerifyCodeSchema,
+} from '@/types/zod-types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuth, useSignUp } from '@clerk/expo';
+import SignVerify from '@/components/sign-verify';
+import { useEffect, useState } from 'react';
+import SignForm from '@/components/sign-form';
+import LoadingScreen from '@/components/loading-screen';
 
 export default function SignUp() {
+  const form = useForm<SignFormData>({ resolver: zodResolver(SignFormSchema) });
+
   const { signUp, errors, fetchStatus } = useSignUp();
-  const [emailAddress, setEmailAddress] = useState('');
-  const [password, setPassword] = useState('');
-  const [code, setCode] = useState('');
-  const loading = fetchStatus === 'fetching';
+  const { isLoaded, isSignedIn } = useAuth();
 
-  const needsCode =
-    signUp.status === 'missing_requirements' &&
-    signUp.unverifiedFields.includes('email_address') &&
-    signUp.missingFields.length === 0;
+  const [processedErrors, setProcessedErrors] =
+    useState<ProcessedErrors | null>(null);
 
-  const handleSubmit = async () => {
-    const { error } = await signUp.password({ emailAddress, password });
-    if (error) return;
-    await signUp.verifications.sendEmailCode();
-  };
+  const onSubmit = async (data: SignFormData) => {
+    const validation = SignFormSchema.safeParse(data);
+    if (!validation.success) {
+      return;
+    }
 
-  const handleVerify = async () => {
-    const { error } = await signUp.verifications.verifyEmailCode({ code });
-    if (error) return;
-    if (signUp.status === 'complete') {
-      await signUp.finalize({ navigate: navigateAfterAuth });
+    const { error } = await signUp.password({
+      emailAddress: validation.data.email,
+      password: validation.data.password,
+    });
+
+    if (error) {
+      console.error(JSON.stringify(error, null, 2));
+    }
+
+    if (!error) {
+      await signUp.verifications.sendEmailCode();
     }
   };
 
-  const startOver = async () => {
-    await signUp.reset();
-    setCode('');
+  const onVerify = async (data: VerifyCodeData) => {
+    const validation = VerifyCodeSchema.safeParse(data);
+    if (!validation.success) {
+      return;
+    }
+
+    await signUp.verifications.verifyEmailCode({
+      code: validation.data.code,
+    });
+
+    if (signUp.status === 'complete') {
+      await signUp.finalize({
+        navigate: ({ session, decorateUrl }) => {
+          if (session?.currentTask) {
+            console.log(session?.currentTask);
+            return;
+          }
+
+          const url = decorateUrl('/(tabs)');
+          router.replace(url as Href);
+        },
+      });
+    } else {
+      console.error('Sign-up attempt not complete:', signUp);
+    }
   };
+
+  useEffect(() => {
+    Object.entries(errors.fields).forEach(([key, value]) => {
+      setProcessedErrors((prevErrors) => ({
+        ...prevErrors,
+        [key]: value?.message,
+      }));
+    });
+  }, [errors]);
+
+  const handleCodeResend = () => signUp.verifications.sendEmailCode();
+
+  if (!isLoaded || signUp.status === 'complete' || isSignedIn) {
+    return <LoadingScreen />;
+  }
+
+  if (
+    signUp.status === 'missing_requirements' &&
+    signUp.unverifiedFields.includes('email_address') &&
+    signUp.missingFields.length === 0
+  )
+    return (
+      <SignVerify
+        errors={processedErrors}
+        fetchStatus={fetchStatus}
+        email={form.getValues().email}
+        onVerify={onVerify}
+        codeResend={handleCodeResend}
+      />
+    );
 
   return (
     <SafeView className='flex-1 bg-amber-50'>
-      <ScrollView
-        contentContainerClassName='gap-4 p-6'
-        keyboardShouldPersistTaps='handled'>
-        <Pressable onPress={() => router.back()}>
-          <Text className='text-base text-blue-500'>‹ Back</Text>
-        </Pressable>
-        <Text className='text-3xl font-bold text-blue-500'>
-          Create account
-        </Text>
+      <KeyboardAvoidingView
+        className='flex-1'
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <ScrollView
+          className='flex-1'
+          contentContainerClassName='flex-grow justify-center px-6 py-8'
+          keyboardShouldPersistTaps='handled'
+          showsVerticalScrollIndicator={false}>
+          <View className='mx-auto w-full max-w-md gap-6'>
+            <View className='items-center gap-2'>
+              <Text className='text-center text-3xl font-bold text-neutral-900'>
+                Create your Account
+              </Text>
+              <Text className='text-center text-sm text-neutral-600'>
+                Sign up to start
+              </Text>
+            </View>
 
-        {needsCode ? (
-          <>
-            <Text className='text-base text-gray-700'>
-              We sent a verification code to {emailAddress}.
-            </Text>
-            <Field
-              label='Code'
-              value={code}
-              onChangeText={setCode}
-              keyboardType='number-pad'
-              placeholder='123456'
-              error={errors.fields.code?.message}
+            <SignForm
+              form={form}
+              onSubmit={form.handleSubmit(onSubmit)}
+              fetchStatus={fetchStatus}
+              errors={processedErrors}
+              zodErrors={form.formState.errors}
+              type='sign-up'
             />
-            <GlobalErrors errors={errors.global} />
-            <Button
-              title='Verify'
-              onPress={handleVerify}
-              loading={loading}
-              disabled={!code}
-            />
-            <Button
-              title='Resend code'
-              variant='secondary'
-              onPress={() => signUp.verifications.sendEmailCode()}
-              disabled={loading}
-            />
-            <Pressable onPress={startOver}>
-              <Text className='text-center text-blue-500'>Start over</Text>
-            </Pressable>
-          </>
-        ) : (
-          <>
-            <Field
-              label='Email'
-              value={emailAddress}
-              onChangeText={setEmailAddress}
-              keyboardType='email-address'
-              autoComplete='email'
-              placeholder='you@example.com'
-              error={errors.fields.emailAddress?.message}
-            />
-            <Field
-              label='Password'
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoComplete='new-password'
-              error={errors.fields.password?.message}
-            />
-            <GlobalErrors errors={errors.global} />
-            <Button
-              title='Sign up'
-              onPress={handleSubmit}
-              loading={loading}
-              disabled={!emailAddress || !password}
-            />
-            <View className='flex-row justify-center gap-1'>
-              <Text className='text-gray-700'>Already have an account?</Text>
+
+            <View className='flex-row items-center justify-center gap-1.5'>
+              <Text className='text-sm text-neutral-600'>
+                Already have an account?
+              </Text>
               <Link
-                href='/sign-in'
-                replace>
-                <Text className='font-semibold text-blue-500'>Sign in</Text>
+                href='/(auth)/sign-in'
+                asChild>
+                <Pressable>
+                  <Text className='text-sm font-semibold text-blue-600'>
+                    Sign In
+                  </Text>
+                </Pressable>
               </Link>
             </View>
-          </>
-        )}
-
-        {/* Required mount point for Clerk bot protection (captcha). */}
-        <View nativeID='clerk-captcha' />
-      </ScrollView>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeView>
   );
 }
