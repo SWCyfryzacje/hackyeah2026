@@ -19,8 +19,8 @@ Definicja ukończenia każdego taska (DoD): spełnione kryteria taska, `npx tsc 
 ## Faza 2a — fundament (sekwencyjnie, przed teammates)
 | ID | Task | Właściciel | Zależy od | Kryterium ukończenia | Status |
 |---|---|---|---|---|---|
-| T0.1 | Migracja `20261004090000_group_routes.sql` (tabele, helpery, RLS, RPC, publikacja realtime) | lider | P1 | SQL idempotentny gdzie się da; **wklejony przez użytkownika**; `get_advisors` (security) bez nowych ostrzeżeń dla tych tabel | 🔄 SQL gotowy, czeka na wklejenie |
-| T0.2 | Migracja `20261004090100_group_routes_cron.sql` (auto-finish co 5 min, purge 02:45 UTC) | lider | T0.1 | joby widoczne w `cron.job` | 🔄 SQL gotowy, czeka na wklejenie |
+| T0.1 | Migracja `20261004090000_group_routes.sql` (tabele, helpery, RLS, RPC, publikacja realtime) | lider | P1 | SQL idempotentny gdzie się da; **wklejony przez użytkownika**; `get_advisors` (security) bez nowych ostrzeżeń dla tych tabel | ✅ zastosowana przez MCP za zgodą (04.10); advisor: tylko zamierzone WARN 0029 dla 10 RPC (security definer z własnymi checkami) |
+| T0.2 | Migracja `20261004090100_group_routes_cron.sql` (auto-finish co 5 min, purge 02:45 UTC) | lider | T0.1 | joby widoczne w `cron.job` | ✅ 2 joby w `cron.job` |
 | T0.3 | `src/types/group-routes.ts`, `src/lib/group-routes.ts`, `src/lib/group-route-draft.ts` | lider | T0.1 | wszystkie RPC z ARCHITECTURE §2 mają typowane wrappery | ✅ |
 | T0.4 | Stuby wszystkich plików z kontraktów + ekranów (zwracają placeholder) | lider | T0.3 | `tsc` i `lint` przechodzą; commit bazowy dla teammates | ✅ |
 
