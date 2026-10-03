@@ -9,26 +9,36 @@ type ModalProps = {
 };
 
 export default function useLocationPermission() {
-  const [showModal, setShowModal] = useState(false);
+  const [visibility, setVisibility] = useState(false);
   const [granted, setGranted] = useState(false);
 
   const onAllow = async () => {
-    setShowModal(false);
+    setVisibility(false);
+
     const { status, canAskAgain } =
       await Location.requestForegroundPermissionsAsync();
+
     if (status === 'granted') setGranted(true);
     else if (!canAskAgain) await Linking.openSettings();
   };
 
   const onLater = () => {
-    setShowModal(false);
+    setVisibility(false);
   };
 
-  useEffect(() => {
-    setShowModal(true);
-  }, []);
+  const showModal = () => setVisibility(true);
+  const hideModal = () => setVisibility(false);
+  const grantPermission = () => setGranted(true);
 
-  return { granted, showModal, onAllow, onLater };
+  return {
+    granted,
+    visibility,
+    showModal,
+    hideModal,
+    grantPermission,
+    onAllow,
+    onLater,
+  };
 }
 
 export function LocationModal({ visible, onAllow, onLater }: ModalProps) {
