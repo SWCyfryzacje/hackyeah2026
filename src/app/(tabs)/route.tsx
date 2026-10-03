@@ -6,21 +6,17 @@ import React, {
   type ComponentProps,
 } from 'react';
 import { View } from 'react-native';
-import MapView, {
-  Marker,
-  Polyline,
-  PROVIDER_GOOGLE,
-  type LatLng,
-} from 'react-native-maps';
+import RNMapView, { Marker, Polyline, type LatLng } from 'react-native-maps';
 import * as Location from 'expo-location';
 import LocationModal from '@/components/location-modal';
 import useLocationPermission from '@/hooks/useLocationPermission';
+import MapView from '@/components/map-view';
 import {
   useRouteCalculation,
   type RouteStop,
 } from '@/hooks/useRouteCalculation';
 import RouteControlPanel from '@/components/route/route-control-panel';
-import { DEFAULT_LOOP_OPTIONS, INITIAL_REGION } from '@/constants/map';
+import { DEFAULT_LOOP_OPTIONS } from '@/constants/map';
 import { StatusBar } from 'expo-status-bar';
 import useMonumentSuggestions from '@/hooks/useMonumentSuggestions';
 import {
@@ -31,7 +27,7 @@ import {
 export default function RouteScreen() {
   const { granted, visibility, onAllow, onLater } = useLocationPermission();
 
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<RNMapView>(null);
   const [start, setStart] = useState<LatLng | null>(null);
   const [monumentStops, setMonumentStops] = useState<RouteStop[]>([]);
 
@@ -64,8 +60,8 @@ export default function RouteScreen() {
   const routeKey = loop
     ? `loop-${loop.bearing}`
     : waypoints.length > 0
-    ? JSON.stringify(waypoints)
-    : '';
+      ? JSON.stringify(waypoints)
+      : '';
 
   const monuments = useMonumentSuggestions(
     activeRoute,
@@ -137,8 +133,6 @@ export default function RouteScreen() {
 
   return (
     <View className='flex-1'>
-      <StatusBar style='light' />
-
       <LocationModal
         visible={visibility}
         onAllow={onAllow}
@@ -147,10 +141,7 @@ export default function RouteScreen() {
 
       <MapView
         ref={mapRef}
-        style={{ flex: 1 }}
-        initialRegion={INITIAL_REGION}
-        provider={PROVIDER_GOOGLE}
-        showsUserLocation={granted}
+        permission={granted}
         onPress={onMapPress}>
         {waypoints.map((w, i) => (
           <Marker

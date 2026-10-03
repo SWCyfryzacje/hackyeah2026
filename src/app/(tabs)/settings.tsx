@@ -241,8 +241,6 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
 
   return (
     <SafeView className='flex-1 bg-neutral-50'>
-      <StatusBar style='dark' />
-
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className='flex-1'>

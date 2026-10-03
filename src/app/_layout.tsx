@@ -3,7 +3,7 @@ import '@/global.css';
 import { ClerkProvider, useAuth } from '@clerk/expo';
 import { tokenCache } from '@clerk/expo/token-cache';
 import LoadingScreen from '@/components/loading-screen';
-import useProfileSync from '@/hooks/useProfileSync';
+import { StatusBar } from 'expo-status-bar';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -15,12 +15,13 @@ if (!publishableKey) {
 
 function RootLayoutContent() {
   const { isLoaded: authLoaded } = useAuth();
-  useProfileSync();
 
   if (!authLoaded) return <LoadingScreen />;
 
   return (
     <>
+      <StatusBar style='dark' />
+
       <Stack
         initialRouteName='(auth)'
         screenOptions={{ headerShown: false }}>

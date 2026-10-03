@@ -143,8 +143,6 @@ export default function Home() {
 
   return (
     <SafeView className='flex-1 bg-neutral-50'>
-      <StatusBar style='dark' />
-
       <LocationModal
         visible={visibility}
         onAllow={onAllow}

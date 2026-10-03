@@ -31,8 +31,6 @@ export default function Map() {
 
   return (
     <SafeView className='flex-1 items-center bg-amber-50'>
-      <StatusBar style='light' />
-
       <LocationModal
         visible={visibility}
         onAllow={onAllow}
@@ -41,19 +39,20 @@ export default function Map() {
 
       <MonumentLevelPicker className='z-10 mx-10 mt-10' />
 
-      {/*<Pressable*/}
-      {/*  onPress={goToMe}*/}
-      {/*  className='absolute right-4 bottom-8 z-10 h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg'>*/}
-      {/*  <Ionicons*/}
-      {/*    name='locate'*/}
-      {/*    size={24}*/}
-      {/*    color='#2563eb'*/}
-      {/*  />*/}
-      {/*</Pressable>*/}
+      <Pressable
+        onPress={goToMe}
+        className='absolute top-44 right-4 z-10 size-10 items-center justify-center rounded-full bg-white shadow-lg'>
+        <Ionicons
+          name='locate'
+          size={24}
+          color='#2563eb'
+        />
+      </Pressable>
 
       <MapView
         ref={mapRef}
         permission={granted}
+        mapPadding={{ top: 140, right: 10, bottom: 20, left: 10 }}
         onRegionChangeComplete={nearby.onRegionChangeComplete}>
         <MonumentMarkers monuments={nearby.monuments} />
       </MapView>
