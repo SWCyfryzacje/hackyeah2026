@@ -50,3 +50,6 @@ example
 
 .claude
 .agents
+
+# supabase backend (not part of the app)
+supabase/
