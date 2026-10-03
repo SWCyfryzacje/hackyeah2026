@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import * as Location from 'expo-location';
 import { Linking, Modal, Pressable, Text, View } from 'react-native';
 
@@ -12,7 +12,7 @@ export default function useLocationPermission() {
   const [visibility, setVisibility] = useState(false);
   const [granted, setGranted] = useState(false);
 
-  const onAllow = async () => {
+  const onAllow = useCallback(async () => {
     setVisibility(false);
 
     const { status, canAskAgain } =
@@ -20,15 +20,15 @@ export default function useLocationPermission() {
 
     if (status === 'granted') setGranted(true);
     else if (!canAskAgain) await Linking.openSettings();
-  };
+  }, []);
 
-  const onLater = () => {
+  const onLater = useCallback(() => {
     setVisibility(false);
-  };
+  }, []);
 
-  const showModal = () => setVisibility(true);
-  const hideModal = () => setVisibility(false);
-  const grantPermission = () => setGranted(true);
+  const showModal = useCallback(() => setVisibility(true), []);
+  const hideModal = useCallback(() => setVisibility(false), []);
+  const grantPermission = useCallback(() => setGranted(true), []);
 
   return {
     granted,

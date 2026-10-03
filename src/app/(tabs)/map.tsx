@@ -32,7 +32,7 @@ export default function Map() {
         grantPermission();
       }
     })();
-  }, []);
+  }, [grantPermission, showModal]);
 
   return (
     <SafeView className='flex-1 items-center justify-center bg-amber-50'>

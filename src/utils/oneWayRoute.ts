@@ -8,6 +8,16 @@ export type Route = {
   duration: number; // seconds
 };
 
+export class OsrmError extends Error {
+  readonly code: string;
+
+  constructor(code: string, message?: string) {
+    super(message || code || 'Route calculation failed');
+    this.name = 'OsrmError';
+    this.code = code;
+  }
+}
+
 type OsrmResponse = {
   code: string; // 'Ok' | 'NoRoute' | 'NoSegment' | ...
   message?: string;
@@ -18,7 +28,7 @@ type OsrmResponse = {
   }[];
 };
 
-export async function routeThrough(
+export async function routeBetween(
   points: LatLng[],
   signal?: AbortSignal
 ): Promise<Route> {
@@ -37,8 +47,12 @@ export async function routeThrough(
   }
 
   const json: OsrmResponse = await res.json();
-  if (json.code !== 'Ok' || !json.routes?.length)
-    throw new Error(json.message || json.code || 'Route calculation failed');
+  if (json.code !== 'Ok' || !json.routes?.length) {
+    throw new OsrmError(
+      json.code,
+      json.message || `Route calculation failed with code: ${json.code}`
+    );
+  }
 
   const r = json.routes[0];
   return {
@@ -50,3 +64,5 @@ export async function routeThrough(
     duration: r.duration,
   };
 }
+
+export const routeThrough = routeBetween;
