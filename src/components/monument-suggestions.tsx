@@ -7,20 +7,25 @@ import MonumentLevelPicker from '@/components/monument-level-picker';
 const SELECTED_COLOR = '#16a34a';
 const SUGGESTED_COLOR = '#d97706';
 
-/** Map markers for suggested monuments; tapping one adds/removes it as a stop. */
+/** Map markers for suggested monuments; tapping callout button adds/removes it as a stop. */
 export function MonumentSuggestionMarkers({
   suggestions,
   selectedIds,
   toggle,
 }: MonumentSuggestions) {
-  return suggestions.map((m) => (
-    <MonumentMarker
-      key={m.id}
-      monument={m}
-      color={selectedIds.has(m.id) ? SELECTED_COLOR : SUGGESTED_COLOR}
-      onPress={() => toggle(m.id)}
-    />
-  ));
+  return suggestions.map((m) => {
+    const isSelected = selectedIds.has(m.id);
+    return (
+      <MonumentMarker
+        key={m.id}
+        monument={m}
+        color={isSelected ? SELECTED_COLOR : SUGGESTED_COLOR}
+        isSelected={isSelected}
+        showAddButton
+        onCalloutPress={() => toggle(m.id)}
+      />
+    );
+  });
 }
 
 /** Checklist of suggested monuments for the route panel. */

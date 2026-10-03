@@ -133,9 +133,9 @@ function reusedRoadRatio(
 
     const length = Math.hypot(dx, dy);
 
-    if (length < 0.01) continue;
+    if (length < 0.01 || !Number.isFinite(length)) continue;
 
-    const steps = Math.max(1, Math.ceil(length / sampleSpacing));
+    const steps = Math.min(50, Math.max(1, Math.ceil(length / sampleSpacing)));
 
     for (let step = 0; step <= steps; step++) {
       // Avoid sampling the beginning of every segment twice.
@@ -357,6 +357,7 @@ export type LoopOptions = {
 
 export type LoopResult = Route & {
   bearing: number;
+  ring: LatLng[];
 };
 
 export async function loopOfLength({
@@ -390,6 +391,7 @@ export async function loopOfLength({
     route: Route;
     score: number;
     bearing: number;
+    ring: LatLng[];
   } | null = null;
 
   /*
@@ -430,6 +432,17 @@ export async function loopOfLength({
         continue;
       }
 
+      // If we already found a valid route on an earlier attempt, don't crash on a transient failure
+      if (best) {
+        continue;
+      }
+
+      // If more attempts remain, try adjusting radius and continuing
+      if (attempt < maxAttempts - 1) {
+        radius *= 0.9;
+        continue;
+      }
+
       throw e;
     }
 
@@ -463,6 +476,7 @@ export async function loopOfLength({
         route,
         score,
         bearing: candidateBearing,
+        ring,
       };
     }
 
@@ -480,6 +494,7 @@ export async function loopOfLength({
       return {
         ...route,
         bearing: candidateBearing,
+        ring,
       };
     }
 
@@ -506,5 +521,6 @@ export async function loopOfLength({
   return {
     ...best.route,
     bearing: best.bearing,
+    ring: best.ring,
   };
 }

@@ -25,7 +25,7 @@ export default function RouteControlPanel({
   return (
     <View className='absolute right-4 bottom-8 left-4 gap-3 rounded-2xl bg-white p-4 shadow-lg'>
       <Text
-        className={`font-semibold ${
+        className={`text-center text-xl font-semibold ${
           isError ? 'text-red-500' : 'text-neutral-900'
         }`}>
         {statusText}

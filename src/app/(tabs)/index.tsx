@@ -169,7 +169,7 @@ export default function Home() {
             <Text
               className='text-2xl font-bold tracking-tight text-neutral-900'
               numberOfLines={1}>
-              {displayName} 👋
+              {displayName ?? ' '} 👋
             </Text>
           </View>
 
