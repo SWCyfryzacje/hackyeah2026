@@ -1,5 +1,4 @@
 import SafeView from '@/components/safe-view';
-import { Text } from 'react-native';
 import TripMap from '@/components/TripMap';
 
 export default function Map() {
