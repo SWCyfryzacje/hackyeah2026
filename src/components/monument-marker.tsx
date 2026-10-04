@@ -66,7 +66,7 @@ export default function MonumentMarker({
 
             {distanceStr && (
               <Text style={{ fontSize: 12, color: '#525252', marginTop: 2 }}>
-                {distanceStr} from route
+                {distanceStr} od trasy
               </Text>
             )}
 
@@ -97,7 +97,7 @@ export default function MonumentMarker({
                     fontWeight: '600',
                     textAlign: 'center',
                   }}>
-                  {isSelected ? 'Remove from route' : '+ Add to route'}
+                  {isSelected ? 'Usuń z trasy' : '+ Dodaj do trasy'}
                 </Text>
               </CalloutSubview>
             ) : (
@@ -118,7 +118,7 @@ export default function MonumentMarker({
                     fontWeight: '600',
                     textAlign: 'center',
                   }}>
-                  {isSelected ? 'Remove from route' : '+ Add to route'}
+                  {isSelected ? 'Usuń z trasy' : '+ Dodaj do trasy'}
                 </Text>
               </View>
             )}

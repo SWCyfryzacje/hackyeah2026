@@ -7,8 +7,8 @@ type SettingsHeaderProps = {
 };
 
 export default function SettingsHeader({
-  title = 'Settings',
-  subtitle = 'Manage your personal info, fitness preferences & Clerk profile',
+  title = 'Ustawienia',
+  subtitle = 'Zarządzaj swoimi danymi osobowymi i preferencjami treningowymi',
 }: SettingsHeaderProps) {
   return (
     <View className='px-5 pt-4 pb-2'>

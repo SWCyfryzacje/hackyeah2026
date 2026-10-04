@@ -38,7 +38,7 @@ export default function SettingsActionButtons({
               color='#ffffff'
             />
             <Text className='text-sm font-bold text-white'>
-              Save Profile to Clerk
+              Zapisz zmiany
             </Text>
           </>
         )}
@@ -50,7 +50,7 @@ export default function SettingsActionButtons({
           disabled={isSaving}
           className='h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 active:bg-slate-50'>
           <Text className='text-xs font-bold text-slate-600'>
-            Discard Changes
+            Odrzuć zmiany
           </Text>
         </Pressable>
       )}

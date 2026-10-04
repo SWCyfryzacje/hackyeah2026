@@ -1,8 +1,8 @@
 export const ACTIVITY_LEVELS = [
-  { id: 'Walking', label: 'Walking', icon: 'walk-outline' },
+  { id: 'Walking', label: 'Spacer', icon: 'walk-outline' },
   { id: 'Jogging', label: 'Jogging', icon: 'fitness-outline' },
-  { id: 'Running', label: 'Running', icon: 'speedometer-outline' },
-  { id: 'Cycling', label: 'Cycling', icon: 'bicycle-outline' },
+  { id: 'Running', label: 'Bieganie', icon: 'speedometer-outline' },
+  { id: 'Cycling', label: 'Kolarstwo', icon: 'bicycle-outline' },
 ] as const;
 
 export type ActivityLevelId = (typeof ACTIVITY_LEVELS)[number]['id'];
