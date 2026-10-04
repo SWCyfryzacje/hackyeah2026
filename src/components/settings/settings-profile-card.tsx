@@ -1,5 +1,6 @@
 import React from 'react';
-import { Image, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 
 type SettingsProfileCardProps = {
@@ -23,7 +24,8 @@ export default function SettingsProfileCard({
             {imageUrl ? (
               <Image
                 source={{ uri: imageUrl }}
-                className='h-full w-full'
+                style={{ width: '100%', height: '100%' }}
+                contentFit='cover'
               />
             ) : (
               <Ionicons

@@ -5,9 +5,9 @@ import {
   ScrollView,
   Pressable,
   RefreshControl,
-  Image,
   ActivityIndicator,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useUser } from '@clerk/expo';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -29,6 +29,109 @@ import { formatDistance } from '@/components/monument-marker';
 
 // Default Kraków coordinates if user location is not yet ready
 const DEFAULT_COORDS = { latitude: 50.0614, longitude: 19.9366 };
+
+function MonumentCard({ monument }: { monument: Monument }) {
+  const router = useRouter();
+  const [imageError, setImageError] = useState(false);
+
+  const hasImage = Boolean(monument.imageUrl) && !imageError;
+
+  return (
+    <Pressable
+      onPress={() => router.push('/(tabs)/map')}
+      className='w-64 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm active:opacity-90'>
+      {hasImage ? (
+        <View className='relative h-32 w-full overflow-hidden bg-neutral-100'>
+          <Image
+            source={{ uri: monument.imageUrl! }}
+            style={{ width: '100%', height: '100%' }}
+            contentFit='cover'
+            transition={200}
+            onError={() => setImageError(true)}
+          />
+          <View className='absolute top-2.5 right-2.5 rounded-full bg-black/60 px-2 py-0.5 backdrop-blur-sm'>
+            <Text className='text-[10px] font-bold text-amber-300'>
+              {monument.score >= 10
+                ? '★ Top'
+                : monument.score >= 5
+                  ? '★ Popularny'
+                  : '★ Zabytek'}
+            </Text>
+          </View>
+          {monument.kind && (
+            <View className='absolute bottom-2.5 left-2.5 rounded-md bg-white/90 px-2 py-0.5'>
+              <Text
+                className='text-[10px] font-bold text-neutral-800 capitalize'
+                numberOfLines={1}>
+                {monument.kind}
+              </Text>
+            </View>
+          )}
+        </View>
+      ) : (
+        <View className='relative h-28 w-full items-center justify-center bg-gradient-to-br from-amber-500 to-amber-700 p-4'>
+          <MaterialCommunityIcons
+            name='pillar'
+            size={36}
+            color='#ffffff'
+          />
+          <View className='absolute top-2.5 right-2.5 rounded-full bg-black/30 px-2 py-0.5'>
+            <Text className='text-[10px] font-bold text-amber-200'>
+              {monument.score >= 10 ? '★ Top' : '★ Zabytek'}
+            </Text>
+          </View>
+          {monument.kind && (
+            <View className='absolute bottom-2.5 left-2.5 rounded-md bg-black/20 px-2 py-0.5'>
+              <Text
+                className='text-[10px] font-medium text-white capitalize'
+                numberOfLines={1}>
+                {monument.kind}
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
+
+      <View className='p-3.5'>
+        <Text
+          className='text-sm font-bold text-neutral-900'
+          numberOfLines={1}>
+          {monument.name}
+        </Text>
+
+        <View className='mt-1.5 flex-row items-center gap-1.5'>
+          <Ionicons
+            name='location-outline'
+            size={13}
+            color='#64748b'
+          />
+          <Text className='text-xs font-medium text-neutral-600'>
+            {formatDistance(monument.distanceM)} od Ciebie
+          </Text>
+        </View>
+
+        {monument.description ? (
+          <Text
+            className='mt-1.5 text-xs text-neutral-500'
+            numberOfLines={2}>
+            {monument.description}
+          </Text>
+        ) : null}
+
+        <View className='mt-3 flex-row items-center justify-between border-t border-neutral-100 pt-2'>
+          <Text className='text-[11px] font-semibold text-blue-600'>
+            Pokaż na mapie
+          </Text>
+          <Ionicons
+            name='arrow-forward'
+            size={12}
+            color='#2563eb'
+          />
+        </View>
+      </View>
+    </Pressable>
+  );
+}
 
 export default function Home() {
   const router = useRouter();
@@ -243,7 +346,8 @@ export default function Home() {
             {user?.imageUrl ? (
               <Image
                 source={{ uri: user.imageUrl }}
-                className='h-full w-full'
+                style={{ width: '100%', height: '100%' }}
+                contentFit='cover'
               />
             ) : (
               <Ionicons
@@ -536,98 +640,10 @@ export default function Home() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}>
               {nearbyMonuments.map((monument) => (
-                <Pressable
+                <MonumentCard
                   key={monument.id}
-                  onPress={() => router.push('/(tabs)/map')}
-                  className='w-64 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm active:opacity-90'>
-                  {monument.imageUrl ? (
-                    <View className='relative h-32 w-full bg-neutral-100'>
-                      <Image
-                        source={{ uri: monument.imageUrl }}
-                        className='h-full w-full'
-                        resizeMode='cover'
-                      />
-                      <View className='absolute top-2.5 right-2.5 rounded-full bg-black/60 px-2 py-0.5 backdrop-blur-sm'>
-                        <Text className='text-[10px] font-bold text-amber-300'>
-                          {monument.score >= 10
-                            ? '★ Top'
-                            : monument.score >= 5
-                              ? '★ Popularny'
-                              : '★ Zabytek'}
-                        </Text>
-                      </View>
-                      {monument.kind && (
-                        <View className='absolute bottom-2.5 left-2.5 rounded-md bg-white/90 px-2 py-0.5'>
-                          <Text
-                            className='text-[10px] font-bold text-neutral-800 capitalize'
-                            numberOfLines={1}>
-                            {monument.kind}
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  ) : (
-                    <View className='relative h-28 w-full items-center justify-center bg-gradient-to-br from-amber-500 to-amber-700 p-4'>
-                      <MaterialCommunityIcons
-                        name='pillar'
-                        size={36}
-                        color='#ffffff'
-                      />
-                      <View className='absolute top-2.5 right-2.5 rounded-full bg-black/30 px-2 py-0.5'>
-                        <Text className='text-[10px] font-bold text-amber-200'>
-                          {monument.score >= 10 ? '★ Top' : '★ Zabytek'}
-                        </Text>
-                      </View>
-                      {monument.kind && (
-                        <View className='absolute bottom-2.5 left-2.5 rounded-md bg-black/20 px-2 py-0.5'>
-                          <Text
-                            className='text-[10px] font-medium text-white capitalize'
-                            numberOfLines={1}>
-                            {monument.kind}
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  )}
-
-                  <View className='p-3.5'>
-                    <Text
-                      className='text-sm font-bold text-neutral-900'
-                      numberOfLines={1}>
-                      {monument.name}
-                    </Text>
-
-                    <View className='mt-1.5 flex-row items-center gap-1.5'>
-                      <Ionicons
-                        name='location-outline'
-                        size={13}
-                        color='#64748b'
-                      />
-                      <Text className='text-xs font-medium text-neutral-600'>
-                        {formatDistance(monument.distanceM)} od Ciebie
-                      </Text>
-                    </View>
-
-                    {monument.description ? (
-                      <Text
-                        className='mt-1.5 text-xs text-neutral-500'
-                        numberOfLines={2}>
-                        {monument.description}
-                      </Text>
-                    ) : null}
-
-                    <View className='mt-3 flex-row items-center justify-between border-t border-neutral-100 pt-2'>
-                      <Text className='text-[11px] font-semibold text-blue-600'>
-                        Pokaż na mapie
-                      </Text>
-                      <Ionicons
-                        name='arrow-forward'
-                        size={12}
-                        color='#2563eb'
-                      />
-                    </View>
-                  </View>
-                </Pressable>
+                  monument={monument}
+                />
               ))}
             </ScrollView>
           ) : (
