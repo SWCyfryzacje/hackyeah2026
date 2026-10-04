@@ -39,7 +39,7 @@ export async function routeBetween(
   }
 
   const coords = points.map((p) => `${p.longitude},${p.latitude}`).join(';');
-  const url = `${BASE}/route/v1/driving/${coords}?overview=full&geometries=geojson&continue_straight=true`;
+  const url = `${BASE}/route/v1/walking/${coords}?overview=full&geometries=geojson&continue_straight=true`;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {
