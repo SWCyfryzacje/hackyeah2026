@@ -15,4 +15,14 @@ export const INITIAL_REGION: Region = {
   ...DEFAULT_DELTAS,
 };
 
-export const DEFAULT_LOOP_OPTIONS = [3, 5, 10];
+export type LoopPreset = {
+  minKm: number;
+  maxKm: number;
+  label: string;
+};
+
+export const DEFAULT_LOOP_OPTIONS: LoopPreset[] = [
+  { minKm: 2, maxKm: 4, label: '2-4 km' },
+  { minKm: 4, maxKm: 8, label: '4-8 km' },
+  { minKm: 8, maxKm: 15, label: '8-15 km' },
+];

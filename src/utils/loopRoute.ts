@@ -290,7 +290,17 @@ function createLoopWaypoints(
 export type LoopOptions = {
   start: LatLng;
 
-  targetMeters: number;
+  targetMeters?: number;
+
+  /**
+   * Minimum desired route length in meters for range-based loop generation.
+   */
+  minMeters?: number;
+
+  /**
+   * Maximum desired route length in meters for range-based loop generation.
+   */
+  maxMeters?: number;
 
   /**
    * Preferred initial direction, radians clockwise from north.
@@ -349,7 +359,9 @@ export type LoopResult = Route & {
 
 export async function loopOfLength({
   start,
-  targetMeters,
+  targetMeters: explicitTargetMeters,
+  minMeters,
+  maxMeters,
   bearing = Math.random() * TAU,
   points = 5,
   tolerance = 0.12,
@@ -358,6 +370,12 @@ export async function loopOfLength({
   minAreaRatio = 0.02,
   signal,
 }: LoopOptions): Promise<LoopResult> {
+  const targetMeters =
+    explicitTargetMeters ??
+    (minMeters !== undefined && maxMeters !== undefined
+      ? (minMeters + maxMeters) / 2
+      : minMeters ?? maxMeters ?? 5000);
+
   if (targetMeters <= 0) {
     throw new Error('Target length must be positive');
   }
@@ -384,13 +402,17 @@ export async function loopOfLength({
     {
       bearing: bearing + 0.6,
       direction: -1,
-      radius: baseRadius * 0.92,
+      radius: minMeters
+        ? (minMeters / (TAU * effectiveRoadFactor)) * 1.05
+        : baseRadius * 0.92,
       wobble: 1,
     },
     {
       bearing: bearing - 0.6,
       direction: 1,
-      radius: baseRadius * 1.08,
+      radius: maxMeters
+        ? (maxMeters / (TAU * effectiveRoadFactor)) * 0.95
+        : baseRadius * 1.08,
       wobble: 2,
     },
     {
@@ -426,7 +448,19 @@ export async function loopOfLength({
 
     const route = await routeBetween([start, ...ring, start], signal);
 
-    const lengthError = Math.abs(route.distance - targetMeters) / targetMeters;
+    let lengthError: number;
+    if (minMeters !== undefined && maxMeters !== undefined) {
+      if (route.distance < minMeters) {
+        lengthError = (minMeters - route.distance) / minMeters;
+      } else if (route.distance > maxMeters) {
+        lengthError = (route.distance - maxMeters) / maxMeters;
+      } else {
+        lengthError = 0;
+      }
+    } else {
+      lengthError = Math.abs(route.distance - targetMeters) / targetMeters;
+    }
+
     const overlap = reusedRoadRatio(route.coords);
     const areaRatio = enclosedAreaRatio(route.coords, route.distance);
 

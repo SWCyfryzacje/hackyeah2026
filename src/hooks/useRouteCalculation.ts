@@ -48,6 +48,14 @@ function mergeLoopWaypoints(
   return [start, ...allPoints.map((p) => p.point), start];
 }
 
+export type LoopTarget =
+  | number
+  | {
+      minKm: number;
+      maxKm: number;
+      label?: string;
+    };
+
 export function useRouteCalculation({
   start,
   useUserLocationAsStart = true,
@@ -171,7 +179,7 @@ export function useRouteCalculation({
   useEffect(() => () => loopAbortRef.current?.abort(), []);
 
   const generateLoop = useCallback(
-    async (km: number) => {
+    async (target: LoopTarget) => {
       if (!start) return;
 
       loopAbortRef.current?.abort();
@@ -186,11 +194,22 @@ export function useRouteCalculation({
       setBaseLoop(null);
 
       try {
-        const r = await loopOfLength({
-          start,
-          targetMeters: km * 1000,
-          signal: ctrl.signal,
-        });
+        const loopParams =
+          typeof target === 'number'
+            ? {
+                start,
+                targetMeters: target * 1000,
+                signal: ctrl.signal,
+              }
+            : {
+                start,
+                minMeters: target.minKm * 1000,
+                maxMeters: target.maxKm * 1000,
+                targetMeters: ((target.minKm + target.maxKm) / 2) * 1000,
+                signal: ctrl.signal,
+              };
+
+        const r = await loopOfLength(loopParams);
 
         if (ctrl.signal.aborted || loopAbortRef.current !== ctrl) return;
 

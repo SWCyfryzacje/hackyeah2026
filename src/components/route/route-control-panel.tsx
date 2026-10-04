@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import LoopSelector from './loop-selector';
+import { DEFAULT_LOOP_OPTIONS, type LoopPreset } from '@/constants/map';
 
 type RouteControlPanelProps = {
   /** Extra content shown above the Reset button */
@@ -8,8 +9,8 @@ type RouteControlPanelProps = {
   statusText: string;
   isError?: boolean;
   disabled?: boolean;
-  loopOptions?: number[];
-  onSelectLoop: (km: number) => void;
+  loopOptions?: LoopPreset[];
+  onSelectLoop: (preset: LoopPreset) => void;
   onReset: () => void;
 };
 
@@ -18,7 +19,7 @@ export default function RouteControlPanel({
   statusText,
   isError = false,
   disabled = false,
-  loopOptions = [3, 5, 10],
+  loopOptions = DEFAULT_LOOP_OPTIONS,
   onSelectLoop,
   onReset,
 }: RouteControlPanelProps) {

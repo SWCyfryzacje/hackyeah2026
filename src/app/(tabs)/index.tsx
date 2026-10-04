@@ -112,27 +112,30 @@ export default function Home() {
 
   const quickLoops = [
     {
-      distance: 3,
-      title: 'Quick 3 km',
-      subtitle: 'Light walk ~18 min',
+      minKm: 2,
+      maxKm: 4,
+      title: 'Quick 2-4 km',
+      subtitle: 'Light walk ~15-25 min',
       icon: 'walk-outline',
       color: 'bg-emerald-500',
       lightBg: 'bg-emerald-50 border-emerald-200',
       textColor: 'text-emerald-700',
     },
     {
-      distance: 5,
-      title: 'Standard 5 km',
-      subtitle: 'Cardio loop ~28 min',
+      minKm: 4,
+      maxKm: 8,
+      title: 'Standard 4-8 km',
+      subtitle: 'Cardio loop ~25-50 min',
       icon: 'fitness-outline',
       color: 'bg-blue-600',
       lightBg: 'bg-blue-50 border-blue-200',
       textColor: 'text-blue-700',
     },
     {
-      distance: 10,
-      title: 'Endurance 10 km',
-      subtitle: 'Long walk ~55 min',
+      minKm: 8,
+      maxKm: 15,
+      title: 'Endurance 8-15 km',
+      subtitle: 'Long session ~50-95 min',
       icon: 'bicycle-outline',
       color: 'bg-amber-600',
       lightBg: 'bg-amber-50 border-amber-200',
@@ -294,8 +297,16 @@ export default function Home() {
           <View className='gap-3'>
             {quickLoops.map((loop) => (
               <Pressable
-                key={loop.distance}
-                onPress={() => router.push('/(tabs)/route')}
+                key={loop.title}
+                onPress={() =>
+                  router.push({
+                    pathname: '/(tabs)/route',
+                    params: {
+                      minKm: loop.minKm.toString(),
+                      maxKm: loop.maxKm.toString(),
+                    },
+                  })
+                }
                 className={`flex-row items-center justify-between rounded-2xl border bg-white p-4 ${loop.lightBg} shadow-sm active:opacity-90`}>
                 <View className='flex-row items-center gap-3.5'>
                   <View
