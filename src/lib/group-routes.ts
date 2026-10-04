@@ -1,8 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { LatLng } from 'react-native-maps';
 import * as Linking from 'expo-linking';
-import { MAX_ROUTE_DAYS_AHEAD } from '@/components/group-routes/new-group-route-schema';
-import { horizonRange } from '@/utils/events';
 import type {
   CreateGroupRouteInput,
   GroupRoute,
@@ -25,7 +23,6 @@ import type {
 // OSRM overview=full can return thousands of points; the DB caps geometry at 20k.
 const MAX_GEOMETRY_POINTS = 2000;
 const MESSAGES_PAGE = 200;
-const UPCOMING_EVENTS_LIMIT = 20;
 
 const EVENT_COLUMNS = 'id, title, url, place, date_text, start_date, end_date';
 
@@ -222,26 +219,6 @@ export async function fetchGroupRouteMessages(
     .limit(limit);
   if (error) throw new Error(error.message);
   return (data as GroupRouteMessageRow[]).map(toGroupRouteMessage).reverse();
-}
-
-/**
- * Events going on between today and the last day a route can be planned for,
- * soonest first (for linking a route to an event).
- */
-export async function fetchUpcomingEvents(
-  supabase: SupabaseClient,
-  limit = UPCOMING_EVENTS_LIMIT
-): Promise<GroupRouteEvent[]> {
-  const { from, until } = horizonRange({ days: MAX_ROUTE_DAYS_AHEAD });
-  const { data, error } = await supabase
-    .from('events')
-    .select(EVENT_COLUMNS)
-    .gte('end_date', from)
-    .lte('start_date', until)
-    .order('start_date', { ascending: true })
-    .limit(limit);
-  if (error) throw new Error(error.message);
-  return (data as GroupRouteEventRow[]).map(toGroupRouteEvent);
 }
 
 // --- writes ---

@@ -337,6 +337,7 @@ export default function RouteScreen() {
           <CreateGroupRouteButton
             route={plannedRoute}
             stops={stops}
+            events={events.selectedEvents}
           />
         )}
         {plannedRoute && (

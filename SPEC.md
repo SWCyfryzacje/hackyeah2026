@@ -20,8 +20,10 @@ uczestnicy widzą na żywo pozycję twórcy po rozpoczęciu i rozmawiają na cza
 - Na ekranie **Route** przycisk „Utwórz wspólną trasę” (aktywny, gdy jest wyliczona trasa lub pętla).
   Przenosi polyline, przystanki, dystans i czas do formularza.
 - Formularz: nazwa (1–100 znaków, wymagana), opis (opc., ≤ 500), dzień (Dziś / Jutro / data)
-  i godzina startu `HH:MM`, opcjonalny koniec, przełącznik publiczna/prywatna, opcjonalny wybór
-  wydarzenia z listy najbliższych (`events`, kończące się dziś lub później, max 20).
+  i godzina startu `HH:MM`, opcjonalny koniec, przełącznik publiczna/prywatna.
+- Wydarzenia zaznaczone na trasie w zakładce **Route** przechodzą do formularza (bez osobnego
+  wyboru wydarzenia). Wtedy można wybrać tylko dzień, w którym w każdym zaznaczonym miejscu trwa
+  jakieś wydarzenie (`start_date`–`end_date`, całe dni); trasa linkuje do pierwszego z nich.
 - Koniec, jeśli podany, musi być po starcie.
 - Twórca automatycznie zostaje uczestnikiem z rolą `creator`.
 - Każda trasa dostaje 6-znakowy kod dołączenia (pokazywany tylko uczestnikom).

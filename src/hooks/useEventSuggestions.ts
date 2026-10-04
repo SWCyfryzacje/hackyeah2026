@@ -31,7 +31,8 @@ export type EventSuggestion = {
  *
  * Suggestions come from the first route computed for a set of waypoints or loop
  * (no stops yet), so they don't shift when stops are added. Selecting an event
- * calls `onStopsChange` with the selected venues in route order.
+ * calls `onStopsChange` with the selected venues in route order; their events
+ * are in `selectedEvents`.
  * Call `clear()` when the route is reset.
  */
 export default function useEventSuggestions(
@@ -76,6 +77,12 @@ export default function useEventSuggestions(
     [selection, routeKey]
   );
 
+  // Events at the selected venues, in route order
+  const selectedEvents = useMemo(
+    () => suggestions.filter((s) => selectedIds.has(s.id)).map((s) => s.events),
+    [suggestions, selectedIds]
+  );
+
   const toggle = (id: string) => {
     const ids = selectedIds.has(id)
       ? [...selectedIds].filter((x) => x !== id)
@@ -97,7 +104,7 @@ export default function useEventSuggestions(
     onStopsChange(NO_STOPS);
   };
 
-  return { suggestions, selectedIds, toggle, clear };
+  return { suggestions, selectedIds, selectedEvents, toggle, clear };
 }
 
 export type EventSuggestions = ReturnType<typeof useEventSuggestions>;

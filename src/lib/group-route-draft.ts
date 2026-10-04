@@ -1,4 +1,5 @@
 import type { LatLng } from 'react-native-maps';
+import type { RouteEventVenue } from '@/utils/group-route-events';
 
 /**
  * Route handed over from the planner (Route tab) to the "new shared route"
@@ -10,6 +11,8 @@ export type GroupRouteDraft = {
   stops: LatLng[];
   distanceM: number;
   durationS: number;
+  /** Selected event venues in route order; the route must fit their dates. */
+  events: RouteEventVenue[];
 };
 
 let draft: GroupRouteDraft | null = null;

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -6,7 +6,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Ionicons } from '@expo/vector-icons';
 import { useSupabase } from '@/lib/supabase';
@@ -23,11 +23,13 @@ import {
   formatStops,
   formatTimeInput,
 } from '@/utils/group-route-format';
+import { eventDayOffsets, eventsOnDay } from '@/utils/group-route-events';
 import ChoiceChip from './choice-chip';
-import EventPicker from './event-picker';
+import RouteEventsInfo from './route-events-info';
 import {
+  ALL_DAY_OFFSETS,
   DAY_OPTIONS,
-  NewGroupRouteSchema,
+  newGroupRouteSchema,
   newGroupRouteDefaults,
   type NewGroupRouteData,
 } from './new-group-route-schema';
@@ -62,11 +64,18 @@ function Field({
 export default function NewGroupRouteForm({ draft, onCreated }: Props) {
   const supabase = useSupabase();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // With events on the route, only the days they are on
+  const allowedDays = useMemo(
+    () => eventDayOffsets(draft.events, ALL_DAY_OFFSETS),
+    [draft.events]
+  );
   const form = useForm<NewGroupRouteData>({
-    resolver: zodResolver(NewGroupRouteSchema),
-    defaultValues: newGroupRouteDefaults(),
+    resolver: zodResolver(newGroupRouteSchema(allowedDays)),
+    defaultValues: newGroupRouteDefaults(allowedDays),
   });
   const { errors, isSubmitting } = form.formState;
+  const dayOffset = useWatch({ control: form.control, name: 'dayOffset' });
+  const canSubmit = allowedDays.length > 0;
 
   const onSubmit = form.handleSubmit(async (data) => {
     setSubmitError(null);
@@ -82,7 +91,8 @@ export default function NewGroupRouteForm({ draft, onCreated }: Props) {
         stops: draft.stops,
         distanceM: draft.distanceM,
         durationS: draft.durationS,
-        eventId: data.eventId,
+        // Linked to the first event on the route that runs that day
+        eventId: eventsOnDay(draft.events, data.dayOffset)?.[0]?.id ?? null,
       });
       onCreated(id);
     } catch (e) {
@@ -152,7 +162,15 @@ export default function NewGroupRouteForm({ draft, onCreated }: Props) {
         />
       </Field>
 
-      <Field label='Dzień'>
+      <RouteEventsInfo
+        venues={draft.events}
+        dayOffset={dayOffset}
+        hasAllowedDay={canSubmit}
+      />
+
+      <Field
+        label='Dzień'
+        error={errors.dayOffset?.message}>
         <Controller
           control={form.control}
           name='dayOffset'
@@ -167,6 +185,7 @@ export default function NewGroupRouteForm({ draft, onCreated }: Props) {
                     label={`${d.label} ${formatShortDate(date)}`}
                     selected={value === d.offset}
                     onPress={() => onChange(d.offset)}
+                    disabled={!allowedDays.includes(d.offset)}
                   />
                 );
               })}
@@ -250,19 +269,6 @@ export default function NewGroupRouteForm({ draft, onCreated }: Props) {
         />
       </Field>
 
-      <Field label='Wydarzenie (opcjonalnie)'>
-        <Controller
-          control={form.control}
-          name='eventId'
-          render={({ field: { onChange, value } }) => (
-            <EventPicker
-              value={value}
-              onChange={onChange}
-            />
-          )}
-        />
-      </Field>
-
       {submitError && (
         <View className='rounded-xl border border-red-200 bg-red-50 p-3'>
           <Text className='text-sm text-red-700'>{submitError}</Text>
@@ -271,9 +277,9 @@ export default function NewGroupRouteForm({ draft, onCreated }: Props) {
 
       <Pressable
         onPress={onSubmit}
-        disabled={isSubmitting}
+        disabled={isSubmitting || !canSubmit}
         className={`items-center justify-center rounded-xl bg-blue-600 px-4 py-3.5 active:bg-blue-700 ${
-          isSubmitting ? 'opacity-50' : ''
+          isSubmitting || !canSubmit ? 'opacity-50' : ''
         }`}>
         {isSubmitting ? (
           <ActivityIndicator color='#ffffff' />
