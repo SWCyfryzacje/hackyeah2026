@@ -1,5 +1,7 @@
 import type { LatLng } from 'react-native-maps';
-import { routeBetween, type Route } from './oneWayRoute';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { routeBetween, type Route, type RouteProfile } from './oneWayRoute';
+import { fetchMonumentsNear, type Monument } from './monuments';
 
 const EARTH_RADIUS_M = 6_371_008.8;
 const TAU = Math.PI * 2;
@@ -19,7 +21,7 @@ function normalizeLongitude(lon: number): number {
  *
  * `bearing` is radians, clockwise from north.
  */
-function offset(p: LatLng, meters: number, bearing: number): LatLng {
+export function offset(p: LatLng, meters: number, bearing: number): LatLng {
   if (meters === 0) return p;
 
   const angularDistance = meters / EARTH_RADIUS_M;
@@ -350,11 +352,28 @@ export type LoopOptions = {
   minAreaRatio?: number;
 
   signal?: AbortSignal;
+  profile?: RouteProfile;
 };
 
 export type LoopResult = Route & {
   bearing: number;
   ring: LatLng[];
+};
+
+export type OneWayOptions = {
+  start: LatLng;
+  targetMeters?: number;
+  minMeters?: number;
+  maxMeters?: number;
+  profile?: RouteProfile;
+  bearing?: number;
+  signal?: AbortSignal;
+  supabase?: SupabaseClient;
+};
+
+export type OneWayResult = Route & {
+  destination: LatLng & { name?: string; description?: string; id?: number };
+  monument?: Monument;
 };
 
 export async function loopOfLength({
@@ -369,6 +388,7 @@ export async function loopOfLength({
   maxOverlap = 0.12,
   minAreaRatio = 0.02,
   signal,
+  profile = 'walking',
 }: LoopOptions): Promise<LoopResult> {
   const targetMeters =
     explicitTargetMeters ??
@@ -446,7 +466,12 @@ export async function loopOfLength({
       c.wobble
     );
 
-    const route = await routeBetween([start, ...ring, start], signal);
+    const route = await routeBetween(
+      [start, ...ring, start],
+      signal,
+      undefined,
+      profile
+    );
 
     let lengthError: number;
     if (minMeters !== undefined && maxMeters !== undefined) {
@@ -568,6 +593,259 @@ export async function loopOfLength({
           checkDone();
         }
       }).catch((err) => {
+        completedCount++;
+        if (completedCount === candidatePromises.length) {
+          checkDone();
+        }
+      });
+    });
+  });
+}
+
+export async function oneWayOfLength({
+  start,
+  targetMeters: explicitTargetMeters,
+  minMeters,
+  maxMeters,
+  bearing = Math.random() * TAU,
+  profile = 'walking',
+  signal,
+  supabase,
+}: OneWayOptions): Promise<OneWayResult> {
+  const targetMeters =
+    explicitTargetMeters ??
+    (minMeters !== undefined && maxMeters !== undefined
+      ? (minMeters + maxMeters) / 2
+      : minMeters ?? maxMeters ?? 4000);
+
+  if (targetMeters <= 0) {
+    throw new Error('Target length must be positive');
+  }
+
+  // 1. If Supabase client is available, attempt to select a random cultural monument in the requested range
+  if (supabase) {
+    try {
+      const searchRadius = Math.max(maxMeters ?? targetMeters * 1.2, 2000);
+      const monuments = await fetchMonumentsNear(
+        supabase,
+        start,
+        searchRadius,
+        0,
+        signal
+      );
+
+      const effectiveMinMeters = minMeters ?? targetMeters * 0.8;
+      const effectiveMaxMeters = maxMeters ?? targetMeters * 1.2;
+
+      // Filter monuments located at a plausible straight-line distance for the route range
+      let candidateMonuments = monuments.filter(
+        (m) =>
+          m.distanceM >= effectiveMinMeters * 0.45 &&
+          m.distanceM <= effectiveMaxMeters * 1.05
+      );
+
+      if (candidateMonuments.length === 0) {
+        candidateMonuments = monuments.filter(
+          (m) =>
+            m.distanceM >= effectiveMinMeters * 0.3 &&
+            m.distanceM <= effectiveMaxMeters * 1.2
+        );
+      }
+
+      if (candidateMonuments.length > 0) {
+        // Randomize candidate ordering for unbiased selection
+        const shuffled = [...candidateMonuments].sort(
+          () => Math.random() - 0.5
+        );
+
+        const testCandidates = shuffled.slice(0, 8);
+
+        type ScoredMonumentRoute = {
+          route: Route;
+          monument: Monument;
+          score: number;
+          inRange: boolean;
+        };
+
+        const monumentPromises = testCandidates.map(async (m) => {
+          const dest = { latitude: m.latitude, longitude: m.longitude };
+          const route = await routeBetween(
+            [start, dest],
+            signal,
+            undefined,
+            profile
+          );
+
+          let lengthError: number;
+          let inRange = false;
+
+          if (minMeters !== undefined && maxMeters !== undefined) {
+            if (route.distance < minMeters) {
+              lengthError = (minMeters - route.distance) / minMeters;
+            } else if (route.distance > maxMeters) {
+              lengthError = (route.distance - maxMeters) / maxMeters;
+            } else {
+              lengthError = 0;
+              inRange = true;
+            }
+          } else {
+            lengthError =
+              Math.abs(route.distance - targetMeters) / targetMeters;
+            inRange = lengthError < 0.2;
+          }
+
+          return {
+            route,
+            monument: m,
+            score: lengthError,
+            inRange,
+          };
+        });
+
+        const settledResults = await Promise.allSettled(monumentPromises);
+        const validResults: ScoredMonumentRoute[] = settledResults
+          .filter(
+            (r): r is PromiseFulfilledResult<ScoredMonumentRoute> =>
+              r.status === 'fulfilled'
+          )
+          .map((r) => r.value);
+
+        if (validResults.length > 0) {
+          const inRangeResults = validResults.filter((r) => r.inRange);
+          const chosen =
+            inRangeResults.length > 0
+              ? inRangeResults[0]
+              : validResults.sort((a, b) => a.score - b.score)[0];
+
+          if (chosen.inRange || chosen.score < 0.4) {
+            return {
+              coords: chosen.route.coords,
+              distance: chosen.route.distance,
+              duration: chosen.route.duration,
+              destination: {
+                latitude: chosen.monument.latitude,
+                longitude: chosen.monument.longitude,
+                name: chosen.monument.name,
+                description: chosen.monument.description ?? undefined,
+                id: chosen.monument.id,
+              },
+              monument: chosen.monument,
+            };
+          }
+        }
+      }
+    } catch (e) {
+      if (signal?.aborted) throw e;
+      // If fetching monuments fails, smoothly fall back to geometric candidate routing
+    }
+  }
+
+  // 2. Geometric fallback route generation
+  const roadFactor = profile === 'driving' ? 1.4 : 1.35;
+  const straightDistance = targetMeters / roadFactor;
+
+  const candidateBearings = [
+    bearing,
+    (bearing + Math.PI / 3) % TAU,
+    (bearing + (2 * Math.PI) / 3) % TAU,
+    (bearing + Math.PI) % TAU,
+    (bearing + (4 * Math.PI) / 3) % TAU,
+    (bearing + (5 * Math.PI) / 3) % TAU,
+  ];
+
+  type ScoredOneWay = OneWayResult & { score: number };
+
+  const candidatePromises = candidateBearings.map(async (b) => {
+    const dest = offset(start, straightDistance, b);
+    const route = await routeBetween([start, dest], signal, undefined, profile);
+
+    let lengthError: number;
+    if (minMeters !== undefined && maxMeters !== undefined) {
+      if (route.distance < minMeters) {
+        lengthError = (minMeters - route.distance) / minMeters;
+      } else if (route.distance > maxMeters) {
+        lengthError = (route.distance - maxMeters) / maxMeters;
+      } else {
+        lengthError = 0;
+      }
+    } else {
+      lengthError = Math.abs(route.distance - targetMeters) / targetMeters;
+    }
+
+    return {
+      ...route,
+      destination: dest,
+      score: lengthError,
+    };
+  });
+
+  return new Promise<OneWayResult>((resolve, reject) => {
+    let completedCount = 0;
+    const validResults: ScoredOneWay[] = [];
+    let graceTimer: ReturnType<typeof setTimeout> | null = null;
+    let settled = false;
+
+    const checkDone = () => {
+      if (settled) return;
+      if (validResults.length > 0) {
+        settled = true;
+        if (graceTimer) clearTimeout(graceTimer);
+        validResults.sort((a, b) => a.score - b.score);
+        resolve({
+          coords: validResults[0].coords,
+          distance: validResults[0].distance,
+          duration: validResults[0].duration,
+          destination: validResults[0].destination,
+        });
+      } else if (completedCount === candidatePromises.length) {
+        settled = true;
+        if (graceTimer) clearTimeout(graceTimer);
+        reject(new Error('Could not calculate a route in this area'));
+      }
+    };
+
+    if (signal) {
+      if (signal.aborted) {
+        reject(signal.reason || new Error('Aborted'));
+        return;
+      }
+      signal.addEventListener(
+        'abort',
+        () => {
+          if (!settled) {
+            settled = true;
+            if (graceTimer) clearTimeout(graceTimer);
+            reject(signal.reason || new Error('Aborted'));
+          }
+        },
+        { once: true }
+      );
+    }
+
+    candidatePromises.forEach((p) => {
+      p.then((res) => {
+        completedCount++;
+        validResults.push(res);
+        if (res.score < 0.15) {
+          settled = true;
+          if (graceTimer) clearTimeout(graceTimer);
+          resolve({
+            coords: res.coords,
+            distance: res.distance,
+            duration: res.duration,
+            destination: res.destination,
+          });
+          return;
+        }
+
+        if (validResults.length >= 1 && !graceTimer) {
+          graceTimer = setTimeout(checkDone, 180);
+        }
+
+        if (completedCount === candidatePromises.length) {
+          checkDone();
+        }
+      }).catch(() => {
         completedCount++;
         if (completedCount === candidatePromises.length) {
           checkDone();

@@ -9,6 +9,8 @@ export type Route = {
   duration: number; // seconds
 };
 
+export type RouteProfile = 'walking' | 'driving';
+
 export class OsrmError extends Error {
   readonly code: string;
 
@@ -32,14 +34,15 @@ type OsrmResponse = {
 export async function routeBetween(
   points: LatLng[],
   signal?: AbortSignal,
-  timeoutMs = DEFAULT_TIMEOUT_MS
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+  profile: RouteProfile = 'walking'
 ): Promise<Route> {
   if (points.length < 2) {
     throw new Error('At least 2 points are required to calculate a route.');
   }
 
   const coords = points.map((p) => `${p.longitude},${p.latitude}`).join(';');
-  const url = `${BASE}/route/v1/walking/${coords}?overview=full&geometries=geojson&continue_straight=true`;
+  const url = `${BASE}/route/v1/${profile}/${coords}?overview=full&geometries=geojson&continue_straight=true`;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {

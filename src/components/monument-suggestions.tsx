@@ -47,7 +47,7 @@ export function MonumentSuggestionList({
       </Text>
       <MonumentLevelPicker />
       {suggestions.length === 0 && (
-        <Text className='text-xs text-neutral-500'>
+        <Text className='text-center text-lg text-neutral-500'>
           None at this level — try a broader one
         </Text>
       )}
