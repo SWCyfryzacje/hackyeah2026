@@ -19,12 +19,12 @@ export default function SettingsAccountDetails({
         month: 'short',
         day: 'numeric',
       })
-    : 'Recent';
+    : 'Niedawno';
 
   return (
     <View className='mt-6 px-5'>
       <Text className='mb-2.5 text-xs font-bold tracking-wider text-slate-500 uppercase'>
-        Account & Security
+        Konto i bezpieczeństwo
       </Text>
 
       <View className='gap-3.5 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs'>
@@ -63,13 +63,13 @@ export default function SettingsAccountDetails({
               color='#64748b'
             />
             <Text className='text-xs font-medium text-slate-600'>
-              Clerk User ID
+              ID użytkownika
             </Text>
           </View>
           <Text
             className='font-mono text-xs font-medium text-slate-500'
             numberOfLines={1}>
-            {userId ? `${userId.slice(0, 14)}...` : 'N/A'}
+            {userId ? `${userId.slice(0, 14)}...` : 'Brak'}
           </Text>
         </View>
 
@@ -83,7 +83,7 @@ export default function SettingsAccountDetails({
               size={18}
               color='#64748b'
             />
-            <Text className='text-xs font-medium text-slate-600'>Joined</Text>
+            <Text className='text-xs font-medium text-slate-600'>Dołączono</Text>
           </View>
           <Text className='text-xs font-semibold text-slate-700'>
             {formattedDate}

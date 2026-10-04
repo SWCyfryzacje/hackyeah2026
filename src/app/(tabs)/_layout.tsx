@@ -40,7 +40,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name='index'
         options={{
-          title: 'Home',
+          title: 'Panel',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? 'home' : 'home-outline'}
@@ -53,7 +53,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name='map'
         options={{
-          title: 'Map',
+          title: 'Mapa',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? 'map' : 'map-outline'}
@@ -66,7 +66,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name='route'
         options={{
-          title: 'Route',
+          title: 'Trasa',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? 'navigate' : 'navigate-outline'}
@@ -92,7 +92,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name='settings'
         options={{
-          title: 'Settings',
+          title: 'Ustawienia',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? 'settings' : 'settings-outline'}

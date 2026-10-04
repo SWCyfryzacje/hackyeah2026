@@ -23,14 +23,14 @@ export default function SettingsWorkoutPreferences({
   return (
     <View className='mt-6 px-5'>
       <Text className='mb-2.5 text-xs font-bold tracking-wider text-slate-500 uppercase'>
-        Workout & Activity Profile
+        Profil treningowy i aktywność
       </Text>
 
       <View className='gap-5 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs'>
         {/* Preferred Activity */}
         <View className='gap-2'>
           <Text className='text-xs font-semibold text-slate-700'>
-            Primary Activity Mode
+            Główny rodzaj aktywności
           </Text>
           <View className='flex-row flex-wrap gap-2'>
             {ACTIVITY_LEVELS.map((act) => {
@@ -65,10 +65,10 @@ export default function SettingsWorkoutPreferences({
         <View className='gap-2'>
           <View className='flex-row items-center justify-between'>
             <Text className='text-xs font-semibold text-slate-700'>
-              Weekly Goal ({distanceUnit})
+              Cel tygodniowy ({distanceUnit})
             </Text>
             <Text className='text-xs font-bold text-indigo-600'>
-              {weeklyGoal} {distanceUnit} / week
+              {weeklyGoal} {distanceUnit} / tydz.
             </Text>
           </View>
 
@@ -100,7 +100,7 @@ export default function SettingsWorkoutPreferences({
             value={weeklyGoal}
             onChangeText={setWeeklyGoal}
             keyboardType='numeric'
-            placeholder='Custom distance goal'
+            placeholder='Własny cel dystansu'
             placeholderTextColor='#94a3b8'
             className='h-11 rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 text-sm font-medium text-slate-900'
           />
@@ -109,7 +109,7 @@ export default function SettingsWorkoutPreferences({
         {/* Unit System */}
         <View className='gap-2'>
           <Text className='text-xs font-semibold text-slate-700'>
-            Unit Preference
+            Jednostka dystansu
           </Text>
           <View className='flex-row rounded-xl border border-slate-200 bg-slate-100 p-1'>
             <Pressable
@@ -123,7 +123,7 @@ export default function SettingsWorkoutPreferences({
                     ? 'text-slate-900'
                     : 'text-slate-500'
                 }`}>
-                Metric (Kilometers - km)
+                Metryczne (Kilometry - km)
               </Text>
             </Pressable>
 
@@ -138,7 +138,7 @@ export default function SettingsWorkoutPreferences({
                     ? 'text-slate-900'
                     : 'text-slate-500'
                 }`}>
-                Imperial (Miles - mi)
+                Imperialne (Mile - mi)
               </Text>
             </Pressable>
           </View>

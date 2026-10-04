@@ -187,9 +187,9 @@ export default function Home() {
   // Time-appropriate greeting
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
-    return 'Good evening';
+    if (hour < 12) return 'Dzień dobry';
+    if (hour < 18) return 'Dzień dobry';
+    return 'Dobry wieczór';
   }, []);
 
   const loadNearbyMonuments = useCallback(
@@ -230,12 +230,12 @@ export default function Home() {
         const parts = [place.city || place.subregion, place.country].filter(
           Boolean
         );
-        setCurrentAddress(parts.join(', ') || 'Current location');
+        setCurrentAddress(parts.join(', ') || 'Bieżąca lokalizacja');
       } else {
-        setCurrentAddress('Current location');
+        setCurrentAddress('Bieżąca lokalizacja');
       }
     } catch {
-      setCurrentAddress('Location ready');
+      setCurrentAddress('Lokalizacja gotowa');
     } finally {
       setLocationLoading(false);
     }
@@ -278,12 +278,12 @@ export default function Home() {
             const parts = [place.city || place.subregion, place.country].filter(
               Boolean
             );
-            setCurrentAddress(parts.join(', ') || 'Current location');
+            setCurrentAddress(parts.join(', ') || 'Bieżąca lokalizacja');
           } else {
-            setCurrentAddress('Current location');
+            setCurrentAddress('Bieżąca lokalizacja');
           }
         } catch {
-          if (active) setCurrentAddress('Location ready');
+          if (active) setCurrentAddress('Lokalizacja gotowa');
         } finally {
           if (active) setLocationLoading(false);
         }
@@ -325,7 +325,7 @@ export default function Home() {
     user?.firstName ||
     user?.fullName ||
     user?.primaryEmailAddress?.emailAddress?.split('@')[0] ||
-    'Runner';
+    'Biegacz';
 
   // Highlighted group route (prioritizing live or earliest scheduled route)
   const featuredRoute = useMemo(() => {
@@ -405,9 +405,9 @@ export default function Home() {
                 numberOfLines={1}>
                 {granted
                   ? locationLoading
-                    ? 'Updating location...'
-                    : currentAddress || 'GPS Location active'
-                  : 'Enable GPS for automatic starting location'}
+                    ? 'Aktualizowanie lokalizacji...'
+                    : currentAddress || 'Lokalizacja GPS aktywna'
+                  : 'Włącz GPS, aby automatycznie ustalić punkt startowy'}
               </Text>
             </View>
             <Ionicons
@@ -430,15 +430,15 @@ export default function Home() {
                     color='#ffffff'
                   />
                   <Text className='text-xs font-bold tracking-wider text-white uppercase'>
-                    Smart Routing
+                    Inteligentne trasy
                   </Text>
                 </View>
                 <Text className='text-2xl leading-tight font-extrabold text-white'>
-                  Ready for your next journey?
+                  Gotowy na kolejną trasę?
                 </Text>
                 <Text className='mt-1.5 text-sm text-indigo-100 leading-5'>
-                  Generate intelligent closed-loop workouts, discover heritage
-                  spots, or join community runs.
+                  Generuj inteligentne pętle treningowe, odkrywaj zabytki
+                  i dołączaj do wspólnych biegów.
                 </Text>
               </View>
             </View>
@@ -453,7 +453,7 @@ export default function Home() {
                   color='#4f46e5'
                 />
                 <Text className='text-xs font-bold text-indigo-600 sm:text-sm'>
-                  Plan Loop
+                  Zaplanuj pętlę
                 </Text>
               </Pressable>
 
@@ -479,7 +479,7 @@ export default function Home() {
                   color='#ffffff'
                 />
                 <Text className='text-xs font-bold text-white sm:text-sm'>
-                  Map
+                  Mapa
                 </Text>
               </Pressable>
             </View>
@@ -896,13 +896,13 @@ export default function Home() {
                 color='#d97706'
               />
               <Text className='text-sm font-bold text-amber-900'>
-                Pro Tip for Outdoor Loops & Cultural Stops
+                Wskazówka dotycząca tras i zabytków
               </Text>
             </View>
             <Text className='text-xs leading-5 text-amber-900/80'>
-              The loop generator uses OpenStreetMap routing algorithms to craft
-              continuous circuits without repeating paths. It automatically
-              detects and suggests cultural monuments along your corridor!
+              Generator pętli wykorzystuje algorytmy wyznaczania tras OpenStreetMap,
+              tworząc zamknięte obwody bez powtarzania tych samych ścieżek.
+              Automatycznie wykrywa i proponuje zabytki wzdłuż Twojej trasy!
             </Text>
           </View>
         </View>

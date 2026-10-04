@@ -286,7 +286,7 @@ export function useRouteCalculation({
         if (ctrl.signal.aborted || loopAbortRef.current !== ctrl) return;
         if (e instanceof Error && e.name === 'AbortError') return;
         setError(
-          e instanceof Error ? e.message : 'Could not generate loop route'
+          e instanceof Error ? e.message : 'Nie udało się wygenerować trasy pętli'
         );
       } finally {
         if (loopAbortRef.current === ctrl) {
@@ -342,7 +342,7 @@ export function useRouteCalculation({
       } catch (e) {
         if (ctrl.signal.aborted || loopAbortRef.current !== ctrl) return;
         if (e instanceof Error && e.name === 'AbortError') return;
-        setError(e instanceof Error ? e.message : 'Could not generate route');
+        setError(e instanceof Error ? e.message : 'Nie udało się wygenerować trasy');
       } finally {
         if (loopAbortRef.current === ctrl) {
           setLoading(false);
@@ -409,7 +409,7 @@ export function useRouteCalculation({
         if (ctrl.signal.aborted || loopAbortRef.current !== ctrl) return;
         if (e instanceof Error && e.name === 'AbortError') return;
         setError(
-          e instanceof Error ? e.message : 'Could not generate loop route'
+          e instanceof Error ? e.message : 'Nie udało się wygenerować trasy pętli'
         );
       } finally {
         if (loopAbortRef.current === ctrl) {
@@ -455,7 +455,7 @@ export function useRouteCalculation({
         if (ctrl.signal.aborted || loopAbortRef.current !== ctrl) return;
         if (e instanceof Error && e.name === 'AbortError') return;
         setError(
-          e instanceof Error ? e.message : 'Could not calculate one-way route'
+          e instanceof Error ? e.message : 'Nie udało się wyznaczyć trasy'
         );
       } finally {
         if (loopAbortRef.current === ctrl) {

@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
+import { ACTIVITY_LEVELS } from '@/constants/settings';
 
 type SettingsProfileCardProps = {
   imageUrl?: string | null;
@@ -16,6 +17,9 @@ export default function SettingsProfileCard({
   email,
   activityLevel,
 }: SettingsProfileCardProps) {
+  const activityLabel =
+    ACTIVITY_LEVELS.find((a) => a.id === activityLevel)?.label || activityLevel;
+
   return (
     <View className='mt-4 px-5'>
       <View className='rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs'>
@@ -56,12 +60,12 @@ export default function SettingsProfileCard({
                   color='#4f46e5'
                 />
                 <Text className='text-[10px] font-bold tracking-wider text-indigo-700 uppercase'>
-                  Clerk Auth
+                  Konto zweryfikowane
                 </Text>
               </View>
               <View className='rounded-full border border-emerald-200/60 bg-emerald-50 px-2.5 py-0.5'>
                 <Text className='text-[10px] font-bold tracking-wider text-emerald-700 uppercase'>
-                  {activityLevel}
+                  {activityLabel}
                 </Text>
               </View>
             </View>

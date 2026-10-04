@@ -28,11 +28,11 @@ export default function SettingsPersonalInfo({
     <View className='mt-6 px-5'>
       <View className='mb-2.5 flex-row items-center justify-between'>
         <Text className='text-xs font-bold tracking-wider text-slate-500 uppercase'>
-          Clerk Personal Information
+          Dane osobowe
         </Text>
         {hasChanges && (
           <Text className='text-xs font-bold text-amber-600'>
-            • Unsaved changes
+            • Niezapisane zmiany
           </Text>
         )}
       </View>
@@ -42,12 +42,12 @@ export default function SettingsPersonalInfo({
         <View className='flex-row gap-3'>
           <View className='flex-1 gap-1.5'>
             <Text className='text-xs font-semibold text-slate-700'>
-              First Name
+              Imię
             </Text>
             <TextInput
               value={firstName}
               onChangeText={setFirstName}
-              placeholder='First name'
+              placeholder='Imię'
               placeholderTextColor='#94a3b8'
               className='h-12 rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 text-sm font-medium text-slate-900'
             />
@@ -55,12 +55,12 @@ export default function SettingsPersonalInfo({
 
           <View className='flex-1 gap-1.5'>
             <Text className='text-xs font-semibold text-slate-700'>
-              Last Name
+              Nazwisko
             </Text>
             <TextInput
               value={lastName}
               onChangeText={setLastName}
-              placeholder='Last name'
+              placeholder='Nazwisko'
               placeholderTextColor='#94a3b8'
               className='h-12 rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 text-sm font-medium text-slate-900'
             />
@@ -70,7 +70,7 @@ export default function SettingsPersonalInfo({
         {/* Username */}
         <View className='gap-1.5'>
           <Text className='text-xs font-semibold text-slate-700'>
-            Username
+            Nazwa użytkownika
           </Text>
           <View className='flex-row items-center rounded-xl border border-slate-200 bg-slate-50/50 px-3.5'>
             <Text className='mr-1 text-sm font-bold text-slate-400'>
@@ -79,7 +79,7 @@ export default function SettingsPersonalInfo({
             <TextInput
               value={username}
               onChangeText={setUsername}
-              placeholder='username'
+              placeholder='nazwa_uzytkownika'
               placeholderTextColor='#94a3b8'
               autoCapitalize='none'
               className='h-12 flex-1 text-sm font-medium text-slate-900'
@@ -90,12 +90,12 @@ export default function SettingsPersonalInfo({
         {/* Bio / About */}
         <View className='gap-1.5'>
           <Text className='text-xs font-semibold text-slate-700'>
-            Bio / Running Motto
+            Bio / Motto biegowe
           </Text>
           <TextInput
             value={bio}
             onChangeText={setBio}
-            placeholder='e.g., Marathon enthusiast & morning jogger'
+            placeholder='np. Pasjonat maratonów i porannego biegania'
             placeholderTextColor='#94a3b8'
             multiline
             numberOfLines={3}
