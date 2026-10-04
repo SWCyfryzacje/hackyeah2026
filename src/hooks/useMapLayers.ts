@@ -1,10 +1,10 @@
 import { useSyncExternalStore } from 'react';
 
-export type MapLayer = 'monuments' | 'events';
+export type MapLayer = 'monuments' | 'events' | 'recreation';
 export type MapLayers = Record<MapLayer, boolean>;
 
 // Shared across screens (map tab and route tab), kept in memory for the session.
-let layers: MapLayers = { monuments: true, events: true };
+let layers: MapLayers = { monuments: true, events: true, recreation: true };
 const listeners = new Set<() => void>();
 
 function setLayer(layer: MapLayer, visible: boolean) {

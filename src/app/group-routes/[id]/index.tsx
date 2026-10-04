@@ -17,6 +17,7 @@ import GroupRouteInfo from '@/components/group-routes/group-route-info';
 import GroupRouteActions from '@/components/group-routes/group-route-actions';
 import JoinCodeCard from '@/components/group-routes/join-code-card';
 import ParticipantList from '@/components/group-routes/participant-list';
+import RouteWeatherCard from '@/components/route-weather-card';
 
 export default function GroupRouteScreen() {
   const { id = '' } = useLocalSearchParams<{ id: string }>();
@@ -98,9 +99,20 @@ export default function GroupRouteScreen() {
         }>
         <GroupRouteInfo route={route} />
 
+        {route.status === 'scheduled' && (
+          <RouteWeatherCard
+            location={route.start}
+            startAt={route.plannedStart}
+            durationS={route.durationS}
+            distanceM={route.distanceM}
+            defaultExpanded
+          />
+        )}
+
         <GroupRouteActions
           route={route}
           myRole={myRole}
+          participantCount={participants.length}
           sharing={sharing}
           onChanged={refresh}
           onLeft={goToList}

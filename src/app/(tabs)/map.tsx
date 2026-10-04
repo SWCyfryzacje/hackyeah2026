@@ -14,11 +14,14 @@ import MonumentLevelPicker from '@/components/monument-level-picker';
 import EventMarkers from '@/components/event-marker';
 import MapLayerToggles, { MapLayerGate } from '@/components/map-layer-toggles';
 import { MAP_EVENTS_MONTHS_AHEAD } from '@/constants/events';
+import useNearbyRecreation from '@/hooks/useNearbyRecreation';
+import RecreationMarkers from '@/components/recreation-marker';
 
 export default function Map() {
   const { granted, visibility, onAllow, onLater } = useLocationPermission();
   const mapRef = useRef<RNMapView>(null);
   const nearby = useNearbyMonuments();
+  const recreation = useNearbyRecreation();
 
   const goToMe = async () => {
     try {
@@ -59,7 +62,13 @@ export default function Map() {
         ref={mapRef}
         permission={granted}
         mapPadding={{ top: 140, right: 10, bottom: 20, left: 10 }}
-        onRegionChangeComplete={nearby.onRegionChangeComplete}>
+        onRegionChangeComplete={(r) => {
+          nearby.onRegionChangeComplete(r);
+          recreation.onRegionChangeComplete(r);
+        }}>
+        <MapLayerGate layer='recreation'>
+          <RecreationMarkers areas={recreation.areas} />
+        </MapLayerGate>
         <MapLayerGate layer='monuments'>
           <MonumentMarkers monuments={nearby.monuments} />
         </MapLayerGate>

@@ -306,12 +306,23 @@ export async function finishGroupRoute(
   await rpc(supabase, 'finish_group_route', { p_route_id: routeId });
 }
 
-/** Creator only: scheduled -> cancelled. */
+/** Creator only: live -> cancelled (kept in the database). */
 export async function cancelGroupRoute(
   supabase: SupabaseClient,
   routeId: string
 ): Promise<void> {
   await rpc(supabase, 'cancel_group_route', { p_route_id: routeId });
+}
+
+/**
+ * Creator only, while scheduled: removes the route from the database. With
+ * other participants only until GROUP_ROUTE_DELETE_LOCK_MS before the start.
+ */
+export async function deleteGroupRoute(
+  supabase: SupabaseClient,
+  routeId: string
+): Promise<void> {
+  await rpc(supabase, 'delete_group_route', { p_route_id: routeId });
 }
 
 /** Creator only, while live: replaces the shared position. */

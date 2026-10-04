@@ -23,6 +23,18 @@ export const GROUP_ROUTE_MESSAGE_MAX_LENGTH = 500;
 export const GROUP_ROUTE_TITLE_MAX_LENGTH = 100;
 export const GROUP_ROUTE_DESCRIPTION_MAX_LENGTH = 500;
 export const GROUP_ROUTE_LOCATION_INTERVAL_MS = 5000;
+/** A scheduled route with participants can't be deleted this close to its start. */
+export const GROUP_ROUTE_DELETE_LOCK_MS = 2 * 60 * 60 * 1000;
+
+/** Mirrors delete_group_route: scheduled, and alone or more than 2 h before the start. */
+export const canDeleteGroupRoute = (
+  route: { status: GroupRouteStatus; plannedStart: Date },
+  hasParticipants: boolean,
+  now = Date.now()
+) =>
+  route.status === 'scheduled' &&
+  (!hasParticipants ||
+    now < route.plannedStart.getTime() - GROUP_ROUTE_DELETE_LOCK_MS);
 
 /** Full route, as read from public.group_routes (details screen). */
 export type GroupRoute = {

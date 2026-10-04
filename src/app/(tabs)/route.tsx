@@ -32,11 +32,12 @@ import {
 } from '@/components/event-suggestions';
 import MapLayerToggles, { MapLayerGate } from '@/components/map-layer-toggles';
 import { MAX_ROUTE_DAYS_AHEAD } from '@/components/group-routes/new-group-route-schema';
-import useRouteObstacles from '@/hooks/useRouteObstacles';
+import RouteWeatherCard from '@/components/route-weather-card';
+import useRecreationSuggestions from '@/hooks/useRecreationSuggestions';
 import {
-  RouteObstacleCard,
-  RouteObstacleOverlays,
-} from '@/components/route-obstacles';
+  RecreationSuggestionList,
+  RecreationSuggestionMarkers,
+} from '@/components/recreation-suggestions';
 
 export default function RouteScreen() {
   const { granted, visibility, onAllow, onLater } = useLocationPermission();
@@ -45,13 +46,14 @@ export default function RouteScreen() {
   const [start, setStart] = useState<LatLng | null>(null);
   const [monumentStops, setMonumentStops] = useState<RouteStop[]>([]);
   const [eventStops, setEventStops] = useState<RouteStop[]>([]);
-  // Selected monuments and events, in order along the route
+  const [recreationStops, setRecreationStops] = useState<RouteStop[]>([]);
+  // Selected monuments, events and recreation areas, in order along the route
   const stops = useMemo(
     () =>
-      [...monumentStops, ...eventStops].sort(
+      [...monumentStops, ...eventStops, ...recreationStops].sort(
         (a, b) => (a.routeFraction ?? 0) - (b.routeFraction ?? 0)
       ),
-    [monumentStops, eventStops]
+    [monumentStops, eventStops, recreationStops]
   );
 
   const handleRouteCalculated = useCallback((coords: LatLng[]) => {
@@ -97,9 +99,11 @@ export default function RouteScreen() {
     { days: MAX_ROUTE_DAYS_AHEAD },
     setEventStops
   );
-  // Obstacles nearby; the route goes around them, otherwise unchanged
-  const obstacles = useRouteObstacles(activeRoute);
-  const plannedRoute = obstacles.rerouted ?? activeRoute;
+  const recreation = useRecreationSuggestions(
+    activeRoute,
+    routeKey,
+    setRecreationStops
+  );
 
   // Fetch initial location when permission is granted
   useEffect(() => {
@@ -174,8 +178,7 @@ export default function RouteScreen() {
       <MapView
         ref={mapRef}
         permission={granted}
-        onPress={onMapPress}
-        onLongPress={(e) => obstacles.report(e.nativeEvent.coordinate)}>
+        onPress={onMapPress}>
         {waypoints.map((w, i) => (
           <Marker
             key={`${w.latitude}-${w.longitude}-${i}`}
@@ -190,6 +193,9 @@ export default function RouteScreen() {
         <MapLayerGate layer='events'>
           <EventSuggestionMarkers {...events} />
         </MapLayerGate>
+        <MapLayerGate layer='recreation'>
+          <RecreationSuggestionMarkers {...recreation} />
+        </MapLayerGate>
 
         <Polyline
           coordinates={route?.coords ?? []}
@@ -202,8 +208,6 @@ export default function RouteScreen() {
           strokeWidth={loop ? 5 : 0}
           strokeColor={loop ? '#16a34a' : 'transparent'}
         />
-
-        <RouteObstacleOverlays {...obstacles} />
       </MapView>
 
       <MapLayerToggles className='absolute top-14 left-4' />
@@ -216,18 +220,27 @@ export default function RouteScreen() {
         onSelectLoop={(km) => {
           monuments.clear();
           events.clear();
+          recreation.clear();
           generateLoop(km);
         }}
         onReset={() => {
           monuments.clear();
           events.clear();
+          recreation.clear();
           resetRoute();
         }}>
         <MonumentSuggestionList {...monuments} />
-        <RouteObstacleCard {...obstacles} />
+        {activeRoute && (
+          <RouteWeatherCard
+            location={activeRoute.coords[0] ?? start}
+            durationS={activeRoute.duration}
+            distanceM={activeRoute.distance}
+          />
+        )}
         <EventSuggestionList {...events} />
+        <RecreationSuggestionList {...recreation} />
         <CreateGroupRouteButton
-          route={plannedRoute}
+          route={activeRoute}
           stops={stops}
         />
       </RouteControlPanel>

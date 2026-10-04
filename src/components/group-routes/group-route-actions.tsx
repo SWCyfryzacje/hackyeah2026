@@ -3,12 +3,14 @@ import { Alert, Text, View } from 'react-native';
 import { useSupabase } from '@/lib/supabase';
 import {
   cancelGroupRoute,
+  deleteGroupRoute,
   finishGroupRoute,
   joinGroupRoute,
   leaveGroupRoute,
   startGroupRoute,
 } from '@/lib/group-routes';
 import {
+  canDeleteGroupRoute,
   OPEN_GROUP_ROUTE_STATUSES,
   type GroupRoute,
   type GroupRouteRole,
@@ -18,14 +20,17 @@ import { formatTimeWithSeconds } from '@/utils/group-route-format';
 import ActionButton from './action-button';
 import LocationConsentDialog from './location-consent-dialog';
 
-type Action = 'join' | 'start' | 'cancel' | 'finish' | 'leave';
+type Action = 'join' | 'start' | 'delete' | 'cancel' | 'finish' | 'leave';
 
 type Props = {
   route: GroupRoute;
   myRole: GroupRouteRole | null;
+  /** Everyone on the route, creator included */
+  participantCount: number;
   sharing: UseLocationSharingResult;
   /** Refetch after a state change (Realtime may lag behind) */
   onChanged: () => Promise<void>;
+  /** After leaving or deleting the route */
   onLeft: () => void;
   onOpenChat: () => void;
 };
@@ -34,6 +39,7 @@ type Props = {
 export default function GroupRouteActions({
   route,
   myRole,
+  participantCount,
   sharing,
   onChanged,
   onLeft,
@@ -46,12 +52,14 @@ export default function GroupRouteActions({
   const isCreator = myRole === 'creator';
   const isMember = myRole != null;
   const isOpen = OPEN_GROUP_ROUTE_STATUSES.includes(route.status);
+  const hasParticipants = participantCount > 1;
+  const canDelete = canDeleteGroupRoute(route, hasParticipants);
 
   const run = async (action: Action, fn: () => Promise<void>) => {
     setBusy(action);
     try {
       await fn();
-      if (action === 'leave') {
+      if (action === 'leave' || action === 'delete') {
         onLeft();
         return;
       }
@@ -111,21 +119,30 @@ export default function GroupRouteActions({
             disabled={busy != null}
             onPress={() => setConsentVisible(true)}
           />
-          <ActionButton
-            label='Anuluj trasę'
-            icon='close-circle-outline'
-            variant='danger'
-            busy={busy === 'cancel'}
-            disabled={busy != null}
-            onPress={() =>
-              confirm(
-                'Anulować trasę?',
-                'Uczestnicy zobaczą, że trasa została anulowana. Tego nie można cofnąć.',
-                'Anuluj trasę',
-                () => run('cancel', () => cancelGroupRoute(supabase, route.id))
-              )
-            }
-          />
+          {canDelete ? (
+            <ActionButton
+              label='Usuń trasę'
+              icon='trash-outline'
+              variant='danger'
+              busy={busy === 'delete'}
+              disabled={busy != null}
+              onPress={() =>
+                confirm(
+                  'Usunąć trasę?',
+                  hasParticipants
+                    ? 'Trasa, czat i lista uczestników zostaną trwale usunięte. Tego nie można cofnąć.'
+                    : 'Trasa zostanie trwale usunięta. Tego nie można cofnąć.',
+                  'Usuń',
+                  () => run('delete', () => deleteGroupRoute(supabase, route.id))
+                )
+              }
+            />
+          ) : (
+            <Text className='text-center text-sm text-neutral-500'>
+              Trasy z uczestnikami nie można usunąć później niż 2 godziny przed
+              startem.
+            </Text>
+          )}
         </>
       )}
 
@@ -156,6 +173,21 @@ export default function GroupRouteActions({
                 'Udostępnianie lokalizacji zostanie wyłączone, a Twoja pozycja usunięta.',
                 'Zakończ',
                 () => run('finish', () => finishGroupRoute(supabase, route.id))
+              )
+            }
+          />
+          <ActionButton
+            label='Anuluj trasę'
+            icon='close-circle-outline'
+            variant='danger'
+            busy={busy === 'cancel'}
+            disabled={busy != null}
+            onPress={() =>
+              confirm(
+                'Anulować trasę?',
+                'Trasa zostanie oznaczona jako anulowana, a udostępnianie lokalizacji wyłączone. Tego nie można cofnąć.',
+                'Anuluj trasę',
+                () => run('cancel', () => cancelGroupRoute(supabase, route.id))
               )
             }
           />

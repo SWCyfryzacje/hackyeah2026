@@ -11,7 +11,8 @@ uczestnicy widzą na żywo pozycję twórcy po rozpoczęciu i rozmawiają na cza
 - **Trasa wspólna** (`group_route`): nazwa, opis (opc.), geometria z plannera, planowany start,
   planowany koniec (opc.), widoczność `public | private`, opcjonalne powiązanie z wydarzeniem.
 - **Statusy:** `scheduled` (zaplanowana) → `live` (trwa) → `finished` (zakończona);
-  `scheduled` → `cancelled` (anulowana).
+  `live` → `cancelled` (anulowana, zostaje w bazie). Zaplanowaną trasę twórca może **usunąć**
+  (wiersz znika z bazy razem z uczestnikami i czatem).
 - **Role:** `creator` (twórca) i `participant` (uczestnik). Brak przekazywania roli.
 
 ## 3. Wymagania funkcjonalne
@@ -41,7 +42,9 @@ uczestnicy widzą na żywo pozycję twórcy po rozpoczęciu i rozmawiają na cza
 
 ### F4. Cykl życia
 - Twórca ręcznie: „Rozpocznij” (`scheduled → live`), „Zakończ” (`live → finished`),
-  „Anuluj” (`scheduled → cancelled`). Trasa nie startuje automatycznie o godzinie startu.
+  „Anuluj” (`live → cancelled`, trasa zostaje w bazie). Trasa nie startuje automatycznie o godzinie startu.
+- **Usuwanie** (tylko `scheduled`, tylko twórca): bez innych uczestników — w każdej chwili;
+  z uczestnikami — najpóźniej 2 h przed planowanym startem. Usunięta trasa znika z bazy.
 - **Auto-zakończenie (pg_cron, co 5 min):** trasa `live` lub `scheduled`, dla której minęło
   `planned_end + 1 h` lub (bez końca) `planned_start + 6 h`, przechodzi w `finished`
   (`live`) / `cancelled` (`scheduled`).
