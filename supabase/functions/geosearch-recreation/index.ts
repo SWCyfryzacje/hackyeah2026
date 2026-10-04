@@ -138,10 +138,11 @@ Deno.serve(async (req) => {
   const counts = { tiles: 0, split: 0, results: 0, written: 0, api_requests: 0 };
   let stopReason: string | null = null;
 
-  for (const tile of pending) {
+  // Split tiles are queued as new rows, so reload the queue until it's empty or time is up.
+  sweep: for (; pending.length; pending = await loadPending()) for (const tile of pending) {
     if (Date.now() + MIN_INTERVAL_MS + FETCH_TIMEOUT_MS > deadline) {
       stopReason = 'time budget used up';
-      break;
+      break sweep;
     }
     let results: LocationIqResult[];
     try {
@@ -150,7 +151,7 @@ Deno.serve(async (req) => {
     } catch (e) {
       if (!(e instanceof TransientError)) throw e;
       stopReason = e.message;
-      break;
+      break sweep;
     }
     counts.results += results.length;
 
