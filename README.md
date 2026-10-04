@@ -1,17 +1,25 @@
-# React Native Expo Template
+### Njord — Collaborative Route Planner (HackYeah 2026)
 
-Minimal Expo starter using TypeScript and Expo Router.
+A mobile application built with `React Native` and `Expo` for planning routes, discovering shared group trips, tracking creator location live, and chatting in real time.
 
-## Getting Started
+---
 
-### Install Dependencies
+### Branches & Stability
 
-```bash
-npm install
-```
+- `master`: Contains the latest changes and bleeding-edge features.
+- `teammates-dev`: A more stable fallback version with core functionality (omits a few recent features).
 
-### Run the App
+---
 
-```bash
-npm start
-```
+### Android Release (.apk)
+
+Ready-to-install standalone `.apk` builds are available for download under the **Releases** tab on the GitHub repository page.
+
+---
+
+### Tech Stack
+
+- **Framework:** `React Native` / `Expo` (`Expo Router`, `NativeWind`)
+- **Authentication:** `Clerk`
+- **Backend & Realtime:** `Supabase` (PostgreSQL with RLS & Realtime)
+- **Maps:** `react-native-maps` (`Google Maps`)
