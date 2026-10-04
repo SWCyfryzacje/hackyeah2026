@@ -3,12 +3,15 @@ import { useAuth } from '@clerk/expo';
 import { Platform } from 'react-native';
 import LoadingScreen from '@/components/loading-screen';
 import TabBarIcon from '@/components/tab-bar-icon';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabsLayout() {
   const { isSignedIn, isLoaded } = useAuth();
 
   if (!isLoaded) return <LoadingScreen />;
   if (!isSignedIn) return <Redirect href='/(auth)/sign-in' />;
+
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
@@ -20,8 +23,8 @@ export default function TabsLayout() {
           backgroundColor: '#ffffff',
           borderTopColor: '#e2e8f0',
           borderTopWidth: 1,
-          height: Platform.OS === 'ios' ? 88 : 64,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+          height: 56 + Math.max(insets.bottom, 8),
+          paddingBottom: Math.max(insets.bottom, 8),
           paddingTop: 0,
           elevation: 8,
           shadowColor: '#000000',

@@ -240,7 +240,9 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
     'Runner Profile';
 
   return (
-    <SafeView className='flex-1 bg-neutral-50'>
+    <SafeView
+      className='flex-1 bg-neutral-50'
+      edges={['top']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className='flex-1'>

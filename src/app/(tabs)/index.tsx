@@ -142,7 +142,9 @@ export default function Home() {
   ];
 
   return (
-    <SafeView className='flex-1 bg-neutral-50'>
+    <SafeView
+      className='flex-1 bg-neutral-50'
+      edges={['top']}>
       <LocationModal
         visible={visibility}
         onAllow={onAllow}
@@ -159,7 +161,7 @@ export default function Home() {
           />
         }>
         {/* Top Header */}
-        <View className='flex-row items-center justify-between px-5 pt-4 pb-3'>
+        <View className='flex-row items-center justify-between px-5 pb-3'>
           <View className='flex-1 flex-row items-center gap-2 pr-3'>
             <Text className='text-lg font-medium text-neutral-500'>
               {greeting},
