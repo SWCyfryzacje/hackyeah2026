@@ -14,7 +14,7 @@ if (!GOOGLE_MAPS_API_KEY) {
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: config.name ?? 'expo-template',
+  name: config.name ?? 'Wypadowo',
   slug: config.slug ?? 'expo-template',
   ios: {
     ...config.ios,
