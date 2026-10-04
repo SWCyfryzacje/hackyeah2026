@@ -1,6 +1,7 @@
 import React, {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ComponentProps,
@@ -24,7 +25,11 @@ import {
   MonumentSuggestionMarkers,
 } from '@/components/monument-suggestions';
 import CreateGroupRouteButton from '@/components/group-routes/create-group-route-button';
-import EventMarkers from '@/components/event-marker';
+import useEventSuggestions from '@/hooks/useEventSuggestions';
+import {
+  EventSuggestionList,
+  EventSuggestionMarkers,
+} from '@/components/event-suggestions';
 import MapLayerToggles, { MapLayerGate } from '@/components/map-layer-toggles';
 import { MAX_ROUTE_DAYS_AHEAD } from '@/components/group-routes/new-group-route-schema';
 
@@ -34,6 +39,15 @@ export default function RouteScreen() {
   const mapRef = useRef<RNMapView>(null);
   const [start, setStart] = useState<LatLng | null>(null);
   const [monumentStops, setMonumentStops] = useState<RouteStop[]>([]);
+  const [eventStops, setEventStops] = useState<RouteStop[]>([]);
+  // Selected monuments and events, in order along the route
+  const stops = useMemo(
+    () =>
+      [...monumentStops, ...eventStops].sort(
+        (a, b) => (a.routeFraction ?? 0) - (b.routeFraction ?? 0)
+      ),
+    [monumentStops, eventStops]
+  );
 
   const handleRouteCalculated = useCallback((coords: LatLng[]) => {
     mapRef.current?.fitToCoordinates(coords, {
@@ -58,7 +72,7 @@ export default function RouteScreen() {
     start,
     useUserLocationAsStart: true,
     onRouteCalculated: handleRouteCalculated,
-    stops: monumentStops,
+    stops,
   });
 
   const routeKey = loop
@@ -71,6 +85,12 @@ export default function RouteScreen() {
     activeRoute,
     routeKey,
     setMonumentStops
+  );
+  const events = useEventSuggestions(
+    activeRoute,
+    routeKey,
+    { days: MAX_ROUTE_DAYS_AHEAD },
+    setEventStops
   );
 
   // Fetch initial location when permission is granted
@@ -158,7 +178,9 @@ export default function RouteScreen() {
         <MapLayerGate layer='monuments'>
           <MonumentSuggestionMarkers {...monuments} />
         </MapLayerGate>
-        <EventMarkers horizon={{ days: MAX_ROUTE_DAYS_AHEAD }} />
+        <MapLayerGate layer='events'>
+          <EventSuggestionMarkers {...events} />
+        </MapLayerGate>
 
         <Polyline
           coordinates={route?.coords ?? []}
@@ -181,19 +203,20 @@ export default function RouteScreen() {
         disabled={loading || !start}
         loopOptions={DEFAULT_LOOP_OPTIONS}
         onSelectLoop={(km) => {
-          setMonumentStops([]);
           monuments.clear();
+          events.clear();
           generateLoop(km);
         }}
         onReset={() => {
-          setMonumentStops([]);
           monuments.clear();
+          events.clear();
           resetRoute();
         }}>
         <MonumentSuggestionList {...monuments} />
+        <EventSuggestionList {...events} />
         <CreateGroupRouteButton
           route={activeRoute}
-          stops={monumentStops}
+          stops={stops}
         />
       </RouteControlPanel>
     </View>

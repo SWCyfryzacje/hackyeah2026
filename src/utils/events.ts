@@ -83,6 +83,16 @@ export async function fetchMapEvents(
   return (data as MapEventRow[]).map(toMapEvent);
 }
 
+/** Events at the same coordinates (e.g. several exhibitions at Wawel), keyed by location. */
+export function groupEventsByLocation(events: MapEvent[]) {
+  const groups = new Map<string, MapEvent[]>();
+  for (const e of events) {
+    const key = `${e.latitude.toFixed(5)},${e.longitude.toFixed(5)}`;
+    groups.set(key, [...(groups.get(key) ?? []), e]);
+  }
+  return [...groups.entries()];
+}
+
 /** The site's date text, or "3.10 – 5.10" when it gave none. */
 export function formatEventDates(
   e: Pick<MapEvent, 'dateText' | 'startDate' | 'endDate'>

@@ -6,22 +6,13 @@ import useMapEvents from '@/hooks/useMapEvents';
 import useMapLayers from '@/hooks/useMapLayers';
 import {
   formatEventDates,
+  groupEventsByLocation,
   type EventHorizon,
   type MapEvent,
 } from '@/utils/events';
 
 // Lines listed in a shared-venue callout before "+N more".
 const MAX_CALLOUT_EVENTS = 5;
-
-/** Events at the same coordinates (e.g. several exhibitions at Wawel), soonest first. */
-function groupByLocation(events: MapEvent[]) {
-  const groups = new Map<string, MapEvent[]>();
-  for (const e of events) {
-    const key = `${e.latitude.toFixed(5)},${e.longitude.toFixed(5)}`;
-    groups.set(key, [...(groups.get(key) ?? []), e]);
-  }
-  return [...groups.entries()];
-}
 
 function EventLocationMarker({ events }: { events: MapEvent[] }) {
   const [first] = events;
@@ -110,7 +101,7 @@ type Props = {
 export default function EventMarkers({ horizon }: Props) {
   const events = useMapEvents(horizon);
   const [layers] = useMapLayers();
-  const groups = useMemo(() => groupByLocation(events), [events]);
+  const groups = useMemo(() => groupEventsByLocation(events), [events]);
 
   if (!layers.events) return null;
   return groups.map(([key, group]) => (
