@@ -32,6 +32,11 @@ import {
 } from '@/components/event-suggestions';
 import MapLayerToggles, { MapLayerGate } from '@/components/map-layer-toggles';
 import { MAX_ROUTE_DAYS_AHEAD } from '@/components/group-routes/new-group-route-schema';
+import useRouteObstacles from '@/hooks/useRouteObstacles';
+import {
+  RouteObstacleCard,
+  RouteObstacleOverlays,
+} from '@/components/route-obstacles';
 
 export default function RouteScreen() {
   const { granted, visibility, onAllow, onLater } = useLocationPermission();
@@ -92,6 +97,9 @@ export default function RouteScreen() {
     { days: MAX_ROUTE_DAYS_AHEAD },
     setEventStops
   );
+  // Obstacles nearby; the route goes around them, otherwise unchanged
+  const obstacles = useRouteObstacles(activeRoute);
+  const plannedRoute = obstacles.rerouted ?? activeRoute;
 
   // Fetch initial location when permission is granted
   useEffect(() => {
@@ -166,7 +174,8 @@ export default function RouteScreen() {
       <MapView
         ref={mapRef}
         permission={granted}
-        onPress={onMapPress}>
+        onPress={onMapPress}
+        onLongPress={(e) => obstacles.report(e.nativeEvent.coordinate)}>
         {waypoints.map((w, i) => (
           <Marker
             key={`${w.latitude}-${w.longitude}-${i}`}
@@ -193,6 +202,8 @@ export default function RouteScreen() {
           strokeWidth={loop ? 5 : 0}
           strokeColor={loop ? '#16a34a' : 'transparent'}
         />
+
+        <RouteObstacleOverlays {...obstacles} />
       </MapView>
 
       <MapLayerToggles className='absolute top-14 left-4' />
@@ -213,9 +224,10 @@ export default function RouteScreen() {
           resetRoute();
         }}>
         <MonumentSuggestionList {...monuments} />
+        <RouteObstacleCard {...obstacles} />
         <EventSuggestionList {...events} />
         <CreateGroupRouteButton
-          route={activeRoute}
+          route={plannedRoute}
           stops={stops}
         />
       </RouteControlPanel>
