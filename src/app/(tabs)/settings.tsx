@@ -1,4 +1,4 @@
-import SafeView from '@/components/safe-view';
+import SafeView, { TAB_SCREEN_EDGES } from '@/components/safe-view';
 import LoadingScreen from '@/components/loading-screen';
 import {
   SettingsHeader,
@@ -240,7 +240,9 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
     'Runner Profile';
 
   return (
-    <SafeView className='flex-1 bg-neutral-50'>
+    <SafeView
+      className='flex-1 bg-neutral-50'
+      edges={TAB_SCREEN_EDGES}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className='flex-1'>

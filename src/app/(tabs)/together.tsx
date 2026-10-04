@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import SafeView from '@/components/safe-view';
+import SafeView, { TAB_SCREEN_EDGES } from '@/components/safe-view';
 import GroupRouteSection from '@/components/group-routes/group-route-section';
 import JoinByCodeForm from '@/components/group-routes/join-by-code-form';
 import useGroupRoutes from '@/hooks/group-routes/useGroupRoutes';
@@ -32,7 +32,9 @@ export default function TogetherScreen() {
   };
 
   return (
-    <SafeView className='flex-1 bg-neutral-50'>
+    <SafeView
+      className='flex-1 bg-neutral-50'
+      edges={TAB_SCREEN_EDGES}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps='handled'

@@ -1,11 +1,13 @@
 import { Redirect, Tabs } from 'expo-router';
 import { useAuth } from '@clerk/expo';
-import { Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LoadingScreen from '@/components/loading-screen';
 import TabBarIcon from '@/components/tab-bar-icon';
 
 export default function TabsLayout() {
   const { isSignedIn, isLoaded } = useAuth();
+  // Lift the tab bar above the phone's system navigation (buttons / gesture bar).
+  const insets = useSafeAreaInsets();
 
   if (!isLoaded) return <LoadingScreen />;
   if (!isSignedIn) return <Redirect href='/(auth)/sign-in' />;
@@ -20,8 +22,8 @@ export default function TabsLayout() {
           backgroundColor: '#ffffff',
           borderTopColor: '#e2e8f0',
           borderTopWidth: 1,
-          height: Platform.OS === 'ios' ? 88 : 64,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+          height: 56 + Math.max(insets.bottom, 8),
+          paddingBottom: Math.max(insets.bottom, 8),
           paddingTop: 0,
           elevation: 8,
           shadowColor: '#000000',

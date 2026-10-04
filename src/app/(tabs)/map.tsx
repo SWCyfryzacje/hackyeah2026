@@ -3,7 +3,7 @@ import { Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import RNMapView from 'react-native-maps';
-import SafeView from '@/components/safe-view';
+import SafeView, { TAB_SCREEN_EDGES } from '@/components/safe-view';
 import LocationModal from '@/components/location-modal';
 import useLocationPermission from '@/hooks/useLocationPermission';
 import MapView from '@/components/map-view';
@@ -30,7 +30,9 @@ export default function Map() {
   };
 
   return (
-    <SafeView className='flex-1 items-center bg-amber-50'>
+    <SafeView
+      className='flex-1 items-center bg-amber-50'
+      edges={TAB_SCREEN_EDGES}>
       <LocationModal
         visible={visibility}
         onAllow={onAllow}

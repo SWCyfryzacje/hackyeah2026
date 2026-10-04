@@ -12,7 +12,7 @@ import { useRouter } from 'expo-router';
 import { useUser } from '@clerk/expo';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import SafeView from '@/components/safe-view';
+import SafeView, { TAB_SCREEN_EDGES } from '@/components/safe-view';
 import useLocationPermission, {
   LocationModal,
 } from '@/hooks/useLocationPermission';
@@ -142,7 +142,9 @@ export default function Home() {
   ];
 
   return (
-    <SafeView className='flex-1 bg-neutral-50'>
+    <SafeView
+      className='flex-1 bg-neutral-50'
+      edges={TAB_SCREEN_EDGES}>
       <LocationModal
         visible={visibility}
         onAllow={onAllow}
