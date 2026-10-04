@@ -1,6 +1,5 @@
 -- RLS / RPC security tests for "Wspólne trasy" (group routes).
--- Covers migrations 20261004090000_group_routes.sql and
--- 20261004130000_group_routes_delete.sql. See supabase/tests/README.md.
+-- Covers migration 20261004090000_group_routes.sql. See supabase/tests/README.md.
 --
 -- Everything runs in ONE transaction that ends with ROLLBACK: fake profiles,
 -- routes, messages and locations are created inside it and vanish afterwards.
@@ -179,10 +178,6 @@ select set_config('rls.can',      pg_temp.mk('RLS to cancel', 'public'), true);
 select set_config('rls.af_live',  pg_temp.mk('RLS autofinish live', 'public'), true);
 select set_config('rls.af_sched', pg_temp.mk('RLS autofinish scheduled', 'public'), true);
 select set_config('rls.af_noend', pg_temp.mk('RLS autofinish no end', 'private', null), true);
--- delete_group_route: alone (start in 1 h), with a participant 1 h / 3 h before the start.
-select set_config('rls.del_solo',  pg_temp.mk('RLS delete alone', 'public'), true);
-select set_config('rls.del_late',  pg_temp.mk('RLS delete too late', 'public'), true);
-select set_config('rls.del_early', pg_temp.mk('RLS delete early', 'public', null), true);
 
 select pg_temp.as_admin();
 select set_config('rls.priv_code',
@@ -211,16 +206,6 @@ select pg_temp.expect_ok('0.6 member joins the private route by code',
 select pg_temp.as_user('rls_test_noprof');
 select pg_temp.expect_ok('0.7 user without profile joins the public route',
   $q$select public.join_group_route(pg_temp.id('pub'))$q$);
-select pg_temp.as_user('rls_test_member');
-select pg_temp.expect_ok('0.8 member joins the delete-too-late route',
-  $q$select public.join_group_route(pg_temp.id('del_late'))$q$);
-select pg_temp.expect_ok('0.9 member joins the delete-early route',
-  $q$select public.join_group_route(pg_temp.id('del_early'))$q$);
-select pg_temp.expect_ok('0.10 member posts on the delete-early route',
-  $q$insert into public.group_route_messages (route_id, body) values (pg_temp.id('del_early'), 'do usuniecia')$q$);
-select pg_temp.as_admin();
-update public.group_routes set planned_start = now() + interval '3 hours'
-where id = pg_temp.id('del_early');
 
 -- ---------------------------------------------------------------------------
 -- 9a. Messages while scheduled
@@ -408,8 +393,6 @@ select pg_temp.expect_error('8.1 member cannot start',
   $q$select public.start_group_route(pg_temp.id('pub'))$q$, '%Tylko tw%');
 select pg_temp.expect_error('8.2 member cannot cancel',
   $q$select public.cancel_group_route(pg_temp.id('pub'))$q$, '%Tylko tw%');
-select pg_temp.expect_error('8.2a member cannot delete',
-  $q$select public.delete_group_route(pg_temp.id('del_early'))$q$, '%Tylko tw%');
 select pg_temp.expect_error('8.3 member cannot finish',
   $q$select public.finish_group_route(pg_temp.id('pub'))$q$, '%Tylko tw%');
 select pg_temp.expect_error('8.4 member cannot update_group_route_location',
@@ -420,28 +403,6 @@ select pg_temp.expect_error('8.5 creator cannot update_group_route_location whil
   $q$select public.update_group_route_location(pg_temp.id('pub'), 50, 19, 5)$q$, '%podczas trwaj%');
 select pg_temp.expect_error('11.1 finish from scheduled fails',
   $q$select public.finish_group_route(pg_temp.id('pub'))$q$, '%Zako%czy% mo%na tylko trwaj%');
-select pg_temp.expect_error('11.1a cancel from scheduled fails',
-  $q$select public.cancel_group_route(pg_temp.id('pub'))$q$, '%Anulowa% mo%na tylko rozpocz%');
-
--- 15. delete_group_route (scheduled only; with participants until 2 h before the start)
-select pg_temp.expect_ok('15.1 creator deletes a route without participants 1 h before the start',
-  $q$select public.delete_group_route(pg_temp.id('del_solo'))$q$);
-select pg_temp.expect_error('15.2 delete with a participant 1 h before the start fails',
-  $q$select public.delete_group_route(pg_temp.id('del_late'))$q$, '%2 godziny przed startem%');
-select pg_temp.expect_ok('15.3 creator deletes a route with a participant 3 h before the start',
-  $q$select public.delete_group_route(pg_temp.id('del_early'))$q$);
-select pg_temp.expect_error('15.4 delete an already deleted route fails',
-  $q$select public.delete_group_route(pg_temp.id('del_solo'))$q$, '%Tylko tw%');
-
-select pg_temp.as_admin();
-select pg_temp.check_count('15.5 deleted routes are gone from the database',
-  $q$select count(*) from public.group_routes where id in (pg_temp.id('del_solo'), pg_temp.id('del_early'))$q$, 0);
-select pg_temp.check_count('15.6 participants and chat of a deleted route are gone (cascade)',
-  $q$select (select count(*) from public.group_route_participants where route_id = pg_temp.id('del_early'))
-          + (select count(*) from public.group_route_messages where route_id = pg_temp.id('del_early'))$q$, 0);
-select pg_temp.check_count('15.7 route that could not be deleted is still scheduled',
-  $q$select count(*) from public.group_routes where id = pg_temp.id('del_late') and status = 'scheduled'$q$, 1);
-select pg_temp.as_user('rls_test_creator');
 
 -- 3. A (stale) location row on a scheduled route is not readable by members.
 select pg_temp.as_admin();
@@ -466,8 +427,8 @@ select pg_temp.expect_ok('11.4 creator starts auto-finish live route',
   $q$select public.start_group_route(pg_temp.id('af_live'))$q$);
 select pg_temp.expect_error('11.5 start again (live) fails',
   $q$select public.start_group_route(pg_temp.id('pub'))$q$, '%tylko, gdy jest zaplanowana%');
-select pg_temp.expect_error('11.6 delete a live route fails',
-  $q$select public.delete_group_route(pg_temp.id('pub'))$q$, '%jeszcze nie rozpocz%');
+select pg_temp.expect_error('11.6 cancel a live route fails',
+  $q$select public.cancel_group_route(pg_temp.id('pub'))$q$, '%Anulowa% mo%na tylko zaplanowan%');
 select pg_temp.expect_ok('8.6 creator update_group_route_location while live (public)',
   $q$select public.update_group_route_location(pg_temp.id('pub'), 50.061, 19.931, 8)$q$);
 select pg_temp.expect_ok('8.7 creator update_group_route_location while live (private)',
@@ -542,8 +503,6 @@ select pg_temp.expect_error('6.11 anon: finish_group_route denied',
   $q$select public.finish_group_route(pg_temp.id('pub'))$q$, '%permission denied%');
 select pg_temp.expect_error('6.12 anon: cancel_group_route denied',
   $q$select public.cancel_group_route(pg_temp.id('can'))$q$, '%permission denied%');
-select pg_temp.expect_error('6.12a anon: delete_group_route denied',
-  $q$select public.delete_group_route(pg_temp.id('del_late'))$q$, '%permission denied%');
 select pg_temp.expect_error('6.13 anon: update_group_route_location denied',
   $q$select public.update_group_route_location(pg_temp.id('pub'), 0, 0, 1)$q$, '%permission denied%');
 select pg_temp.expect_error('6.14 anon: list_group_routes denied',
@@ -622,22 +581,18 @@ select pg_temp.expect_error('11.8 finish again fails',
 select pg_temp.expect_error('11.9 start a finished route fails',
   $q$select public.start_group_route(pg_temp.id('pub'))$q$, '%tylko, gdy jest zaplanowana%');
 select pg_temp.expect_error('11.10 cancel a finished route fails',
-  $q$select public.cancel_group_route(pg_temp.id('pub'))$q$, '%Anulowa% mo%na tylko rozpocz%');
-select pg_temp.expect_error('11.10a delete a finished route fails',
-  $q$select public.delete_group_route(pg_temp.id('pub'))$q$, '%jeszcze nie rozpocz%');
+  $q$select public.cancel_group_route(pg_temp.id('pub'))$q$, '%Anulowa% mo%na tylko zaplanowan%');
 select pg_temp.expect_error('8.13 creator cannot update location after finish',
   $q$select public.update_group_route_location(pg_temp.id('pub'), 50, 19, 5)$q$, '%podczas trwaj%');
 select pg_temp.expect_error('9.14 creator cannot post after finish',
   $q$insert into public.group_route_messages (route_id, body) values (pg_temp.id('pub'), 'po fakcie')$q$,
   '%row-level security%');
-select pg_temp.expect_ok('11.11a creator starts the route to cancel',
-  $q$select public.start_group_route(pg_temp.id('can'))$q$);
-select pg_temp.expect_ok('11.11 creator cancels a started route (live -> cancelled)',
+select pg_temp.expect_ok('11.11 creator cancels scheduled route (scheduled -> cancelled)',
   $q$select public.cancel_group_route(pg_temp.id('can'))$q$);
 select pg_temp.expect_error('11.12 start a cancelled route fails',
   $q$select public.start_group_route(pg_temp.id('can'))$q$, '%tylko, gdy jest zaplanowana%');
 select pg_temp.expect_error('11.13 cancel again fails',
-  $q$select public.cancel_group_route(pg_temp.id('can'))$q$, '%Anulowa% mo%na tylko rozpocz%');
+  $q$select public.cancel_group_route(pg_temp.id('can'))$q$, '%Anulowa% mo%na tylko zaplanowan%');
 select pg_temp.expect_error('9.15 creator cannot post after cancel',
   $q$insert into public.group_route_messages (route_id, body) values (pg_temp.id('can'), 'po anulowaniu')$q$,
   '%row-level security%');
@@ -647,8 +602,6 @@ select pg_temp.check_count('9.16 creator still reads cancelled route history',
 select pg_temp.as_admin();
 select pg_temp.check_count('3.5 finish deleted the location row',
   $q$select count(*) from public.group_route_locations where route_id = pg_temp.id('pub')$q$, 0);
-select pg_temp.check_count('11.15 cancelled route is kept with status cancelled and ended_at set',
-  $q$select count(*) from public.group_routes where id = pg_temp.id('can') and status = 'cancelled' and ended_at is not null$q$, 1);
 select pg_temp.check_count('11.14 finished route has status finished and ended_at set',
   $q$select count(*) from public.group_routes where id = pg_temp.id('pub') and status = 'finished' and ended_at is not null$q$, 1);
 -- Stale row on a finished route must stay hidden too (status filter in the policy).

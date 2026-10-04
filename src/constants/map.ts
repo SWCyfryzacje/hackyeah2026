@@ -15,4 +15,38 @@ export const INITIAL_REGION: Region = {
   ...DEFAULT_DELTAS,
 };
 
-export const DEFAULT_LOOP_OPTIONS = [3, 5, 10];
+export type RoutePreset = {
+  minKm: number;
+  maxKm: number;
+  label: string;
+  tag?: string;
+  description?: string;
+};
+
+export type LoopPreset = RoutePreset;
+
+export const DEFAULT_ROUTE_DISTANCE_OPTIONS: RoutePreset[] = [
+  {
+    minKm: 2,
+    maxKm: 4,
+    label: '2-4 km',
+    tag: 'Krótki',
+    description: 'Szybki spacer lub bieg',
+  },
+  {
+    minKm: 4,
+    maxKm: 8,
+    label: '4-8 km',
+    tag: 'Średni',
+    description: 'Umiarkowany dystans',
+  },
+  {
+    minKm: 8,
+    maxKm: 12,
+    label: '8-12 km',
+    tag: 'Długi',
+    description: 'Długa trasa',
+  },
+];
+
+export const DEFAULT_LOOP_OPTIONS: LoopPreset[] = DEFAULT_ROUTE_DISTANCE_OPTIONS;

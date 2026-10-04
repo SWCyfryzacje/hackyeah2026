@@ -110,8 +110,7 @@ export default function useGroupRoute(id: string) {
           table: 'group_route_participants',
           filter: `route_id=eq.${id}`,
         },
-        // Also fires when the creator deletes the whole route (cascade)
-        () => void refresh()
+        () => void loadParticipants()
       )
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {

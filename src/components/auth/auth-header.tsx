@@ -7,11 +7,11 @@ type AuthHeaderProps = {
 
 export default function AuthHeader({ title, subtitle }: AuthHeaderProps) {
   return (
-    <View className='items-center gap-2'>
-      <Text className='text-center text-3xl font-bold text-neutral-900'>
+    <View className='items-center gap-1.5'>
+      <Text className='text-center text-3xl font-extrabold tracking-tight text-slate-900'>
         {title}
       </Text>
-      <Text className='text-center text-sm text-neutral-600'>{subtitle}</Text>
+      <Text className='text-center text-sm font-medium text-slate-500'>{subtitle}</Text>
     </View>
   );
 }

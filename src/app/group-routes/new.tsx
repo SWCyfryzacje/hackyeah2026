@@ -22,20 +22,20 @@ export default function NewGroupRouteScreen() {
 
   if (!draft) {
     return (
-      <View className='flex-1 items-center justify-center gap-4 bg-neutral-50 p-6'>
+      <View className='flex-1 items-center justify-center gap-4 bg-slate-50 p-6'>
         <Stack.Screen options={{ title: 'Nowa wspólna trasa' }} />
         <Ionicons
           name='map-outline'
           size={40}
           color='#64748b'
         />
-        <Text className='text-center text-base text-neutral-700'>
+        <Text className='text-center text-sm font-medium text-slate-700'>
           Najpierw wyznacz trasę w zakładce Route
         </Text>
         <Pressable
           onPress={() => router.replace('/(tabs)/route')}
-          className='rounded-xl bg-blue-600 px-5 py-3 active:bg-blue-700'>
-          <Text className='text-sm font-semibold text-white'>
+          className='rounded-xl bg-indigo-600 px-5 py-3 shadow-xs active:bg-indigo-700 active:scale-[0.99]'>
+          <Text className='text-sm font-bold text-white'>
             Przejdź do Route
           </Text>
         </Pressable>
@@ -45,7 +45,7 @@ export default function NewGroupRouteScreen() {
 
   return (
     <KeyboardAvoidingView
-      className='flex-1 bg-neutral-50'
+      className='flex-1 bg-slate-50'
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}>
       <Stack.Screen options={{ title: 'Nowa wspólna trasa' }} />

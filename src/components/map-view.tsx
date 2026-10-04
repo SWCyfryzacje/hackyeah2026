@@ -1,10 +1,12 @@
+import React, { useEffect, useState, type ReactNode, type Ref } from 'react';
 import MV, {
+  Marker,
   type MapStyleElement,
   type MapViewProps,
   type Region,
 } from 'react-native-maps';
-import { StyleSheet } from 'react-native';
-import { type ReactNode, type Ref } from 'react';
+import { StyleSheet, View } from 'react-native';
+import * as Location from 'expo-location';
 import { INITIAL_REGION } from '@/constants/map';
 
 export type MapViewWrapperProps = Omit<MapViewProps, 'initialRegion'> & {
@@ -103,7 +105,6 @@ export const cleanLightStyle: MapStyleElement[] = [
   },
 ];
 
-// Default provider: Google Maps on Android, Apple Maps on iOS — both work in Expo Go.
 export default function MapView({
   permission = false,
   children,
@@ -115,18 +116,107 @@ export default function MapView({
   ref,
   ...rest
 }: MapViewWrapperProps) {
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!permission) return;
+
+    let isMounted = true;
+    let subscription: Location.LocationSubscription | null = null;
+
+    Location.getLastKnownPositionAsync({})
+      .then((loc) => {
+        if (isMounted && loc) {
+          setUserLocation({
+            latitude: loc.coords.latitude,
+            longitude: loc.coords.longitude,
+          });
+        }
+      })
+      .catch(() => {});
+
+    Location.watchPositionAsync(
+      {
+        accuracy: Location.Accuracy.Balanced,
+        timeInterval: 3000,
+        distanceInterval: 5,
+      },
+      (loc) => {
+        if (isMounted) {
+          setUserLocation({
+            latitude: loc.coords.latitude,
+            longitude: loc.coords.longitude,
+          });
+        }
+      }
+    )
+      .then((sub) => {
+        if (isMounted) {
+          subscription = sub;
+        } else {
+          sub.remove();
+        }
+      })
+      .catch((err) => {
+        console.warn('MapView location watch error:', err);
+      });
+
+    return () => {
+      isMounted = false;
+      if (subscription) {
+        subscription.remove();
+      }
+    };
+  }, [permission]);
+
+  const activeLocation = permission ? userLocation : null;
+
   return (
     <MV
       ref={ref}
       style={style}
       customMapStyle={cleanLightStyle}
       initialRegion={initialRegion}
-      showsUserLocation={permission}
+      showsUserLocation={false}
       showsMyLocationButton={showsMyLocationButton}
       showsCompass={showsCompass}
       mapPadding={mapPadding}
       {...rest}>
+      {activeLocation && (
+        <Marker
+          coordinate={activeLocation}
+          anchor={{ x: 0.5, y: 0.5 }}
+          flat
+          tracksViewChanges={false}
+          zIndex={1000}>
+          <View style={styles.userLocationOuter}>
+            <View style={styles.userLocationInner} />
+          </View>
+        </Marker>
+      )}
       {children}
     </MV>
   );
 }
+
+const styles = StyleSheet.create({
+  userLocationOuter: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(37, 99, 235, 0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  userLocationInner: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#2563eb',
+    borderWidth: 2.5,
+    borderColor: '#ffffff',
+  },
+});

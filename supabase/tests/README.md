@@ -2,8 +2,7 @@
 
 ## `group_routes_rls.sql`
 
-Security tests for "Wspólne trasy" (migrations `20261004090000_group_routes.sql`,
-`20261004130000_group_routes_delete.sql`):
+Security tests for "Wspólne trasy" (migration `20261004090000_group_routes.sql`):
 RLS policies, grants and the security definer RPCs that protect routes, chat and
 the creator's live location.
 
@@ -33,14 +32,13 @@ and disappear at the end. It never touches existing rows.
 | 5 | `list_group_routes()`: public open routes + my routes, correct `my_role` and `participant_count` |
 | 6 | `anon` cannot read any table or call any RPC |
 | 7 | Direct INSERT/UPDATE/DELETE/TRUNCATE by `authenticated` → permission denied; private helpers not callable |
-| 8 | Only the creator starts/finishes/cancels/deletes and shares location, and location only while `live` |
+| 8 | Only the creator starts/finishes/cancels and shares location, and location only while `live` |
 | 9 | Chat: members post while scheduled/live; no `user_id`/`created_at` spoofing; body rules; read-only after the end |
 | 10 | Creator cannot leave; a member who leaves loses access |
-| 11 | Status transitions: start ← scheduled, finish ← live, cancel ← live (row kept) |
+| 11 | Status transitions: start ← scheduled, finish ← live, cancel ← scheduled |
 | 12 | `private.auto_finish_group_routes()` |
 | 13 | `private.purge_group_route_messages()` (7-day retention) |
 | 14 | Catalog: RLS enabled, no unexpected policies, realtime publication, replica identity default |
-| 15 | `delete_group_route`: scheduled only; alone any time, with participants until 2 h before the start; row and its participants/chat deleted |
 
 ### Running it
 

@@ -11,8 +11,7 @@ uczestnicy widzą na żywo pozycję twórcy po rozpoczęciu i rozmawiają na cza
 - **Trasa wspólna** (`group_route`): nazwa, opis (opc.), geometria z plannera, planowany start,
   planowany koniec (opc.), widoczność `public | private`, opcjonalne powiązanie z wydarzeniem.
 - **Statusy:** `scheduled` (zaplanowana) → `live` (trwa) → `finished` (zakończona);
-  `live` → `cancelled` (anulowana, zostaje w bazie). Zaplanowaną trasę twórca może **usunąć**
-  (wiersz znika z bazy razem z uczestnikami i czatem).
+  `scheduled` → `cancelled` (anulowana).
 - **Role:** `creator` (twórca) i `participant` (uczestnik). Brak przekazywania roli.
 
 ## 3. Wymagania funkcjonalne
@@ -21,8 +20,10 @@ uczestnicy widzą na żywo pozycję twórcy po rozpoczęciu i rozmawiają na cza
 - Na ekranie **Route** przycisk „Utwórz wspólną trasę” (aktywny, gdy jest wyliczona trasa lub pętla).
   Przenosi polyline, przystanki, dystans i czas do formularza.
 - Formularz: nazwa (1–100 znaków, wymagana), opis (opc., ≤ 500), dzień (Dziś / Jutro / data)
-  i godzina startu `HH:MM`, opcjonalny koniec, przełącznik publiczna/prywatna, opcjonalny wybór
-  wydarzenia z listy najbliższych (`events`, kończące się dziś lub później, max 20).
+  i godzina startu `HH:MM`, opcjonalny koniec, przełącznik publiczna/prywatna.
+- Wydarzenia zaznaczone na trasie w zakładce **Route** przechodzą do formularza (bez osobnego
+  wyboru wydarzenia). Wtedy można wybrać tylko dzień, w którym w każdym zaznaczonym miejscu trwa
+  jakieś wydarzenie (`start_date`–`end_date`, całe dni); trasa linkuje do pierwszego z nich.
 - Koniec, jeśli podany, musi być po starcie.
 - Twórca automatycznie zostaje uczestnikiem z rolą `creator`.
 - Każda trasa dostaje 6-znakowy kod dołączenia (pokazywany tylko uczestnikom).
@@ -42,9 +43,7 @@ uczestnicy widzą na żywo pozycję twórcy po rozpoczęciu i rozmawiają na cza
 
 ### F4. Cykl życia
 - Twórca ręcznie: „Rozpocznij” (`scheduled → live`), „Zakończ” (`live → finished`),
-  „Anuluj” (`live → cancelled`, trasa zostaje w bazie). Trasa nie startuje automatycznie o godzinie startu.
-- **Usuwanie** (tylko `scheduled`, tylko twórca): bez innych uczestników — w każdej chwili;
-  z uczestnikami — najpóźniej 2 h przed planowanym startem. Usunięta trasa znika z bazy.
+  „Anuluj” (`scheduled → cancelled`). Trasa nie startuje automatycznie o godzinie startu.
 - **Auto-zakończenie (pg_cron, co 5 min):** trasa `live` lub `scheduled`, dla której minęło
   `planned_end + 1 h` lub (bez końca) `planned_start + 6 h`, przechodzi w `finished`
   (`live`) / `cancelled` (`scheduled`).

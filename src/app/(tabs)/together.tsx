@@ -33,23 +33,24 @@ export default function TogetherScreen() {
 
   return (
     <SafeView
-      className='flex-1 bg-neutral-50'
+      className='flex-1 bg-slate-50'
       edges={TAB_SCREEN_EDGES}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps='handled'
-        contentContainerStyle={{ padding: 20, paddingBottom: 32, gap: 24 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: 32, gap: 20 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
+            tintColor='#4f46e5'
           />
         }>
-        <View>
-          <Text className='text-2xl font-bold tracking-tight text-neutral-900'>
+        <View className='gap-0.5'>
+          <Text className='text-2xl font-extrabold tracking-tight text-slate-900'>
             Razem
           </Text>
-          <Text className='text-sm text-neutral-500'>
+          <Text className='text-xs font-medium text-slate-500'>
             Wspólne trasy — dołącz do innych albo zaproś znajomych
           </Text>
         </View>
@@ -58,37 +59,40 @@ export default function TogetherScreen() {
 
         <Pressable
           onPress={() => router.push('/(tabs)/route')}
-          className='flex-row items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 active:opacity-90'>
-          <Ionicons
-            name='add-circle'
-            size={24}
-            color='#2563eb'
-          />
+          className='flex-row items-center gap-3 rounded-3xl border border-indigo-200/80 bg-indigo-50/80 p-4 shadow-xs active:scale-[0.99]'>
+          <View className='h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 shadow-xs'>
+            <Ionicons
+              name='add'
+              size={22}
+              color='#ffffff'
+            />
+          </View>
           <View className='flex-1'>
-            <Text className='text-sm font-bold text-blue-700'>
+            <Text className='text-sm font-bold text-indigo-950'>
               Utwórz trasę w zakładce Route
             </Text>
-            <Text className='text-xs text-blue-700/80'>
+            <Text className='text-xs text-indigo-700/80 leading-4'>
               Wyznacz trasę lub pętlę, a potem wybierz „Utwórz wspólną trasę”
             </Text>
           </View>
           <Ionicons
             name='chevron-forward'
             size={16}
-            color='#2563eb'
+            color='#4f46e5'
           />
         </Pressable>
 
         {error && (
-          <View className='rounded-xl border border-red-200 bg-red-50 p-3'>
-            <Text className='text-sm text-red-700'>{error}</Text>
+          <View className='rounded-2xl border border-rose-200 bg-rose-50 p-3.5'>
+            <Text className='text-xs font-semibold text-rose-700'>{error}</Text>
           </View>
         )}
 
         {loading && routes.length === 0 && !refreshing ? (
           <ActivityIndicator
             size='large'
-            color='#2563eb'
+            color='#4f46e5'
+            className='py-8'
           />
         ) : (
           <>

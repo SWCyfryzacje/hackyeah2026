@@ -1,8 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { LatLng } from 'react-native-maps';
 import * as Linking from 'expo-linking';
-import { MAX_ROUTE_DAYS_AHEAD } from '@/components/group-routes/new-group-route-schema';
-import { horizonRange } from '@/utils/events';
 import type {
   CreateGroupRouteInput,
   GroupRoute,
@@ -25,7 +23,6 @@ import type {
 // OSRM overview=full can return thousands of points; the DB caps geometry at 20k.
 const MAX_GEOMETRY_POINTS = 2000;
 const MESSAGES_PAGE = 200;
-const UPCOMING_EVENTS_LIMIT = 20;
 
 const EVENT_COLUMNS = 'id, title, url, place, date_text, start_date, end_date';
 
@@ -224,26 +221,6 @@ export async function fetchGroupRouteMessages(
   return (data as GroupRouteMessageRow[]).map(toGroupRouteMessage).reverse();
 }
 
-/**
- * Events going on between today and the last day a route can be planned for,
- * soonest first (for linking a route to an event).
- */
-export async function fetchUpcomingEvents(
-  supabase: SupabaseClient,
-  limit = UPCOMING_EVENTS_LIMIT
-): Promise<GroupRouteEvent[]> {
-  const { from, until } = horizonRange({ days: MAX_ROUTE_DAYS_AHEAD });
-  const { data, error } = await supabase
-    .from('events')
-    .select(EVENT_COLUMNS)
-    .gte('end_date', from)
-    .lte('start_date', until)
-    .order('start_date', { ascending: true })
-    .limit(limit);
-  if (error) throw new Error(error.message);
-  return (data as GroupRouteEventRow[]).map(toGroupRouteEvent);
-}
-
 // --- writes ---
 
 /** Creates the route (I become its creator) and returns its id. */
@@ -306,23 +283,12 @@ export async function finishGroupRoute(
   await rpc(supabase, 'finish_group_route', { p_route_id: routeId });
 }
 
-/** Creator only: live -> cancelled (kept in the database). */
+/** Creator only: scheduled -> cancelled. */
 export async function cancelGroupRoute(
   supabase: SupabaseClient,
   routeId: string
 ): Promise<void> {
   await rpc(supabase, 'cancel_group_route', { p_route_id: routeId });
-}
-
-/**
- * Creator only, while scheduled: removes the route from the database. With
- * other participants only until GROUP_ROUTE_DELETE_LOCK_MS before the start.
- */
-export async function deleteGroupRoute(
-  supabase: SupabaseClient,
-  routeId: string
-): Promise<void> {
-  await rpc(supabase, 'delete_group_route', { p_route_id: routeId });
 }
 
 /** Creator only, while live: replaces the shared position. */

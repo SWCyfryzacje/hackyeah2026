@@ -16,26 +16,26 @@ export default function SettingsFeedbackBanner({
   return (
     <View className='gap-2.5'>
       {successMessage ? (
-        <View className='mx-5 mt-3 flex-row items-center gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5'>
+        <View className='mx-5 mt-3 flex-row items-center gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5 shadow-xs'>
           <Ionicons
             name='checkmark-circle'
             size={20}
-            color='#16a34a'
+            color='#10b981'
           />
-          <Text className='flex-1 text-xs font-semibold text-emerald-800'>
+          <Text className='flex-1 text-xs font-bold text-emerald-800'>
             {successMessage}
           </Text>
         </View>
       ) : null}
 
       {errorMessage ? (
-        <View className='mx-5 mt-3 flex-row items-center gap-2.5 rounded-2xl border border-rose-200 bg-rose-50 p-3.5'>
+        <View className='mx-5 mt-3 flex-row items-center gap-2.5 rounded-2xl border border-rose-200 bg-rose-50 p-3.5 shadow-xs'>
           <Ionicons
             name='alert-circle'
             size={20}
-            color='#dc2626'
+            color='#e11d48'
           />
-          <Text className='flex-1 text-xs font-semibold text-rose-800'>
+          <Text className='flex-1 text-xs font-bold text-rose-800'>
             {errorMessage}
           </Text>
         </View>

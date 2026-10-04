@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, Text } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import MonumentMarker, { formatDistance } from '@/components/monument-marker';
 import type { MonumentSuggestions } from '@/hooks/useMonumentSuggestions';
@@ -39,37 +39,59 @@ export function MonumentSuggestionList({
 
   return (
     <>
-      <Text className='text-sm text-neutral-500'>
+      <Text className='text-center text-xs font-bold uppercase tracking-wider text-slate-500'>
         Monuments along the way
-        {selectedIds.size > 0 ? ` · ${selectedIds.size} added` : ' — tap to add'}
+        {selectedIds.size > 0
+          ? ` · ${selectedIds.size} added`
+          : ' — tap to add'}
       </Text>
       <MonumentLevelPicker />
       {suggestions.length === 0 && (
-        <Text className='text-xs text-neutral-500'>
+        <Text className='text-center text-xs text-slate-400'>
           None at this level — try a broader one
         </Text>
       )}
-      <ScrollView className='max-h-40'>
+      <ScrollView
+        className='max-h-48'
+        contentContainerClassName='gap-2 py-1'>
         {suggestions.map((m) => {
           const selected = selectedIds.has(m.id);
           return (
             <Pressable
               key={m.id}
-              className='flex-row items-center gap-2 py-1.5'
+              className={`flex-row items-center justify-between rounded-2xl px-3.5 py-2.5 ${
+                selected
+                  ? 'border border-emerald-500 bg-emerald-50/90 shadow-xs'
+                  : 'border border-slate-200 bg-slate-50/70 active:bg-slate-100'
+              }`}
               onPress={() => toggle(m.id)}>
-              <Ionicons
-                name={selected ? 'checkbox' : 'square-outline'}
-                size={20}
-                color={selected ? SELECTED_COLOR : '#a3a3a3'}
-              />
-              <Text
-                className='flex-1'
-                numberOfLines={1}>
-                {m.name}
-              </Text>
-              <Text className='text-xs text-neutral-500'>
-                {formatDistance(m.distanceM)} off
-              </Text>
+              <View className='flex-1 pr-2'>
+                <Text
+                  className={`text-sm ${
+                    selected
+                      ? 'font-bold text-emerald-950'
+                      : 'font-semibold text-slate-800'
+                  }`}
+                  numberOfLines={1}>
+                  {m.name}
+                </Text>
+                <Text className='text-xs font-medium text-slate-500'>
+                  {formatDistance(m.distanceM)} off
+                </Text>
+              </View>
+
+              {selected && (
+                <View className='flex-row items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 shadow-xs'>
+                  <Ionicons
+                    name='checkmark'
+                    size={12}
+                    color='#ffffff'
+                  />
+                  <Text className='text-xs font-bold text-white'>
+                    Selected
+                  </Text>
+                </View>
+              )}
             </Pressable>
           );
         })}

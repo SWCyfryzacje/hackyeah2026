@@ -17,7 +17,6 @@ import GroupRouteInfo from '@/components/group-routes/group-route-info';
 import GroupRouteActions from '@/components/group-routes/group-route-actions';
 import JoinCodeCard from '@/components/group-routes/join-code-card';
 import ParticipantList from '@/components/group-routes/participant-list';
-import RouteWeatherCard from '@/components/route-weather-card';
 
 export default function GroupRouteScreen() {
   const { id = '' } = useLocalSearchParams<{ id: string }>();
@@ -43,11 +42,11 @@ export default function GroupRouteScreen() {
 
   if (loading && !route) {
     return (
-      <View className='flex-1 items-center justify-center bg-neutral-50'>
+      <View className='flex-1 items-center justify-center bg-slate-50'>
         <Stack.Screen options={{ title: 'Trasa' }} />
         <ActivityIndicator
           size='large'
-          color='#2563eb'
+          color='#4f46e5'
         />
       </View>
     );
@@ -55,20 +54,20 @@ export default function GroupRouteScreen() {
 
   if (!route) {
     return (
-      <View className='flex-1 items-center justify-center gap-4 bg-neutral-50 p-6'>
+      <View className='flex-1 items-center justify-center gap-4 bg-slate-50 p-6'>
         <Stack.Screen options={{ title: 'Trasa' }} />
         <Ionicons
           name='alert-circle-outline'
           size={40}
           color='#64748b'
         />
-        <Text className='text-center text-base text-neutral-700'>
+        <Text className='text-center text-sm font-medium text-slate-700'>
           {error ?? 'Nie znaleziono trasy lub nie masz do niej dostępu.'}
         </Text>
         <Pressable
           onPress={goToList}
-          className='rounded-xl bg-blue-600 px-5 py-3 active:bg-blue-700'>
-          <Text className='text-sm font-semibold text-white'>
+          className='rounded-xl bg-indigo-600 px-5 py-3 shadow-xs active:bg-indigo-700 active:scale-[0.99]'>
+          <Text className='text-sm font-bold text-white'>
             Wróć do Razem
           </Text>
         </Pressable>
@@ -79,68 +78,67 @@ export default function GroupRouteScreen() {
   const isMember = myRole != null;
 
   return (
-    <View className='flex-1 bg-neutral-50'>
-      <Stack.Screen options={{ title: route.title }} />
-
-      <View style={{ height: '42%' }}>
-        <GroupRouteMap
-          route={route}
-          showLive={isMember && route.status === 'live'}
-        />
-      </View>
-
+    <View className='flex-1 bg-slate-50'>
+      <Stack.Screen
+        options={{
+          title: route.title,
+          headerTitleStyle: { fontSize: 18, fontWeight: '700', color: '#0f172a' },
+        }}
+      />
       <ScrollView
-        contentContainerStyle={{ padding: 20, paddingBottom: 40, gap: 20 }}
+        contentContainerStyle={{
+          paddingBottom: 40,
+          gap: 20,
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
+            tintColor='#4f46e5'
           />
         }>
-        <GroupRouteInfo route={route} />
-
-        {route.status === 'scheduled' && (
-          <RouteWeatherCard
-            location={route.start}
-            startAt={route.plannedStart}
-            durationS={route.durationS}
-            distanceM={route.distanceM}
-            defaultExpanded
+        <View className='h-1/2'>
+          <GroupRouteMap
+            route={route}
+            showLive={isMember && route.status === 'live'}
           />
-        )}
+        </View>
 
-        <GroupRouteActions
-          route={route}
-          myRole={myRole}
-          participantCount={participants.length}
-          sharing={sharing}
-          onChanged={refresh}
-          onLeft={goToList}
-          onOpenChat={() =>
-            router.push({
-              pathname: '/group-routes/[id]/chat',
-              params: { id: route.id },
-            })
-          }
-        />
+        <View className='flex gap-4 px-4'>
+          <GroupRouteInfo route={route} />
 
-        {isMember ? (
-          <>
-            <JoinCodeCard
-              code={route.joinCode}
-              title={route.title}
-            />
-            <ParticipantList
-              participants={participants}
-              myUserId={userId}
-            />
-          </>
-        ) : (
-          <Text className='text-sm text-neutral-500'>
-            Dołącz, aby zobaczyć uczestników, pozycję prowadzącego na żywo i
-            czat.
-          </Text>
-        )}
+          <GroupRouteActions
+            route={route}
+            myRole={myRole}
+            sharing={sharing}
+            onChanged={refresh}
+            onLeft={goToList}
+            onOpenChat={() =>
+              router.push({
+                pathname: '/group-routes/[id]/chat',
+                params: { id: route.id },
+              })
+            }
+          />
+
+          {isMember ? (
+            <>
+              <JoinCodeCard
+                code={route.joinCode}
+                title={route.title}
+              />
+              <ParticipantList
+                participants={participants}
+                myUserId={userId}
+              />
+            </>
+          ) : (
+            <Text className='text-sm text-neutral-500'>
+              Dołącz, aby zobaczyć uczestników, pozycję prowadzącego na żywo i
+              czat.
+            </Text>
+          )}
+        </View>
       </ScrollView>
     </View>
   );

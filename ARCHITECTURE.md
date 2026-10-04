@@ -93,8 +93,7 @@ akceptowalne, bo do publicznej i tak może dołączyć każdy. Kod trasy prywatn
 | `leave_group_route(p_route_id) → void` | uczestnik ≠ creator | usuwa wiersz uczestnika |
 | `start_group_route(p_route_id)` | creator | `scheduled → live`, `started_at = now()` |
 | `finish_group_route(p_route_id)` | creator | `live → finished`, `ended_at`, **delete location** |
-| `cancel_group_route(p_route_id)` | creator | `live → cancelled`, `ended_at`, delete location (wiersz zostaje) |
-| `delete_group_route(p_route_id)` | creator | tylko `scheduled`; z innymi uczestnikami do `planned_start - 2h`; **delete** trasy (kaskada: uczestnicy, czat, lokalizacja) |
+| `cancel_group_route(p_route_id)` | creator | `scheduled → cancelled`, `ended_at`, delete location |
 | `update_group_route_location(p_route_id, p_lat, p_lng, p_accuracy)` | creator | tylko `live`; upsert 1 wiersza |
 | `list_group_routes() → setof row` | zalogowany | publiczne `scheduled/live` + wszystkie moje (dowolny status, ostatnie 7 dni); kolumny trasy + `participant_count`, `my_role` (null gdy nie członek) |
 | `get_group_route_participants(p_route_id) → (user_id, role, nick, avatar_url, joined_at)` | uczestnik | nick wg SPEC F7; jedyne miejsce, gdzie inni widzą dane z `profiles` |

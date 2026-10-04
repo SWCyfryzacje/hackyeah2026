@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import * as Location from 'expo-location';
-import { Linking } from 'react-native';
+import { AppState, Linking } from 'react-native';
 
 export { default as LocationModal } from '@/components/location-modal';
 
@@ -13,6 +13,20 @@ export default function useLocationPermission({
 }: UseLocationPermissionOptions = {}) {
   const [visibility, setVisibility] = useState(false);
   const [granted, setGranted] = useState(false);
+
+  const checkPermission = useCallback(async () => {
+    try {
+      const { status } = await Location.getForegroundPermissionsAsync();
+      if (status === 'granted') {
+        setGranted(true);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.warn('Permission check error:', e);
+      return false;
+    }
+  }, []);
 
   const onAllow = useCallback(async () => {
     setVisibility(false);
@@ -33,19 +47,22 @@ export default function useLocationPermission({
   const grantPermission = useCallback(() => setGranted(true), []);
 
   useEffect(() => {
-    if (!autoRequest) return;
-
     let cancelled = false;
 
     (async () => {
       try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (cancelled) return;
+        const alreadyGranted = await checkPermission();
+        if (cancelled || alreadyGranted) return;
 
-        if (status === 'granted') {
-          setGranted(true);
-        } else {
-          setVisibility(true);
+        if (autoRequest) {
+          const { status } = await Location.requestForegroundPermissionsAsync();
+          if (cancelled) return;
+
+          if (status === 'granted') {
+            setGranted(true);
+          } else {
+            setVisibility(true);
+          }
         }
       } catch (e) {
         console.warn('Permission request error:', e);
@@ -55,7 +72,19 @@ export default function useLocationPermission({
     return () => {
       cancelled = true;
     };
-  }, [autoRequest]);
+  }, [autoRequest, checkPermission]);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        void checkPermission();
+      }
+    });
+
+    return () => {
+      sub.remove();
+    };
+  }, [checkPermission]);
 
   return {
     granted,
@@ -65,5 +94,6 @@ export default function useLocationPermission({
     grantPermission,
     onAllow,
     onLater,
+    checkPermission,
   };
 }
