@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Linking, Switch, Text, View } from 'react-native';
 import { EVENT_MARKER_COLOR, GEOCODING_ATTRIBUTION } from '@/constants/events';
 import useMapLayers, { type MapLayer } from '@/hooks/useMapLayers';
+import { RECREATION_MARKER_COLOR } from '@/constants/recreation';
 
 const MONUMENT_COLOR = '#d97706';
 
@@ -40,9 +41,12 @@ type Props = {
   className?: string;
 };
 
-/** Card with switches to show or hide monument and event markers on the maps. */
+/** Card with switches to show or hide monument, event and recreation markers on the maps. */
 export default function MapLayerToggles({ className = '' }: Props) {
   const [layers, setLayer] = useMapLayers();
+  // Events and recreation areas both come from LocationIQ search on OSM data
+  const attribution =
+    layers.events || layers.recreation ? GEOCODING_ATTRIBUTION : [];
 
   return (
     <View
@@ -59,9 +63,15 @@ export default function MapLayerToggles({ className = '' }: Props) {
         value={layers.events}
         onChange={(v) => setLayer('events', v)}
       />
-      {layers.events && (
+      <LayerRow
+        label='Parks & recreation'
+        color={RECREATION_MARKER_COLOR}
+        value={layers.recreation}
+        onChange={(v) => setLayer('recreation', v)}
+      />
+      {attribution.length > 0 && (
         <Text className='pb-0.5 text-[10px] leading-tight text-neutral-500'>
-          {GEOCODING_ATTRIBUTION.map((a, i) => (
+          {attribution.map((a, i) => (
             <Text
               key={a.url}
               onPress={() => void Linking.openURL(a.url)}>
