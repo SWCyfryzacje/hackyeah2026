@@ -31,12 +31,25 @@ type MonumentRow = {
   route_fraction?: number;
 };
 
+const normalizeImageUrl = (url: string | null | undefined): string | null => {
+  if (!url) return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('//')) {
+    return `https:${trimmed}`;
+  }
+  if (trimmed.startsWith('http://')) {
+    return trimmed.replace('http://', 'https://');
+  }
+  return trimmed;
+};
+
 const toMonument = (r: MonumentRow): Monument => ({
   id: r.id,
   name: r.name,
   kind: r.kind,
   description: r.description,
-  imageUrl: r.image_url,
+  imageUrl: normalizeImageUrl(r.image_url),
   score: r.score,
   latitude: r.latitude,
   longitude: r.longitude,

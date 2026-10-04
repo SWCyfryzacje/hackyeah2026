@@ -39,9 +39,7 @@ export default function CreateGroupRouteButton({ route, stops }: Props) {
         size={16}
         color='#ffffff'
       />
-      <Text className='text-sm font-semibold text-white'>
-        Utwórz wspólną trasę
-      </Text>
+      <Text className='text-sm font-semibold text-white'>Udostępnij trasę</Text>
     </Pressable>
   );
 }

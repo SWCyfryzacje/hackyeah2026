@@ -79,56 +79,65 @@ export default function GroupRouteScreen() {
 
   return (
     <View className='flex-1 bg-neutral-50'>
-      <Stack.Screen options={{ title: route.title }} />
-
-      <View style={{ height: '42%' }}>
-        <GroupRouteMap
-          route={route}
-          showLive={isMember && route.status === 'live'}
-        />
-      </View>
-
+      <Stack.Screen
+        options={{
+          title: route.title,
+          headerTitleStyle: { fontSize: 20, color: 'black' },
+        }}
+      />
       <ScrollView
-        contentContainerStyle={{ padding: 20, paddingBottom: 40, gap: 20 }}
+        contentContainerStyle={{
+          paddingBottom: 40,
+          gap: 20,
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
           />
         }>
-        <GroupRouteInfo route={route} />
+        <View className='h-1/2'>
+          <GroupRouteMap
+            route={route}
+            showLive={isMember && route.status === 'live'}
+          />
+        </View>
 
-        <GroupRouteActions
-          route={route}
-          myRole={myRole}
-          sharing={sharing}
-          onChanged={refresh}
-          onLeft={goToList}
-          onOpenChat={() =>
-            router.push({
-              pathname: '/group-routes/[id]/chat',
-              params: { id: route.id },
-            })
-          }
-        />
+        <View className='flex gap-4 px-4'>
+          <GroupRouteInfo route={route} />
 
-        {isMember ? (
-          <>
-            <JoinCodeCard
-              code={route.joinCode}
-              title={route.title}
-            />
-            <ParticipantList
-              participants={participants}
-              myUserId={userId}
-            />
-          </>
-        ) : (
-          <Text className='text-sm text-neutral-500'>
-            Dołącz, aby zobaczyć uczestników, pozycję prowadzącego na żywo i
-            czat.
-          </Text>
-        )}
+          <GroupRouteActions
+            route={route}
+            myRole={myRole}
+            sharing={sharing}
+            onChanged={refresh}
+            onLeft={goToList}
+            onOpenChat={() =>
+              router.push({
+                pathname: '/group-routes/[id]/chat',
+                params: { id: route.id },
+              })
+            }
+          />
+
+          {isMember ? (
+            <>
+              <JoinCodeCard
+                code={route.joinCode}
+                title={route.title}
+              />
+              <ParticipantList
+                participants={participants}
+                myUserId={userId}
+              />
+            </>
+          ) : (
+            <Text className='text-sm text-neutral-500'>
+              Dołącz, aby zobaczyć uczestników, pozycję prowadzącego na żywo i
+              czat.
+            </Text>
+          )}
+        </View>
       </ScrollView>
     </View>
   );

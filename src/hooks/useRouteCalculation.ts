@@ -1,10 +1,38 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { LatLng } from 'react-native-maps';
-import { routeBetween, type Route } from '@/utils/oneWayRoute';
-import { loopOfLength, type LoopResult } from '@/utils/loopRoute';
+import { useSupabase } from '@/lib/supabase';
+import {
+  routeBetween,
+  type Route,
+  type RouteProfile,
+} from '@/utils/oneWayRoute';
+import {
+  loopOfLength,
+  loopThroughPoint,
+  oneWayOfLength,
+  type LoopResult,
+} from '@/utils/loopRoute';
+
+export { type RouteProfile } from '@/utils/oneWayRoute';
 
 export type RouteStop = LatLng & {
   routeFraction?: number;
+  name?: string;
+};
+
+export type Waypoint = LatLng & {
+  name?: string;
+  description?: string;
+  id?: number;
+};
+
+export type RouteType = 'loop' | 'one_way';
+
+export type RoutePreferences = {
+  type: RouteType;
+  minKm: number;
+  maxKm: number;
+  profile: RouteProfile;
 };
 
 export type UseRouteCalculationOptions = {
@@ -13,6 +41,7 @@ export type UseRouteCalculationOptions = {
   onRouteCalculated?: (coords: LatLng[]) => void;
   /** Extra stops inserted before the destination or into the loop (e.g. selected monuments) */
   stops?: RouteStop[];
+  initialProfile?: RouteProfile;
 };
 
 const NO_STOPS: RouteStop[] = [];
@@ -48,22 +77,35 @@ function mergeLoopWaypoints(
   return [start, ...allPoints.map((p) => p.point), start];
 }
 
+export type LoopTarget =
+  | number
+  | {
+      minKm: number;
+      maxKm: number;
+      label?: string;
+    };
+
 export function useRouteCalculation({
   start,
   useUserLocationAsStart = true,
   onRouteCalculated,
   stops = NO_STOPS,
+  initialProfile = 'walking',
 }: UseRouteCalculationOptions) {
   const maxWaypoints = useUserLocationAsStart ? 1 : 2;
+  const supabase = useSupabase();
 
-  const [waypoints, setWaypoints] = useState<LatLng[]>([]);
+  const [profile, setProfile] = useState<RouteProfile>(initialProfile);
+  const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
   const [route, setRoute] = useState<Route | null>(null);
   const [detourRoute, setDetourRoute] = useState<Route | null>(null);
   const [baseLoop, setBaseLoop] = useState<BaseLoop | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isGeneratingRoute, setIsGeneratingRoute] = useState(false);
 
   const loopAbortRef = useRef<AbortController | null>(null);
+  const prevWaypointsRef = useRef<LatLng[]>([]);
 
   const loop: LoopResult | null = useMemo(
     () =>
@@ -101,15 +143,22 @@ export function useRouteCalculation({
       return;
     }
 
+    const waypointsChanged = prevWaypointsRef.current !== waypoints;
+    prevWaypointsRef.current = waypoints;
+    const isNewRoute = waypointsChanged;
+
     let active = true;
     const ctrl = new AbortController();
 
     (async () => {
       setLoading(true);
+      if (isNewRoute) {
+        setIsGeneratingRoute(true);
+      }
       setError(null);
 
       try {
-        const r = await routeBetween(points, ctrl.signal);
+        const r = await routeBetween(points, ctrl.signal, undefined, profile);
         if (!active) return;
 
         setRoute(r);
@@ -120,7 +169,10 @@ export function useRouteCalculation({
         setError(e instanceof Error ? e.message : 'Route calculation failed');
         setRoute(null);
       } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setLoading(false);
+          setIsGeneratingRoute(false);
+        }
       }
     })();
 
@@ -128,7 +180,15 @@ export function useRouteCalculation({
       active = false;
       ctrl.abort();
     };
-  }, [start, waypoints, stops, useUserLocationAsStart, onRouteCalculated, baseLoop]);
+  }, [
+    start,
+    waypoints,
+    stops,
+    useUserLocationAsStart,
+    onRouteCalculated,
+    baseLoop,
+    profile,
+  ]);
 
   // Recalculate loop route when stops change on an active baseLoop
   useEffect(() => {
@@ -147,7 +207,12 @@ export function useRouteCalculation({
           baseLoop.ring,
           stops
         );
-        const r = await routeBetween(mergedPoints, ctrl.signal);
+        const r = await routeBetween(
+          mergedPoints,
+          ctrl.signal,
+          undefined,
+          profile
+        );
         if (!active) return;
 
         setDetourRoute(r);
@@ -165,30 +230,169 @@ export function useRouteCalculation({
       active = false;
       ctrl.abort();
     };
-  }, [baseLoop, stops, onRouteCalculated]);
+  }, [baseLoop, stops, onRouteCalculated, profile]);
 
   // Cleanup abort controller on unmount
   useEffect(() => () => loopAbortRef.current?.abort(), []);
 
   const generateLoop = useCallback(
-    async (km: number) => {
+    async (target: LoopTarget, targetProfile: RouteProfile = profile) => {
       if (!start) return;
 
+      setProfile(targetProfile);
       loopAbortRef.current?.abort();
       const ctrl = new AbortController();
       loopAbortRef.current = ctrl;
 
       setLoading(true);
+      setIsGeneratingRoute(true);
       setError(null);
       setRoute(null);
       setDetourRoute(null);
       setWaypoints([]);
+      prevWaypointsRef.current = [];
       setBaseLoop(null);
 
       try {
-        const r = await loopOfLength({
+        const loopParams =
+          typeof target === 'number'
+            ? {
+                start,
+                targetMeters: target * 1000,
+                signal: ctrl.signal,
+                profile: targetProfile,
+              }
+            : {
+                start,
+                minMeters: target.minKm * 1000,
+                maxMeters: target.maxKm * 1000,
+                targetMeters: ((target.minKm + target.maxKm) / 2) * 1000,
+                signal: ctrl.signal,
+                profile: targetProfile,
+              };
+
+        const r = await loopOfLength(loopParams);
+
+        if (ctrl.signal.aborted || loopAbortRef.current !== ctrl) return;
+
+        setBaseLoop({
           start,
-          targetMeters: km * 1000,
+          ring: r.ring,
+          bearing: r.bearing,
+          initialResult: r,
+        });
+        onRouteCalculated?.(r.coords);
+      } catch (e) {
+        if (ctrl.signal.aborted || loopAbortRef.current !== ctrl) return;
+        if (e instanceof Error && e.name === 'AbortError') return;
+        setError(
+          e instanceof Error ? e.message : 'Could not generate loop route'
+        );
+      } finally {
+        if (loopAbortRef.current === ctrl) {
+          setLoading(false);
+          setIsGeneratingRoute(false);
+        }
+      }
+    },
+    [start, onRouteCalculated, profile]
+  );
+
+  const generateOneWay = useCallback(
+    async (
+      target: { minKm: number; maxKm: number },
+      targetProfile: RouteProfile = profile
+    ) => {
+      if (!start) return;
+
+      setProfile(targetProfile);
+      loopAbortRef.current?.abort();
+      const ctrl = new AbortController();
+      loopAbortRef.current = ctrl;
+
+      setLoading(true);
+      setIsGeneratingRoute(true);
+      setError(null);
+      setRoute(null);
+      setDetourRoute(null);
+      setBaseLoop(null);
+      setWaypoints([]);
+      prevWaypointsRef.current = [];
+
+      try {
+        const r = await oneWayOfLength({
+          start,
+          minMeters: target.minKm * 1000,
+          maxMeters: target.maxKm * 1000,
+          profile: targetProfile,
+          signal: ctrl.signal,
+          supabase,
+        });
+
+        if (ctrl.signal.aborted || loopAbortRef.current !== ctrl) return;
+
+        setWaypoints([r.destination]);
+        prevWaypointsRef.current = [r.destination];
+        setRoute({
+          coords: r.coords,
+          distance: r.distance,
+          duration: r.duration,
+        });
+        onRouteCalculated?.(r.coords);
+      } catch (e) {
+        if (ctrl.signal.aborted || loopAbortRef.current !== ctrl) return;
+        if (e instanceof Error && e.name === 'AbortError') return;
+        setError(e instanceof Error ? e.message : 'Could not generate route');
+      } finally {
+        if (loopAbortRef.current === ctrl) {
+          setLoading(false);
+          setIsGeneratingRoute(false);
+        }
+      }
+    },
+    [start, onRouteCalculated, profile, supabase]
+  );
+
+  const generateRoute = useCallback(
+    async (prefs: RoutePreferences) => {
+      if (prefs.type === 'loop') {
+        return generateLoop(
+          { minKm: prefs.minKm, maxKm: prefs.maxKm },
+          prefs.profile
+        );
+      } else {
+        return generateOneWay(
+          { minKm: prefs.minKm, maxKm: prefs.maxKm },
+          prefs.profile
+        );
+      }
+    },
+    [generateLoop, generateOneWay]
+  );
+
+  const generateLoopThroughPoint = useCallback(
+    async (via: Waypoint, targetProfile: RouteProfile = profile) => {
+      if (!start) return;
+
+      setProfile(targetProfile);
+      loopAbortRef.current?.abort();
+      const ctrl = new AbortController();
+      loopAbortRef.current = ctrl;
+
+      setLoading(true);
+      setIsGeneratingRoute(true);
+      setError(null);
+      setRoute(null);
+      setDetourRoute(null);
+      setWaypoints([via]);
+      prevWaypointsRef.current = [via];
+      setBaseLoop(null);
+
+      try {
+        const r = await loopThroughPoint({
+          start,
+          via,
+          profile: targetProfile,
           signal: ctrl.signal,
         });
 
@@ -210,10 +414,57 @@ export function useRouteCalculation({
       } finally {
         if (loopAbortRef.current === ctrl) {
           setLoading(false);
+          setIsGeneratingRoute(false);
         }
       }
     },
-    [start, onRouteCalculated]
+    [start, onRouteCalculated, profile]
+  );
+
+  const generateOneWayToDestination = useCallback(
+    async (destination: Waypoint, targetProfile: RouteProfile = profile) => {
+      if (!start) return;
+
+      setProfile(targetProfile);
+      loopAbortRef.current?.abort();
+      const ctrl = new AbortController();
+      loopAbortRef.current = ctrl;
+
+      setLoading(true);
+      setIsGeneratingRoute(true);
+      setError(null);
+      setRoute(null);
+      setDetourRoute(null);
+      setBaseLoop(null);
+      setWaypoints([destination]);
+      prevWaypointsRef.current = [destination];
+
+      try {
+        const r = await routeBetween(
+          [start, destination],
+          ctrl.signal,
+          undefined,
+          targetProfile
+        );
+
+        if (ctrl.signal.aborted || loopAbortRef.current !== ctrl) return;
+
+        setRoute(r);
+        onRouteCalculated?.(r.coords);
+      } catch (e) {
+        if (ctrl.signal.aborted || loopAbortRef.current !== ctrl) return;
+        if (e instanceof Error && e.name === 'AbortError') return;
+        setError(
+          e instanceof Error ? e.message : 'Could not calculate one-way route'
+        );
+      } finally {
+        if (loopAbortRef.current === ctrl) {
+          setLoading(false);
+          setIsGeneratingRoute(false);
+        }
+      }
+    },
+    [start, onRouteCalculated, profile]
   );
 
   const addWaypoint = useCallback(
@@ -231,40 +482,47 @@ export function useRouteCalculation({
     setBaseLoop(null);
     setDetourRoute(null);
     setWaypoints([]);
+    prevWaypointsRef.current = [];
     setRoute(null);
     setError(null);
     setLoading(false);
+    setIsGeneratingRoute(false);
   }, []);
 
   const activeRoute = loop || route;
 
   const getStatusText = useCallback(() => {
-    if (loading) return loop || baseLoop ? 'Generating loop...' : 'Calculating route...';
+    if (isGeneratingRoute)
+      return loop || baseLoop ? 'Generowanie pętli...' : 'Generowanie trasy...';
+    if (loading) return 'Aktualizowanie trasy...';
     if (error) return error;
 
     if (activeRoute) {
       const km = (activeRoute.distance / 1000).toFixed(1);
       const min = Math.round(activeRoute.duration / 60);
-      return `${loop ? 'Loop: ' : ''}${km} km · ${min} min`;
+      const profileIcon = profile === 'driving' ? 'Jazda' : 'Spacer';
+      return `${profileIcon} · ${loop ? 'Pętla: ' : ''}${km} km · ${min} min`;
     }
 
     if (useUserLocationAsStart && !start) {
-      return 'Waiting for location...';
+      return 'Oczekiwanie na lokalizację...';
     }
 
     if (waypoints.length < maxWaypoints) {
       return maxWaypoints === 1
-        ? 'Tap map to set destination or pick a loop'
-        : `Tap map to set waypoint ${waypoints.length + 1} of ${maxWaypoints}`;
+        ? 'Wybierz preferencje lub wskaż cel na mapie'
+        : `Wskaż punkt ${waypoints.length + 1} z ${maxWaypoints}`;
     }
 
-    return 'No route found';
+    return 'Brak trasy';
   }, [
+    isGeneratingRoute,
     loading,
     loop,
     baseLoop,
     error,
     activeRoute,
+    profile,
     useUserLocationAsStart,
     start,
     waypoints.length,
@@ -278,9 +536,16 @@ export function useRouteCalculation({
     activeRoute,
     error,
     loading,
+    isGeneratingRoute,
     statusText: getStatusText(),
     maxWaypoints,
+    profile,
+    setProfile,
+    generateRoute,
     generateLoop,
+    generateOneWay,
+    generateLoopThroughPoint,
+    generateOneWayToDestination,
     addWaypoint,
     resetRoute,
   };
