@@ -143,8 +143,6 @@ export default function Home() {
 
   return (
     <SafeView className='flex-1 bg-neutral-50'>
-      <StatusBar style='dark' />
-
       <LocationModal
         visible={visibility}
         onAllow={onAllow}
@@ -162,15 +160,16 @@ export default function Home() {
         }>
         {/* Top Header */}
         <View className='flex-row items-center justify-between px-5 pt-4 pb-3'>
-          <View className='flex-1 pr-3'>
-            <Text className='text-sm font-medium text-neutral-500'>
+          <View className='flex-1 flex-row items-center gap-2 pr-3'>
+            <Text className='text-lg font-medium text-neutral-500'>
               {greeting},
             </Text>
             <Text
-              className='text-2xl font-bold tracking-tight text-neutral-900'
+              className='text-xl font-bold tracking-tight text-neutral-900'
               numberOfLines={1}>
-              {displayName} 👋
+              {displayName ?? ' '}
             </Text>
+            <Text className='text-xl'>👋</Text>
           </View>
 
           <Pressable

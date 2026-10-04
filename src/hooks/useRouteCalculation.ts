@@ -1,17 +1,52 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { LatLng } from 'react-native-maps';
 import { routeBetween, type Route } from '@/utils/oneWayRoute';
 import { loopOfLength, type LoopResult } from '@/utils/loopRoute';
+
+export type RouteStop = LatLng & {
+  routeFraction?: number;
+};
 
 export type UseRouteCalculationOptions = {
   start: LatLng | null;
   useUserLocationAsStart?: boolean;
   onRouteCalculated?: (coords: LatLng[]) => void;
-  /** Extra stops inserted before the destination (e.g. selected monuments) */
-  stops?: LatLng[];
+  /** Extra stops inserted before the destination or into the loop (e.g. selected monuments) */
+  stops?: RouteStop[];
 };
 
-const NO_STOPS: LatLng[] = [];
+const NO_STOPS: RouteStop[] = [];
+
+type BaseLoop = {
+  start: LatLng;
+  ring: LatLng[];
+  bearing: number;
+  initialResult: LoopResult;
+};
+
+function mergeLoopWaypoints(
+  start: LatLng,
+  ring: LatLng[],
+  stops: RouteStop[]
+): LatLng[] {
+  const n = ring.length;
+  // Assign each ring point an approximate fraction along the loop (0 < fraction < 1)
+  const ringWithFractions = ring.map((pt, i) => ({
+    point: pt,
+    fraction: (i + 1) / (n + 1),
+  }));
+
+  const stopsWithFractions = stops.map((s, i) => ({
+    point: { latitude: s.latitude, longitude: s.longitude },
+    fraction: s.routeFraction ?? (i + 1) / (stops.length + 1),
+  }));
+
+  const allPoints = [...ringWithFractions, ...stopsWithFractions].sort(
+    (a, b) => a.fraction - b.fraction
+  );
+
+  return [start, ...allPoints.map((p) => p.point), start];
+}
 
 export function useRouteCalculation({
   start,
@@ -23,14 +58,32 @@ export function useRouteCalculation({
 
   const [waypoints, setWaypoints] = useState<LatLng[]>([]);
   const [route, setRoute] = useState<Route | null>(null);
-  const [loop, setLoop] = useState<LoopResult | null>(null);
+  const [detourRoute, setDetourRoute] = useState<Route | null>(null);
+  const [baseLoop, setBaseLoop] = useState<BaseLoop | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const loopAbortRef = useRef<AbortController | null>(null);
 
+  const loop: LoopResult | null = useMemo(
+    () =>
+      baseLoop
+        ? stops.length > 0 && detourRoute
+          ? {
+              ...detourRoute,
+              bearing: baseLoop.bearing,
+              ring: baseLoop.ring,
+            }
+          : baseLoop.initialResult
+        : null,
+    [baseLoop, stops.length, detourRoute]
+  );
+
   // Point-to-point routing effect
   useEffect(() => {
+    // Only calculate point-to-point if we have destination waypoints and no active baseLoop
+    if (baseLoop) return;
+
     const points: LatLng[] = [];
 
     if (useUserLocationAsStart) {
@@ -54,7 +107,6 @@ export function useRouteCalculation({
     (async () => {
       setLoading(true);
       setError(null);
-      setLoop(null);
 
       try {
         const r = await routeBetween(points, ctrl.signal);
@@ -76,7 +128,44 @@ export function useRouteCalculation({
       active = false;
       ctrl.abort();
     };
-  }, [start, waypoints, stops, useUserLocationAsStart, onRouteCalculated]);
+  }, [start, waypoints, stops, useUserLocationAsStart, onRouteCalculated, baseLoop]);
+
+  // Recalculate loop route when stops change on an active baseLoop
+  useEffect(() => {
+    if (!baseLoop || stops.length === 0) return;
+
+    let active = true;
+    const ctrl = new AbortController();
+
+    (async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const mergedPoints = mergeLoopWaypoints(
+          baseLoop.start,
+          baseLoop.ring,
+          stops
+        );
+        const r = await routeBetween(mergedPoints, ctrl.signal);
+        if (!active) return;
+
+        setDetourRoute(r);
+        onRouteCalculated?.(r.coords);
+      } catch (e: unknown) {
+        if (!active) return;
+        if (e instanceof Error && e.name === 'AbortError') return;
+        setError(e instanceof Error ? e.message : 'Could not recalculate loop');
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+      ctrl.abort();
+    };
+  }, [baseLoop, stops, onRouteCalculated]);
 
   // Cleanup abort controller on unmount
   useEffect(() => () => loopAbortRef.current?.abort(), []);
@@ -92,7 +181,9 @@ export function useRouteCalculation({
       setLoading(true);
       setError(null);
       setRoute(null);
+      setDetourRoute(null);
       setWaypoints([]);
+      setBaseLoop(null);
 
       try {
         const r = await loopOfLength({
@@ -101,15 +192,25 @@ export function useRouteCalculation({
           signal: ctrl.signal,
         });
 
-        setLoop(r);
+        if (ctrl.signal.aborted || loopAbortRef.current !== ctrl) return;
+
+        setBaseLoop({
+          start,
+          ring: r.ring,
+          bearing: r.bearing,
+          initialResult: r,
+        });
         onRouteCalculated?.(r.coords);
       } catch (e) {
+        if (ctrl.signal.aborted || loopAbortRef.current !== ctrl) return;
         if (e instanceof Error && e.name === 'AbortError') return;
         setError(
           e instanceof Error ? e.message : 'Could not generate loop route'
         );
       } finally {
-        if (!ctrl.signal.aborted) setLoading(false);
+        if (loopAbortRef.current === ctrl) {
+          setLoading(false);
+        }
       }
     },
     [start, onRouteCalculated]
@@ -117,19 +218,20 @@ export function useRouteCalculation({
 
   const addWaypoint = useCallback(
     (coordinate: LatLng) => {
+      if (baseLoop) return;
       if (waypoints.length >= maxWaypoints) return;
-      setLoop(null);
       setError(null);
       setWaypoints((w) => [...w, coordinate]);
     },
-    [waypoints.length, maxWaypoints]
+    [baseLoop, waypoints.length, maxWaypoints]
   );
 
   const resetRoute = useCallback(() => {
     loopAbortRef.current?.abort();
+    setBaseLoop(null);
+    setDetourRoute(null);
     setWaypoints([]);
     setRoute(null);
-    setLoop(null);
     setError(null);
     setLoading(false);
   }, []);
@@ -137,7 +239,7 @@ export function useRouteCalculation({
   const activeRoute = loop || route;
 
   const getStatusText = useCallback(() => {
-    if (loading) return loop ? 'Generating loop...' : 'Calculating route...';
+    if (loading) return loop || baseLoop ? 'Generating loop...' : 'Calculating route...';
     if (error) return error;
 
     if (activeRoute) {
@@ -160,6 +262,7 @@ export function useRouteCalculation({
   }, [
     loading,
     loop,
+    baseLoop,
     error,
     activeRoute,
     useUserLocationAsStart,

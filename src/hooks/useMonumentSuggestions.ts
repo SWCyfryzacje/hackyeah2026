@@ -4,16 +4,17 @@ import { useSupabase } from '@/lib/supabase';
 import useMonumentLevel from '@/hooks/useMonumentLevel';
 import { fetchMonumentsAlongRoute, type Monument } from '@/utils/monuments';
 import type { Route } from '@/utils/oneWayRoute';
+import type { RouteStop } from '@/hooks/useRouteCalculation';
 
 // How far from the route (meters) a monument may be to be suggested
 const SUGGESTION_BUFFER_M = 300;
 
-const NO_STOPS: LatLng[] = [];
+const NO_STOPS: RouteStop[] = [];
 
 /**
  * Monuments near the route that the user can add as stops.
  *
- * Suggestions are fetched once per set of waypoints, from the first route
+ * Suggestions are fetched once per set of waypoints or loop route, from the first route
  * computed for them (no stops yet), so they don't shift when stops are added.
  * Selecting a monument calls `onStopsChange` with the selected monuments in
  * the order they appear along the route; pass those as route stops.
@@ -21,11 +22,14 @@ const NO_STOPS: LatLng[] = [];
  */
 export default function useMonumentSuggestions(
   route: Route | null,
-  waypoints: LatLng[],
-  onStopsChange: (stops: LatLng[]) => void
+  routeKeyOrWaypoints: string | LatLng[],
+  onStopsChange: (stops: RouteStop[]) => void
 ) {
   const supabase = useSupabase();
-  const key = JSON.stringify(waypoints);
+  const key =
+    typeof routeKeyOrWaypoints === 'string'
+      ? routeKeyOrWaypoints
+      : JSON.stringify(routeKeyOrWaypoints);
 
   const [found, setFound] = useState<{ key: string; items: Monument[] }>();
   const [selection, setSelection] = useState<{ key: string; ids: number[] }>();
@@ -46,7 +50,7 @@ export default function useMonumentSuggestions(
   );
 
   useEffect(() => {
-    if (!route || found?.key === key) return;
+    if (!route || !key || key === '[]' || found?.key === key) return;
 
     const ctrl = new AbortController();
     fetchMonumentsAlongRoute(supabase, route, SUGGESTION_BUFFER_M, ctrl.signal)
@@ -68,7 +72,11 @@ export default function useMonumentSuggestions(
       suggestions
         .filter((m) => ids.includes(m.id))
         .sort((a, b) => (a.routeFraction ?? 0) - (b.routeFraction ?? 0))
-        .map((m) => ({ latitude: m.latitude, longitude: m.longitude }))
+        .map((m) => ({
+          latitude: m.latitude,
+          longitude: m.longitude,
+          routeFraction: m.routeFraction,
+        }))
     );
   };
 

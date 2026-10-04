@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Region } from 'react-native-maps';
 import { useSupabase } from '@/lib/supabase';
 import useMonumentLevel from '@/hooks/useMonumentLevel';
@@ -26,7 +26,7 @@ export default function useNearbyMonuments() {
   const supabase = useSupabase();
   const [minScore] = useMonumentLevel();
   const [region, setRegion] = useState<Region>(DEFAULT_REGION);
-  const [monuments, setMonuments] = useState<Monument[]>([]);
+  const [allMonuments, setAllMonuments] = useState<Monument[]>([]);
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -35,10 +35,10 @@ export default function useNearbyMonuments() {
         supabase,
         region,
         regionRadiusM(region.latitudeDelta),
-        minScore,
+        0,
         ctrl.signal
       )
-        .then(setMonuments)
+        .then(setAllMonuments)
         .catch((e: unknown) => {
           if (ctrl.signal.aborted) return;
           console.warn('Monuments error:', e instanceof Error ? e.message : e);
@@ -49,7 +49,12 @@ export default function useNearbyMonuments() {
       clearTimeout(timer);
       ctrl.abort();
     };
-  }, [region, minScore, supabase]);
+  }, [region, supabase]);
+
+  const monuments = useMemo(
+    () => allMonuments.filter((m) => m.score >= minScore),
+    [allMonuments, minScore]
+  );
 
   return { monuments, onRegionChangeComplete: setRegion };
 }

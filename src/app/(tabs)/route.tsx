@@ -6,18 +6,17 @@ import React, {
   type ComponentProps,
 } from 'react';
 import { View } from 'react-native';
-import MapView, {
-  Marker,
-  Polyline,
-  PROVIDER_GOOGLE,
-  type LatLng,
-} from 'react-native-maps';
+import RNMapView, { Marker, Polyline, type LatLng } from 'react-native-maps';
 import * as Location from 'expo-location';
 import LocationModal from '@/components/location-modal';
 import useLocationPermission from '@/hooks/useLocationPermission';
-import { useRouteCalculation } from '@/hooks/useRouteCalculation';
+import MapView from '@/components/map-view';
+import {
+  useRouteCalculation,
+  type RouteStop,
+} from '@/hooks/useRouteCalculation';
 import RouteControlPanel from '@/components/route/route-control-panel';
-import { DEFAULT_LOOP_OPTIONS, INITIAL_REGION } from '@/constants/map';
+import { DEFAULT_LOOP_OPTIONS } from '@/constants/map';
 import { StatusBar } from 'expo-status-bar';
 import useMonumentSuggestions from '@/hooks/useMonumentSuggestions';
 import {
@@ -29,9 +28,9 @@ import CreateGroupRouteButton from '@/components/group-routes/create-group-route
 export default function RouteScreen() {
   const { granted, visibility, onAllow, onLater } = useLocationPermission();
 
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<RNMapView>(null);
   const [start, setStart] = useState<LatLng | null>(null);
-  const [monumentStops, setMonumentStops] = useState<LatLng[]>([]);
+  const [monumentStops, setMonumentStops] = useState<RouteStop[]>([]);
 
   const handleRouteCalculated = useCallback((coords: LatLng[]) => {
     mapRef.current?.fitToCoordinates(coords, {
@@ -58,7 +57,18 @@ export default function RouteScreen() {
     onRouteCalculated: handleRouteCalculated,
     stops: monumentStops,
   });
-  const monuments = useMonumentSuggestions(route, waypoints, setMonumentStops);
+
+  const routeKey = loop
+    ? `loop-${loop.bearing}`
+    : waypoints.length > 0
+      ? JSON.stringify(waypoints)
+      : '';
+
+  const monuments = useMonumentSuggestions(
+    activeRoute,
+    routeKey,
+    setMonumentStops
+  );
 
   // Fetch initial location when permission is granted
   useEffect(() => {
@@ -68,17 +78,39 @@ export default function RouteScreen() {
 
     (async () => {
       try {
-        const { coords } = await Location.getCurrentPositionAsync({});
+        // Step 1: Instantly retrieve cached location if available
+        const lastKnown = await Location.getLastKnownPositionAsync({
+          maxAge: 60000,
+        });
 
-        if (!cancelled) {
-          const userLoc = {
-            latitude: coords.latitude,
-            longitude: coords.longitude,
+        if (!cancelled && lastKnown) {
+          const cachedLoc = {
+            latitude: lastKnown.coords.latitude,
+            longitude: lastKnown.coords.longitude,
           };
 
-          setStart(userLoc);
+          setStart(cachedLoc);
           mapRef.current?.animateToRegion({
-            ...userLoc,
+            ...cachedLoc,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          });
+        }
+
+        // Step 2: Concurrently fetch fresh position with balanced accuracy for fast resolution
+        const fresh = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+
+        if (!cancelled) {
+          const freshLoc = {
+            latitude: fresh.coords.latitude,
+            longitude: fresh.coords.longitude,
+          };
+
+          setStart(freshLoc);
+          mapRef.current?.animateToRegion({
+            ...freshLoc,
             latitudeDelta: 0.05,
             longitudeDelta: 0.05,
           });
@@ -94,13 +126,14 @@ export default function RouteScreen() {
   }, [granted]);
 
   const onMapPress: ComponentProps<typeof MapView>['onPress'] = (e) => {
+    const action = (e.nativeEvent as { action?: string })?.action;
+    if (action === 'marker-press' || action === 'callout-press') return;
+    if (loop || activeRoute) return;
     addWaypoint(e.nativeEvent.coordinate);
   };
 
   return (
     <View className='flex-1'>
-      <StatusBar style='light' />
-
       <LocationModal
         visible={visibility}
         onAllow={onAllow}
@@ -109,10 +142,7 @@ export default function RouteScreen() {
 
       <MapView
         ref={mapRef}
-        style={{ flex: 1 }}
-        initialRegion={INITIAL_REGION}
-        provider={PROVIDER_GOOGLE}
-        showsUserLocation={granted}
+        permission={granted}
         onPress={onMapPress}>
         {waypoints.map((w, i) => (
           <Marker
@@ -124,21 +154,17 @@ export default function RouteScreen() {
 
         <MonumentSuggestionMarkers {...monuments} />
 
-        {route && (
-          <Polyline
-            coordinates={route.coords}
-            strokeWidth={5}
-            strokeColor='#2563eb'
-          />
-        )}
+        <Polyline
+          coordinates={route?.coords ?? []}
+          strokeWidth={route ? 5 : 0}
+          strokeColor={route ? '#2563eb' : 'transparent'}
+        />
 
-        {loop && (
-          <Polyline
-            coordinates={loop.coords}
-            strokeWidth={5}
-            strokeColor='#16a34a'
-          />
-        )}
+        <Polyline
+          coordinates={loop?.coords ?? []}
+          strokeWidth={loop ? 5 : 0}
+          strokeColor={loop ? '#16a34a' : 'transparent'}
+        />
       </MapView>
 
       <RouteControlPanel
@@ -147,10 +173,12 @@ export default function RouteScreen() {
         disabled={loading || !start}
         loopOptions={DEFAULT_LOOP_OPTIONS}
         onSelectLoop={(km) => {
+          setMonumentStops([]);
           monuments.clear();
           generateLoop(km);
         }}
         onReset={() => {
+          setMonumentStops([]);
           monuments.clear();
           resetRoute();
         }}>
