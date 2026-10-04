@@ -1,6 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { LatLng } from 'react-native-maps';
 import * as Linking from 'expo-linking';
+import { MAX_ROUTE_DAYS_AHEAD } from '@/components/group-routes/new-group-route-schema';
+import { horizonRange } from '@/utils/events';
 import type {
   CreateGroupRouteInput,
   GroupRoute,
@@ -222,16 +224,20 @@ export async function fetchGroupRouteMessages(
   return (data as GroupRouteMessageRow[]).map(toGroupRouteMessage).reverse();
 }
 
-/** Events that haven't ended yet, soonest first (for linking a route to an event). */
+/**
+ * Events going on between today and the last day a route can be planned for,
+ * soonest first (for linking a route to an event).
+ */
 export async function fetchUpcomingEvents(
   supabase: SupabaseClient,
   limit = UPCOMING_EVENTS_LIMIT
 ): Promise<GroupRouteEvent[]> {
-  const today = new Date().toISOString().slice(0, 10);
+  const { from, until } = horizonRange({ days: MAX_ROUTE_DAYS_AHEAD });
   const { data, error } = await supabase
     .from('events')
     .select(EVENT_COLUMNS)
-    .gte('end_date', today)
+    .gte('end_date', from)
+    .lte('start_date', until)
     .order('start_date', { ascending: true })
     .limit(limit);
   if (error) throw new Error(error.message);

@@ -11,6 +11,9 @@ import { StatusBar } from 'expo-status-bar';
 import useNearbyMonuments from '@/hooks/useNearbyMonuments';
 import { MonumentMarkers } from '@/components/monument-marker';
 import MonumentLevelPicker from '@/components/monument-level-picker';
+import EventMarkers from '@/components/event-marker';
+import MapLayerToggles, { MapLayerGate } from '@/components/map-layer-toggles';
+import { MAP_EVENTS_MONTHS_AHEAD } from '@/constants/events';
 
 export default function Map() {
   const { granted, visibility, onAllow, onLater } = useLocationPermission();
@@ -40,6 +43,7 @@ export default function Map() {
       />
 
       <MonumentLevelPicker className='z-10 mx-10 mt-10' />
+      <MapLayerToggles className='absolute top-44 left-4 z-10' />
 
       <Pressable
         onPress={goToMe}
@@ -56,7 +60,10 @@ export default function Map() {
         permission={granted}
         mapPadding={{ top: 140, right: 10, bottom: 20, left: 10 }}
         onRegionChangeComplete={nearby.onRegionChangeComplete}>
-        <MonumentMarkers monuments={nearby.monuments} />
+        <MapLayerGate layer='monuments'>
+          <MonumentMarkers monuments={nearby.monuments} />
+        </MapLayerGate>
+        <EventMarkers horizon={{ months: MAP_EVENTS_MONTHS_AHEAD }} />
       </MapView>
     </SafeView>
   );

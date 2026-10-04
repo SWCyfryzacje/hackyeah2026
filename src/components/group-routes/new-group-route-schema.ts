@@ -16,6 +16,9 @@ export const DAY_OPTIONS = [
   { offset: 2, label: 'Pojutrze' },
 ] as const;
 
+/** How many days ahead a route can be planned (also the event horizon for routes). */
+export const MAX_ROUTE_DAYS_AHEAD = DAY_OPTIONS[DAY_OPTIONS.length - 1].offset;
+
 export const NewGroupRouteSchema = z
   .object({
     title: z
@@ -33,7 +36,7 @@ export const NewGroupRouteSchema = z
         GROUP_ROUTE_DESCRIPTION_MAX_LENGTH,
         `Maksymalnie ${GROUP_ROUTE_DESCRIPTION_MAX_LENGTH} znaków`
       ),
-    dayOffset: z.number().int().min(0).max(2),
+    dayOffset: z.number().int().min(0).max(MAX_ROUTE_DAYS_AHEAD),
     startTime: z.string().regex(TIME_RE, TIME_MESSAGE),
     endTime: z
       .string()

@@ -24,6 +24,9 @@ import {
   MonumentSuggestionMarkers,
 } from '@/components/monument-suggestions';
 import CreateGroupRouteButton from '@/components/group-routes/create-group-route-button';
+import EventMarkers from '@/components/event-marker';
+import MapLayerToggles, { MapLayerGate } from '@/components/map-layer-toggles';
+import { MAX_ROUTE_DAYS_AHEAD } from '@/components/group-routes/new-group-route-schema';
 
 export default function RouteScreen() {
   const { granted, visibility, onAllow, onLater } = useLocationPermission();
@@ -152,7 +155,10 @@ export default function RouteScreen() {
           />
         ))}
 
-        <MonumentSuggestionMarkers {...monuments} />
+        <MapLayerGate layer='monuments'>
+          <MonumentSuggestionMarkers {...monuments} />
+        </MapLayerGate>
+        <EventMarkers horizon={{ days: MAX_ROUTE_DAYS_AHEAD }} />
 
         <Polyline
           coordinates={route?.coords ?? []}
@@ -166,6 +172,8 @@ export default function RouteScreen() {
           strokeColor={loop ? '#16a34a' : 'transparent'}
         />
       </MapView>
+
+      <MapLayerToggles className='absolute top-14 left-4' />
 
       <RouteControlPanel
         statusText={statusText}
