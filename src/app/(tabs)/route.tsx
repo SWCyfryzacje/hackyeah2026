@@ -238,7 +238,7 @@ export default function RouteScreen() {
 
       <Pressable
         onPress={goToMe}
-        className='absolute top-16 right-4 z-10 size-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white shadow-md active:scale-95'>
+        className='absolute top-21 right-4 z-10 size-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white shadow-md active:scale-95'>
         <Ionicons
           name='locate'
           size={22}
