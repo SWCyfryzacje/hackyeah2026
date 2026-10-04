@@ -1,11 +1,11 @@
 import { useRef } from 'react';
-import MapView, {
+import RNMapView, {
   Marker,
   Polyline,
-  PROVIDER_GOOGLE,
   type LatLng,
   type Region,
 } from 'react-native-maps';
+import MapView from '@/components/map-view';
 import type { GroupRoute } from '@/types/group-routes';
 import LiveLocationMarker from './live-location-marker';
 
@@ -16,6 +16,7 @@ type Props = {
 };
 
 const EDGE_PADDING = { top: 40, right: 40, bottom: 40, left: 40 };
+const NO_PADDING = { top: 0, right: 0, bottom: 0, left: 0 };
 
 /** Region covering all points, so the map starts roughly framed before fitting. */
 function regionFor(points: LatLng[]): Region {
@@ -35,14 +36,14 @@ function regionFor(points: LatLng[]): Region {
 
 /** Route geometry with start/stop markers and the creator's live marker. */
 export default function GroupRouteMap({ route, showLive }: Props) {
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<RNMapView>(null);
   const points = route.geometry.length > 0 ? route.geometry : [route.start];
 
   return (
     <MapView
       ref={mapRef}
       style={{ flex: 1 }}
-      provider={PROVIDER_GOOGLE}
+      mapPadding={NO_PADDING}
       initialRegion={regionFor(points)}
       onMapReady={() =>
         mapRef.current?.fitToCoordinates(points, {

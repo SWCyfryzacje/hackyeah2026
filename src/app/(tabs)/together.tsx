@@ -7,7 +7,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import SafeView from '@/components/safe-view';
@@ -34,8 +33,6 @@ export default function TogetherScreen() {
 
   return (
     <SafeView className='flex-1 bg-neutral-50'>
-      <StatusBar style='dark' />
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps='handled'
