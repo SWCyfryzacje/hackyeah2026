@@ -13,7 +13,7 @@ export default function MonumentLevelPicker({ className = '' }: Props) {
     <View
       className={`flex-col gap-2 rounded-3xl border border-slate-200/80 bg-white/95 p-3.5 shadow-md ${className}`}>
       <Text className='text-center text-xs font-bold uppercase tracking-wider text-slate-700'>
-        Monument Importance
+        Ważność zabytków
       </Text>
       <View className='w-full flex-row rounded-2xl bg-slate-100 p-1'>
         {MONUMENT_LEVELS.map((level) => {

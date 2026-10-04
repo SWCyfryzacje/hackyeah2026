@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Alert, Text, View } from 'react-native';
+import type { LatLng } from 'react-native-maps';
 import { useSupabase } from '@/lib/supabase';
 import {
   cancelGroupRoute,
@@ -15,8 +16,16 @@ import {
 } from '@/types/group-routes';
 import type { UseLocationSharingResult } from '@/hooks/group-routes/useLocationSharing';
 import { formatTimeWithSeconds } from '@/utils/group-route-format';
+import { openGoogleMapsNavigation } from '@/utils/google-maps';
 import ActionButton from './action-button';
 import LocationConsentDialog from './location-consent-dialog';
+
+function isSameCoord(a: LatLng, b: LatLng): boolean {
+  return (
+    Math.abs(a.latitude - b.latitude) < 0.00001 &&
+    Math.abs(a.longitude - b.longitude) < 0.00001
+  );
+}
 
 type Action = 'join' | 'start' | 'cancel' | 'finish' | 'leave';
 
@@ -82,6 +91,50 @@ export default function GroupRouteActions({
     : sharing.lastSentAt
       ? `Udostępniasz lokalizację · ostatnio ${formatTimeWithSeconds(sharing.lastSentAt)}`
       : 'Udostępniasz lokalizację · czekam na pierwszą pozycję…';
+
+  const handleOpenGoogleMaps = async () => {
+    const origin: LatLng = route.start || route.geometry?.[0];
+    if (!origin) {
+      Alert.alert('Błąd', 'Brak punktu startowego trasy.');
+      return;
+    }
+
+    const geom = route.geometry || [];
+    const destination: LatLng =
+      geom.length > 0 ? geom[geom.length - 1] : origin;
+
+    let intermediateWaypoints: LatLng[] = [];
+    const stops = (route.stops || []).map((s) => ({
+      latitude: s.latitude,
+      longitude: s.longitude,
+    }));
+
+    const isLoop = geom.length > 1 && isSameCoord(origin, destination);
+
+    if (isLoop) {
+      const rawWaypoints: LatLng[] = [...stops];
+      if (rawWaypoints.length === 0 && geom.length >= 4) {
+        const q1 = geom[Math.floor(geom.length * 0.25)];
+        const q2 = geom[Math.floor(geom.length * 0.5)];
+        const q3 = geom[Math.floor(geom.length * 0.75)];
+        rawWaypoints.push(q1, q2, q3);
+      }
+      intermediateWaypoints = rawWaypoints;
+    } else {
+      intermediateWaypoints = [...stops];
+    }
+
+    const cleanWaypoints = intermediateWaypoints.filter(
+      (wp) => !isSameCoord(wp, origin) && !isSameCoord(wp, destination)
+    );
+
+    await openGoogleMapsNavigation({
+      origin,
+      destination,
+      waypoints: cleanWaypoints,
+      profile: 'walking',
+    });
+  };
 
   return (
     <View className='gap-2.5'>
@@ -160,6 +213,15 @@ export default function GroupRouteActions({
             }
           />
         </>
+      )}
+
+      {isMember && (
+        <ActionButton
+          label='Otwórz w Mapach Google'
+          icon='navigate-outline'
+          variant='success'
+          onPress={handleOpenGoogleMaps}
+        />
       )}
 
       {myRole === 'participant' && isOpen && (

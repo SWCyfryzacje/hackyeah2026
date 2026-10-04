@@ -30,7 +30,7 @@ export default function SettingsLogoutButton({
               color='#e11d48'
             />
             <Text className='text-sm font-bold text-rose-600'>
-              Log Out of Account
+              Wyloguj się z konta
             </Text>
           </>
         )}

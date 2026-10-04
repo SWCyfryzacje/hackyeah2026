@@ -12,8 +12,8 @@ type RouteLoadingOverlayProps = {
 export default function RouteLoadingOverlay({
   loading,
   hasRoute,
-  loadingMessage = 'Generating your route...',
-  successMessage = 'Route generated!',
+  loadingMessage = 'Generowanie Twojej trasy...',
+  successMessage = 'Trasa wygenerowana!',
 }: RouteLoadingOverlayProps) {
   const [fadeAnim] = useState(() => new Animated.Value(0));
   const [scaleAnim] = useState(() => new Animated.Value(0.85));
@@ -128,7 +128,7 @@ export default function RouteLoadingOverlay({
               {successMessage}
             </Text>
             <Text className='mt-1 text-center text-xs font-medium text-green-400'>
-              Ready to explore!
+              Gotowy do odkrywania!
             </Text>
           </Animated.View>
         ) : (
@@ -142,7 +142,7 @@ export default function RouteLoadingOverlay({
               {loadingMessage}
             </Text>
             <Text className='mt-1 text-center text-xs font-medium text-neutral-400'>
-              Finding optimal route & monuments...
+              Wyszukiwanie optymalnej trasy i zabytków...
             </Text>
           </View>
         )}

@@ -25,7 +25,7 @@ export default function Settings() {
   const { user, isLoaded } = useUser();
 
   if (!isLoaded) {
-    return <LoadingScreen message='Loading settings...' />;
+    return <LoadingScreen message='Wczytywanie ustawień...' />;
   }
 
   // Key the form component by user ID and updatedAt timestamp so initial state stays in sync
@@ -187,7 +187,7 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
 
       await user.update(payload);
 
-      setSuccessBanner('Personal data updated successfully in Clerk!');
+      setSuccessBanner('Dane profilu zostały pomyślnie zaktualizowane!');
       setTimeout(() => setSuccessBanner(null), 4000);
     } catch (err: unknown) {
       console.error('Failed to update Clerk profile:', err);
@@ -199,7 +199,7 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
         clerkErr.errors?.[0]?.longMessage ||
         clerkErr.errors?.[0]?.message ||
         clerkErr.message ||
-        'Failed to update profile. Please try again.';
+        'Nie udało się zaktualizować profilu. Spróbuj ponownie.';
       setErrorMessage(msg);
     } finally {
       setIsSaving(false);
@@ -208,12 +208,12 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
 
   const handleLogoutPrompt = () => {
     Alert.alert(
-      'Log Out',
-      'Are you sure you want to log out of your account?',
+      'Wyloguj się',
+      'Czy na pewno chcesz się wylogować ze swojego konta?',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Anuluj', style: 'cancel' },
         {
-          text: 'Log Out',
+          text: 'Wyloguj',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -222,7 +222,7 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
             } catch (error) {
               console.error('Failed to log out:', error);
               setIsLoggingOut(false);
-              Alert.alert('Error', 'Failed to log out. Please try again.');
+              Alert.alert('Błąd', 'Nie udało się wylogować. Spróbuj ponownie.');
             }
           },
         },
@@ -231,12 +231,12 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
   };
 
   const primaryEmail =
-    user?.primaryEmailAddress?.emailAddress || 'No email attached';
+    user?.primaryEmailAddress?.emailAddress || 'Brak przypisanego adresu email';
   const displayName =
     [firstName, lastName].filter(Boolean).join(' ') ||
     user?.fullName ||
     user?.firstName ||
-    'Runner Profile';
+    'Profil biegacza';
 
   return (
     <SafeView
