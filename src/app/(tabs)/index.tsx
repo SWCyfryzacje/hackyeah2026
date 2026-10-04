@@ -7,7 +7,6 @@ import {
   RefreshControl,
   Image,
 } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { useUser } from '@clerk/expo';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
