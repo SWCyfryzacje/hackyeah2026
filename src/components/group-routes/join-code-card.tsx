@@ -15,24 +15,24 @@ export default function JoinCodeCard({ code, title }: Props) {
     }).catch(() => {});
 
   return (
-    <View className='flex-row items-center justify-between rounded-xl border border-neutral-200 bg-white p-3'>
+    <View className='flex-row items-center justify-between rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xs'>
       <View>
-        <Text className='text-xs text-neutral-500'>Kod dołączenia</Text>
+        <Text className='text-xs font-bold uppercase tracking-wider text-slate-500'>Kod dołączenia</Text>
         <Text
-          className='text-xl font-bold tracking-widest text-neutral-900'
+          className='text-xl font-extrabold tracking-widest text-slate-900'
           selectable>
           {code}
         </Text>
       </View>
       <Pressable
         onPress={onShare}
-        className='flex-row items-center gap-1.5 rounded-xl bg-neutral-100 px-4 py-2.5 active:bg-neutral-200'>
+        className='flex-row items-center gap-1.5 rounded-xl bg-indigo-50 px-4 py-2.5 active:bg-indigo-100'>
         <Ionicons
           name='share-outline'
           size={16}
-          color='#2563eb'
+          color='#4f46e5'
         />
-        <Text className='text-sm font-semibold text-blue-600'>Udostępnij</Text>
+        <Text className='text-sm font-bold text-indigo-600'>Udostępnij</Text>
       </Pressable>
     </View>
   );

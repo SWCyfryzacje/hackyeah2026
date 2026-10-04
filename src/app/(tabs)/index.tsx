@@ -46,9 +46,9 @@ function MonumentCard({
   return (
     <Pressable
       onPress={onPress}
-      className='w-64 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm active:opacity-90'>
+      className='w-64 overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm active:scale-[0.99]'>
       {hasImage ? (
-        <View className='relative h-32 w-full overflow-hidden bg-neutral-100'>
+        <View className='relative h-32 w-full overflow-hidden bg-slate-100'>
           <Image
             source={{ uri: monument.imageUrl! }}
             style={{ width: '100%', height: '100%' }}
@@ -56,7 +56,7 @@ function MonumentCard({
             transition={200}
             onError={() => setImageError(true)}
           />
-          <View className='absolute top-2.5 right-2.5 rounded-full bg-black/60 px-2 py-0.5 backdrop-blur-sm'>
+          <View className='absolute top-2.5 right-2.5 rounded-full bg-slate-900/70 px-2.5 py-0.5 backdrop-blur-sm'>
             <Text className='text-[10px] font-bold text-amber-300'>
               {monument.score >= 10
                 ? '★ Top'
@@ -66,9 +66,9 @@ function MonumentCard({
             </Text>
           </View>
           {monument.kind && (
-            <View className='absolute bottom-2.5 left-2.5 rounded-md bg-white/90 px-2 py-0.5'>
+            <View className='absolute bottom-2.5 left-2.5 rounded-lg bg-white/95 px-2 py-0.5 shadow-xs'>
               <Text
-                className='text-[10px] font-bold text-neutral-800 capitalize'
+                className='text-[10px] font-bold text-slate-800 capitalize'
                 numberOfLines={1}>
                 {monument.kind}
               </Text>
@@ -76,19 +76,19 @@ function MonumentCard({
           )}
         </View>
       ) : (
-        <View className='relative h-28 w-full items-center justify-center bg-gradient-to-br from-amber-500 to-amber-700 p-4'>
+        <View className='relative h-28 w-full items-center justify-center bg-gradient-to-br from-amber-500 to-amber-600 p-4'>
           <MaterialCommunityIcons
             name='pillar'
             size={36}
             color='#ffffff'
           />
           <View className='absolute top-2.5 right-2.5 rounded-full bg-black/30 px-2 py-0.5'>
-            <Text className='text-[10px] font-bold text-amber-200'>
+            <Text className='text-[10px] font-bold text-amber-100'>
               {monument.score >= 10 ? '★ Top' : '★ Zabytek'}
             </Text>
           </View>
           {monument.kind && (
-            <View className='absolute bottom-2.5 left-2.5 rounded-md bg-black/20 px-2 py-0.5'>
+            <View className='absolute bottom-2.5 left-2.5 rounded-lg bg-black/20 px-2 py-0.5'>
               <Text
                 className='text-[10px] font-medium text-white capitalize'
                 numberOfLines={1}>
@@ -101,7 +101,7 @@ function MonumentCard({
 
       <View className='p-3.5'>
         <Text
-          className='text-sm font-bold text-neutral-900'
+          className='text-sm font-bold text-slate-900'
           numberOfLines={1}>
           {monument.name}
         </Text>
@@ -112,27 +112,27 @@ function MonumentCard({
             size={13}
             color='#64748b'
           />
-          <Text className='text-xs font-medium text-neutral-600'>
+          <Text className='text-xs font-medium text-slate-600'>
             {formatDistance(monument.distanceM)} od Ciebie
           </Text>
         </View>
 
         {monument.description ? (
           <Text
-            className='mt-1.5 text-xs text-neutral-500'
+            className='mt-1.5 text-xs text-slate-500'
             numberOfLines={2}>
             {monument.description}
           </Text>
         ) : null}
 
-        <View className='mt-3 flex-row items-center justify-between border-t border-neutral-100 pt-2'>
-          <Text className='text-[11px] font-semibold text-blue-600'>
+        <View className='mt-3 flex-row items-center justify-between border-t border-slate-100 pt-2'>
+          <Text className='text-[11px] font-bold text-indigo-600'>
             Zaplanuj trasę
           </Text>
           <Ionicons
             name='arrow-forward'
             size={12}
-            color='#2563eb'
+            color='#4f46e5'
           />
         </View>
       </View>
@@ -338,7 +338,7 @@ export default function Home() {
 
   return (
     <SafeView
-      className='flex-1 bg-neutral-50'
+      className='flex-1 bg-slate-50'
       edges={TAB_SCREEN_EDGES}>
       <LocationModal
         visible={visibility}
@@ -353,16 +353,17 @@ export default function Home() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
+            tintColor='#4f46e5'
           />
         }>
         {/* Top Header */}
         <View className='flex-row items-center justify-between px-5 pb-3'>
           <View className='flex-1 flex-row items-center gap-2 pr-3'>
-            <Text className='text-lg font-medium text-neutral-500'>
+            <Text className='text-lg font-medium text-slate-500'>
               {greeting},
             </Text>
             <Text
-              className='text-xl font-bold tracking-tight text-neutral-900'
+              className='text-xl font-extrabold tracking-tight text-slate-900'
               numberOfLines={1}>
               {displayName}
             </Text>
@@ -371,7 +372,7 @@ export default function Home() {
 
           <Pressable
             onPress={() => router.push('/(tabs)/settings')}
-            className='h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-neutral-200 bg-white shadow-sm active:scale-95'>
+            className='h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white shadow-xs active:scale-95'>
             {user?.imageUrl ? (
               <Image
                 source={{ uri: user.imageUrl }}
@@ -382,7 +383,7 @@ export default function Home() {
               <Ionicons
                 name='person'
                 size={20}
-                color='#2563eb'
+                color='#4f46e5'
               />
             )}
           </Pressable>
@@ -392,15 +393,15 @@ export default function Home() {
         <View className='px-5 pb-4'>
           <Pressable
             onPress={() => (granted ? fetchAddress() : showModal())}
-            className='flex-row items-center justify-between rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 shadow-sm'>
-            <View className='flex-1 flex-row items-center gap-2'>
+            className='flex-row items-center justify-between rounded-2xl border border-slate-200/80 bg-white px-4 py-3 shadow-xs active:scale-[0.99]'>
+            <View className='flex-1 flex-row items-center gap-2.5'>
               <Ionicons
                 name={granted ? 'location' : 'location-outline'}
                 size={18}
-                color={granted ? '#16a34a' : '#d97706'}
+                color={granted ? '#10b981' : '#f59e0b'}
               />
               <Text
-                className='flex-1 text-xs font-medium text-neutral-700'
+                className='flex-1 text-xs font-semibold text-slate-700'
                 numberOfLines={1}>
                 {granted
                   ? locationLoading
@@ -419,23 +420,23 @@ export default function Home() {
 
         {/* Hero Quick Start Action Banner */}
         <View className='mb-6 px-5'>
-          <View className='overflow-hidden rounded-3xl bg-blue-600 p-6 shadow-md'>
+          <View className='overflow-hidden rounded-3xl bg-indigo-600 p-6 shadow-md'>
             <View className='flex-row items-start justify-between'>
               <View className='flex-1 pr-4'>
-                <View className='mb-2.5 flex-row items-center gap-1.5 self-start rounded-full bg-blue-500/40 px-2.5 py-0.5'>
+                <View className='mb-2.5 flex-row items-center gap-1.5 self-start rounded-full bg-indigo-500/50 px-3 py-1'>
                   <MaterialCommunityIcons
                     name='routes'
                     size={14}
                     color='#ffffff'
                   />
-                  <Text className='text-xs font-semibold tracking-wider text-white uppercase'>
+                  <Text className='text-xs font-bold tracking-wider text-white uppercase'>
                     Smart Routing
                   </Text>
                 </View>
-                <Text className='text-2xl leading-tight font-black text-white'>
+                <Text className='text-2xl leading-tight font-extrabold text-white'>
                   Ready for your next journey?
                 </Text>
-                <Text className='mt-1 text-sm text-blue-100'>
+                <Text className='mt-1.5 text-sm text-indigo-100 leading-5'>
                   Generate intelligent closed-loop workouts, discover heritage
                   spots, or join community runs.
                 </Text>
@@ -445,20 +446,20 @@ export default function Home() {
             <View className='mt-5 flex-row gap-2.5'>
               <Pressable
                 onPress={() => router.push('/(tabs)/route')}
-                className='flex-1 flex-row items-center justify-center gap-1.5 rounded-xl bg-white px-3 py-3 shadow-sm active:bg-blue-50'>
+                className='flex-1 flex-row items-center justify-center gap-1.5 rounded-xl bg-white px-3 py-3 shadow-xs active:bg-indigo-50'>
                 <Ionicons
                   name='navigate'
                   size={16}
-                  color='#2563eb'
+                  color='#4f46e5'
                 />
-                <Text className='text-xs font-bold text-blue-600 sm:text-sm'>
+                <Text className='text-xs font-bold text-indigo-600 sm:text-sm'>
                   Plan Loop
                 </Text>
               </Pressable>
 
               <Pressable
                 onPress={() => router.push('/(tabs)/together')}
-                className='flex-1 flex-row items-center justify-center gap-1.5 rounded-xl border border-blue-500/60 bg-blue-700 px-3 py-3 active:bg-blue-800'>
+                className='flex-1 flex-row items-center justify-center gap-1.5 rounded-xl border border-indigo-500/60 bg-indigo-700 px-3 py-3 active:bg-indigo-800'>
                 <Ionicons
                   name='people'
                   size={16}
@@ -471,7 +472,7 @@ export default function Home() {
 
               <Pressable
                 onPress={() => router.push('/(tabs)/map')}
-                className='flex-1 flex-row items-center justify-center gap-1.5 rounded-xl border border-blue-500/60 bg-blue-700 px-3 py-3 active:bg-blue-800'>
+                className='flex-1 flex-row items-center justify-center gap-1.5 rounded-xl border border-indigo-500/60 bg-indigo-700 px-3 py-3 active:bg-indigo-800'>
                 <Ionicons
                   name='map'
                   size={16}
@@ -490,36 +491,36 @@ export default function Home() {
           <View className='mb-3 flex-row items-center justify-between'>
             <View className='flex-1 pr-2'>
               <View className='flex-row items-center gap-2'>
-                <Text className='text-lg font-bold text-neutral-900'>
+                <Text className='text-lg font-bold text-slate-900'>
                   Wspólne trasy (Razem)
                 </Text>
                 {featuredRoute?.status === 'live' && (
-                  <View className='flex-row items-center gap-1 rounded-full bg-green-100 px-2 py-0.5'>
-                    <View className='h-2 w-2 rounded-full bg-green-600' />
-                    <Text className='text-[10px] font-bold text-green-700 uppercase'>
+                  <View className='flex-row items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5'>
+                    <View className='h-2 w-2 rounded-full bg-emerald-600' />
+                    <Text className='text-[10px] font-bold text-emerald-700 uppercase'>
                       Na żywo
                     </Text>
                   </View>
                 )}
               </View>
-              <Text className='text-xs text-neutral-500'>
+              <Text className='text-xs text-slate-500'>
                 Dołącz do tras biegowych i spacerów ze społecznością
               </Text>
             </View>
             <Pressable onPress={() => router.push('/(tabs)/together')}>
-              <Text className='text-xs font-semibold text-blue-600'>
+              <Text className='text-xs font-bold text-indigo-600'>
                 Wszystkie
               </Text>
             </Pressable>
           </View>
 
           {groupRoutesLoading && groupRoutes.length === 0 ? (
-            <View className='items-center justify-center rounded-2xl border border-neutral-200 bg-white p-6'>
+            <View className='items-center justify-center rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs'>
               <ActivityIndicator
                 size='small'
-                color='#2563eb'
+                color='#4f46e5'
               />
-              <Text className='mt-2 text-xs text-neutral-500'>
+              <Text className='mt-2 text-xs text-slate-500'>
                 Ładowanie tras grupowych...
               </Text>
             </View>
@@ -531,14 +532,14 @@ export default function Home() {
                   params: { id: featuredRoute.id },
                 })
               }
-              className={`rounded-2xl border p-4 shadow-sm active:opacity-90 ${
+              className={`rounded-3xl border p-4 shadow-xs active:scale-[0.99] ${
                 featuredRoute.status === 'live'
-                  ? 'border-green-300 bg-green-50'
-                  : 'border-neutral-200 bg-white'
+                  ? 'border-emerald-300 bg-emerald-50/70'
+                  : 'border-slate-200/80 bg-white'
               }`}>
               <View className='flex-row items-start justify-between gap-3'>
                 <Text
-                  className='flex-1 text-base font-bold text-neutral-900'
+                  className='flex-1 text-base font-bold text-slate-900'
                   numberOfLines={1}>
                   {featuredRoute.title}
                 </Text>
@@ -553,7 +554,7 @@ export default function Home() {
                     color='#64748b'
                   />
                   <Text
-                    className='text-xs text-neutral-600'
+                    className='text-xs font-medium text-slate-600'
                     numberOfLines={1}>
                     {formatTimeRange(
                       featuredRoute.plannedStart,
@@ -569,7 +570,7 @@ export default function Home() {
                     color='#64748b'
                   />
                   <Text
-                    className='text-xs text-neutral-600'
+                    className='text-xs font-medium text-slate-600'
                     numberOfLines={1}>
                     {`${featuredRoute.creatorNick} · ${formatParticipants(featuredRoute.participantCount)}`}
                   </Text>
@@ -583,7 +584,7 @@ export default function Home() {
                       color='#64748b'
                     />
                     <Text
-                      className='text-xs text-neutral-600'
+                      className='text-xs font-medium text-slate-600'
                       numberOfLines={1}>
                       {formatRouteSize(
                         featuredRoute.distanceM,
@@ -594,34 +595,34 @@ export default function Home() {
                 )}
               </View>
 
-              <View className='mt-3 flex-row items-center justify-between border-t border-neutral-100 pt-2.5'>
-                <Text className='text-xs font-semibold text-blue-600'>
+              <View className='mt-3 flex-row items-center justify-between border-t border-slate-100 pt-2.5'>
+                <Text className='text-xs font-bold text-indigo-600'>
                   Zobacz trasę i dołącz
                 </Text>
                 <Ionicons
                   name='arrow-forward'
                   size={14}
-                  color='#2563eb'
+                  color='#4f46e5'
                 />
               </View>
             </Pressable>
           ) : (
             <Pressable
               onPress={() => router.push('/(tabs)/together')}
-              className='flex-row items-center justify-between rounded-2xl border border-dashed border-neutral-300 bg-white p-4 active:bg-neutral-50'>
+              className='flex-row items-center justify-between rounded-3xl border border-dashed border-slate-300 bg-white p-4 active:bg-slate-50'>
               <View className='flex-1 flex-row items-center gap-3'>
-                <View className='h-10 w-10 items-center justify-center rounded-xl bg-blue-50'>
+                <View className='h-10 w-10 items-center justify-center rounded-xl bg-indigo-50'>
                   <Ionicons
                     name='people-outline'
                     size={22}
-                    color='#2563eb'
+                    color='#4f46e5'
                   />
                 </View>
                 <View className='flex-1'>
-                  <Text className='text-sm font-bold text-neutral-800'>
+                  <Text className='text-sm font-bold text-slate-800'>
                     Stwórz pierwszą trasę wspólną
                   </Text>
-                  <Text className='text-xs text-neutral-500'>
+                  <Text className='text-xs text-slate-500'>
                     Zaproś znajomych lub zaplanuj otwarte wydarzenie
                   </Text>
                 </View>
@@ -635,31 +636,31 @@ export default function Home() {
           )}
         </View>
 
-        {/* Nearby Cultural Heritage Discoveries Section (Replaces quick loop presets) */}
+        {/* Nearby Cultural Heritage Discoveries Section */}
         <View className='mb-6'>
           <View className='mb-3 flex-row items-center justify-between px-5'>
             <View className='flex-1 pr-2'>
-              <Text className='text-lg font-bold text-neutral-900'>
+              <Text className='text-lg font-bold text-slate-900'>
                 Odkryj zabytki w okolicy
               </Text>
-              <Text className='text-xs text-neutral-500'>
+              <Text className='text-xs text-slate-500'>
                 Historyczne miejsca i obiekty dziedzictwa na Twoim szlaku
               </Text>
             </View>
             <Pressable onPress={() => router.push('/(tabs)/map')}>
-              <Text className='text-xs font-semibold text-blue-600'>
+              <Text className='text-xs font-bold text-indigo-600'>
                 Zobacz mapę
               </Text>
             </Pressable>
           </View>
 
           {monumentsLoading && nearbyMonuments.length === 0 ? (
-            <View className='mx-5 items-center justify-center rounded-2xl border border-neutral-200 bg-white p-6'>
+            <View className='mx-5 items-center justify-center rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs'>
               <ActivityIndicator
                 size='small'
-                color='#2563eb'
+                color='#4f46e5'
               />
-              <Text className='mt-2 text-xs text-neutral-500'>
+              <Text className='mt-2 text-xs text-slate-500'>
                 Wyszukiwanie zabytków w pobliżu...
               </Text>
             </View>
@@ -677,7 +678,7 @@ export default function Home() {
               ))}
             </ScrollView>
           ) : (
-            <View className='mx-5 rounded-2xl border border-neutral-200 bg-white p-4'>
+            <View className='mx-5 rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xs'>
               <View className='flex-row items-center gap-3'>
                 <View className='h-10 w-10 items-center justify-center rounded-xl bg-amber-50'>
                   <MaterialCommunityIcons
@@ -687,24 +688,24 @@ export default function Home() {
                   />
                 </View>
                 <View className='flex-1'>
-                  <Text className='text-sm font-bold text-neutral-900'>
+                  <Text className='text-sm font-bold text-slate-900'>
                     Odkryj zabytki w Krakowie
                   </Text>
-                  <Text className='text-xs text-neutral-500'>
+                  <Text className='text-xs text-slate-500'>
                     Przeglądaj setki historycznych miejsc na interaktywnej mapie
                   </Text>
                 </View>
               </View>
               <Pressable
                 onPress={() => router.push('/(tabs)/map')}
-                className='mt-3 flex-row items-center justify-center gap-1.5 rounded-xl bg-neutral-100 py-2 active:bg-neutral-200'>
-                <Text className='text-xs font-semibold text-neutral-800'>
+                className='mt-3 flex-row items-center justify-center gap-1.5 rounded-xl bg-slate-100 py-2.5 active:bg-slate-200'>
+                <Text className='text-xs font-semibold text-slate-800'>
                   Otwórz mapę zabytków
                 </Text>
                 <Ionicons
                   name='arrow-forward'
                   size={12}
-                  color='#262626'
+                  color='#0f172a'
                 />
               </Pressable>
             </View>
@@ -713,29 +714,29 @@ export default function Home() {
 
         {/* Daily Motivation & Discovery Challenge */}
         <View className='mb-6 px-5'>
-          <View className='rounded-2xl border border-blue-200/80 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 shadow-sm'>
+          <View className='rounded-3xl border border-indigo-200/80 bg-gradient-to-r from-indigo-50/80 to-indigo-100/40 p-5 shadow-xs'>
             <View className='flex-row items-start justify-between'>
               <View className='flex-1 pr-3'>
                 <View className='flex-row items-center gap-1.5'>
                   <Ionicons
                     name='trophy'
                     size={16}
-                    color='#2563eb'
+                    color='#4f46e5'
                   />
-                  <Text className='text-xs font-bold text-blue-700 uppercase tracking-wider'>
+                  <Text className='text-xs font-bold text-indigo-700 uppercase tracking-wider'>
                     Wyzwanie Dnia
                   </Text>
                 </View>
-                <Text className='mt-1 text-base font-bold text-neutral-900'>
+                <Text className='mt-1 text-base font-bold text-slate-900'>
                   Pętla Odkrywcy Dziedzictwa
                 </Text>
-                <Text className='mt-1 text-xs text-neutral-600'>
+                <Text className='mt-1 text-xs text-slate-600 leading-4'>
                   Zrób dziś trening w obwodzie zamkniętym, mijając przynajmniej
                   jeden lokalny pomnik lub zabytek.
                 </Text>
               </View>
 
-              <View className='h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 shadow-sm'>
+              <View className='h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 shadow-xs'>
                 <MaterialCommunityIcons
                   name='run-fast'
                   size={26}
@@ -745,35 +746,35 @@ export default function Home() {
             </View>
 
             <View className='mt-3.5 flex-row flex-wrap gap-2'>
-              <View className='flex-row items-center gap-1 rounded-lg bg-white/80 px-2.5 py-1'>
+              <View className='flex-row items-center gap-1 rounded-lg bg-white/90 px-2.5 py-1 shadow-xs'>
                 <Ionicons
                   name='repeat-outline'
                   size={13}
-                  color='#2563eb'
+                  color='#4f46e5'
                 />
-                <Text className='text-xs font-medium text-neutral-700'>
+                <Text className='text-xs font-medium text-slate-700'>
                   Trasa w pętli
                 </Text>
               </View>
 
-              <View className='flex-row items-center gap-1 rounded-lg bg-white/80 px-2.5 py-1'>
+              <View className='flex-row items-center gap-1 rounded-lg bg-white/90 px-2.5 py-1 shadow-xs'>
                 <MaterialCommunityIcons
                   name='pillar'
                   size={13}
                   color='#d97706'
                 />
-                <Text className='text-xs font-medium text-neutral-700'>
+                <Text className='text-xs font-medium text-slate-700'>
                   Przystanki kulturowe
                 </Text>
               </View>
 
-              <View className='flex-row items-center gap-1 rounded-lg bg-white/80 px-2.5 py-1'>
+              <View className='flex-row items-center gap-1 rounded-lg bg-white/90 px-2.5 py-1 shadow-xs'>
                 <Ionicons
                   name='trail-sign-outline'
                   size={13}
-                  color='#059669'
+                  color='#10b981'
                 />
-                <Text className='text-xs font-medium text-neutral-700'>
+                <Text className='text-xs font-medium text-slate-700'>
                   Dowolny dystans
                 </Text>
               </View>
@@ -781,7 +782,7 @@ export default function Home() {
 
             <Pressable
               onPress={() => router.push('/(tabs)/route')}
-              className='mt-3.5 flex-row items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 active:bg-blue-700'>
+              className='mt-3.5 flex-row items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 active:bg-indigo-700 shadow-xs'>
               <Text className='text-xs font-bold text-white'>
                 Zaplanuj pętlę ze stopami
               </Text>
@@ -796,7 +797,7 @@ export default function Home() {
 
         {/* Quick Features & Tools Grid */}
         <View className='mb-6 px-5'>
-          <Text className='mb-3 text-lg font-bold text-neutral-900'>
+          <Text className='mb-3 text-lg font-bold text-slate-900'>
             Możliwości aplikacji
           </Text>
 
@@ -805,7 +806,7 @@ export default function Home() {
               {/* Feature 1: Intelligent Loop Routing */}
               <Pressable
                 onPress={() => router.push('/(tabs)/route')}
-                className='flex-1 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm active:bg-neutral-50'>
+                className='flex-1 rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xs active:scale-[0.99]'>
                 <View className='mb-3 h-10 w-10 items-center justify-center rounded-xl bg-emerald-100'>
                   <Ionicons
                     name='repeat'
@@ -813,10 +814,10 @@ export default function Home() {
                     color='#059669'
                   />
                 </View>
-                <Text className='text-sm font-bold text-neutral-900'>
+                <Text className='text-sm font-bold text-slate-900'>
                   Pętle OSRM
                 </Text>
-                <Text className='mt-1 text-xs leading-4 text-neutral-500'>
+                <Text className='mt-1 text-xs leading-4 text-slate-500'>
                   Inteligentne zamykanie obwodów bez powtarzania tych samych
                   ulic.
                 </Text>
@@ -825,7 +826,7 @@ export default function Home() {
               {/* Feature 2: Cultural Heritage Monuments */}
               <Pressable
                 onPress={() => router.push('/(tabs)/map')}
-                className='flex-1 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm active:bg-neutral-50'>
+                className='flex-1 rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xs active:scale-[0.99]'>
                 <View className='mb-3 h-10 w-10 items-center justify-center rounded-xl bg-amber-100'>
                   <MaterialCommunityIcons
                     name='pillar'
@@ -833,10 +834,10 @@ export default function Home() {
                     color='#d97706'
                   />
                 </View>
-                <Text className='text-sm font-bold text-neutral-900'>
+                <Text className='text-sm font-bold text-slate-900'>
                   Baza Zabytków
                 </Text>
-                <Text className='mt-1 text-xs leading-4 text-neutral-500'>
+                <Text className='mt-1 text-xs leading-4 text-slate-500'>
                   Ponad 700 obiektów dziedzictwa zintegrowanych z Wikipedią.
                 </Text>
               </Pressable>
@@ -846,18 +847,18 @@ export default function Home() {
               {/* Feature 3: Wspólne trasy (Razem) */}
               <Pressable
                 onPress={() => router.push('/(tabs)/together')}
-                className='flex-1 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm active:bg-neutral-50'>
-                <View className='mb-3 h-10 w-10 items-center justify-center rounded-xl bg-purple-100'>
+                className='flex-1 rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xs active:scale-[0.99]'>
+                <View className='mb-3 h-10 w-10 items-center justify-center rounded-xl bg-indigo-100'>
                   <Ionicons
                     name='people'
                     size={22}
-                    color='#9333ea'
+                    color='#4f46e5'
                   />
                 </View>
-                <Text className='text-sm font-bold text-neutral-900'>
+                <Text className='text-sm font-bold text-slate-900'>
                   Grupy (Razem)
                 </Text>
-                <Text className='mt-1 text-xs leading-4 text-neutral-500'>
+                <Text className='mt-1 text-xs leading-4 text-slate-500'>
                   Udostępnianie lokalizacji na żywo, czat i planowane
                   treningi.
                 </Text>
@@ -866,18 +867,18 @@ export default function Home() {
               {/* Feature 4: Custom Waypoints */}
               <Pressable
                 onPress={() => router.push('/(tabs)/route')}
-                className='flex-1 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm active:bg-neutral-50'>
-                <View className='mb-3 h-10 w-10 items-center justify-center rounded-xl bg-teal-100'>
+                className='flex-1 rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xs active:scale-[0.99]'>
+                <View className='mb-3 h-10 w-10 items-center justify-center rounded-xl bg-cyan-100'>
                   <MaterialCommunityIcons
                     name='map-marker-path'
                     size={22}
-                    color='#0d9488'
+                    color='#0891b2'
                   />
                 </View>
-                <Text className='text-sm font-bold text-neutral-900'>
+                <Text className='text-sm font-bold text-slate-900'>
                   Własne Punkty
                 </Text>
-                <Text className='mt-1 text-xs leading-4 text-neutral-500'>
+                <Text className='mt-1 text-xs leading-4 text-slate-500'>
                   Klikaj na mapie, by wyznaczyć optymalny przebieg ścieżki.
                 </Text>
               </Pressable>
@@ -887,7 +888,7 @@ export default function Home() {
 
         {/* Activity Tips & Recommendations */}
         <View className='px-5'>
-          <View className='rounded-2xl border border-amber-300/40 bg-amber-500/10 p-4'>
+          <View className='rounded-3xl border border-amber-300/40 bg-amber-500/10 p-4'>
             <View className='mb-1.5 flex-row items-center gap-2'>
               <Ionicons
                 name='sparkles'

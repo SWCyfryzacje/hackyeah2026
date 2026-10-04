@@ -24,10 +24,10 @@ export default function SignForm({
   const passwordError = errors?.password || zodErrors.password?.message;
 
   return (
-    <View className='w-full rounded-2xl border border-neutral-100 bg-white p-6 shadow-sm'>
+    <View className='w-full rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm'>
       <View className='gap-4'>
         <View className='gap-1.5'>
-          <Text className='text-sm font-medium text-neutral-700'>
+          <Text className='text-xs font-semibold uppercase tracking-wider text-slate-600'>
             Email Address
           </Text>
           <Controller
@@ -35,12 +35,12 @@ export default function SignForm({
             name='email'
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                className='h-12 w-full rounded-xl border border-neutral-300 bg-white pr-14 pl-4 text-base text-neutral-900'
+                className='h-12 w-full rounded-xl border border-slate-200 bg-white pr-4 pl-4 text-sm font-medium text-slate-900 shadow-xs'
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
                 placeholder='Enter e-mail address'
-                placeholderTextColor='#9ca3af'
+                placeholderTextColor='#94a3b8'
                 keyboardType='email-address'
                 autoCapitalize='none'
                 autoComplete='email'
@@ -48,7 +48,7 @@ export default function SignForm({
             )}
           />
           {emailError ? (
-            <Text className='text-xs text-red-500'>{emailError}</Text>
+            <Text className='text-xs font-medium text-rose-500'>{emailError}</Text>
           ) : null}
         </View>
 
@@ -66,10 +66,10 @@ export default function SignForm({
         />
 
         <Pressable
-          className={`mt-2 items-center justify-center rounded-xl bg-blue-600 px-4 py-3.5 active:bg-blue-700 ${fetchStatus === 'fetching' ? 'opacity-50' : ''}`}
+          className={`mt-2 h-12 items-center justify-center rounded-xl bg-indigo-600 px-4 active:bg-indigo-700 shadow-sm ${fetchStatus === 'fetching' ? 'opacity-60' : 'active:scale-[0.99]'}`}
           onPress={onSubmit}
           disabled={fetchStatus === 'fetching'}>
-          <Text className='text-base font-semibold text-white'>
+          <Text className='text-sm font-bold text-white'>
             {fetchStatus === 'fetching'
               ? type === 'sign-in'
                 ? 'Signing In...'

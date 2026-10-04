@@ -29,29 +29,29 @@ export default function MessageInput({ onSend, sending }: Props) {
   };
 
   return (
-    <View className='gap-1 border-t border-neutral-200 bg-white px-3 pt-2 pb-3'>
-      <View className='flex-row items-end gap-2'>
+    <View className='gap-1.5 border-t border-slate-100 bg-white px-4 pt-3 pb-3'>
+      <View className='flex-row items-end gap-2.5'>
         <TextInput
-          className='max-h-32 min-h-11 flex-1 rounded-2xl border border-neutral-300 bg-white px-4 py-2.5 text-base text-neutral-900'
+          className='max-h-32 min-h-12 flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-900 shadow-xs'
           value={text}
           onChangeText={setText}
           placeholder='Napisz wiadomość…'
-          placeholderTextColor='#9ca3af'
+          placeholderTextColor='#94a3b8'
           multiline
           maxLength={GROUP_ROUTE_MESSAGE_MAX_LENGTH}
         />
         <Pressable
-          className={`h-11 items-center justify-center rounded-2xl bg-blue-600 px-4 active:bg-blue-700 ${disabled ? 'opacity-50' : ''}`}
+          className={`h-12 items-center justify-center rounded-xl bg-indigo-600 px-5 active:bg-indigo-700 shadow-xs active:scale-[0.99] ${disabled ? 'opacity-50' : ''}`}
           onPress={submit}
           disabled={disabled}>
           {sending ? (
             <ActivityIndicator color='white' />
           ) : (
-            <Text className='font-semibold text-white'>Wyślij</Text>
+            <Text className='text-sm font-bold text-white'>Wyślij</Text>
           )}
         </Pressable>
       </View>
-      <Text className='text-right text-xs text-neutral-400'>
+      <Text className='text-right text-[11px] font-semibold text-slate-400'>
         {text.length}/{GROUP_ROUTE_MESSAGE_MAX_LENGTH}
       </Text>
     </View>

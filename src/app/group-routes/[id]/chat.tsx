@@ -108,9 +108,9 @@ export default function GroupRouteChatScreen() {
 
   if (route === null) {
     return (
-      <View className='flex-1 items-center justify-center bg-white p-6'>
+      <View className='flex-1 items-center justify-center bg-slate-50 p-6'>
         {header}
-        <Text className='text-center text-neutral-500'>
+        <Text className='text-center text-sm font-medium text-slate-500'>
           Nie znaleziono trasy lub nie masz do niej dostępu.
         </Text>
       </View>
@@ -119,13 +119,13 @@ export default function GroupRouteChatScreen() {
 
   return (
     <KeyboardAvoidingView
-      className='flex-1 bg-white'
+      className='flex-1 bg-slate-50'
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={headerHeight}>
       {header}
       <MessageList messages={messages} />
       {error ? (
-        <Text className='bg-red-50 px-4 py-2 text-sm text-red-600'>
+        <Text className='bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-600 border-t border-rose-200'>
           {error}
         </Text>
       ) : null}
@@ -136,7 +136,7 @@ export default function GroupRouteChatScreen() {
             sending={sending}
           />
         ) : (
-          <Text className='border-t border-neutral-200 bg-neutral-50 px-4 py-4 text-center text-neutral-500'>
+          <Text className='border-t border-slate-200 bg-slate-100/80 px-4 py-4 text-center text-xs font-medium text-slate-500'>
             Trasa zakończona — czat jest tylko do odczytu.
           </Text>
         )}

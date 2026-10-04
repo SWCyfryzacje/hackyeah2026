@@ -14,12 +14,12 @@ export default function AuthFooterLink({
 }: AuthFooterLinkProps) {
   return (
     <View className='flex-row items-center justify-center gap-1.5'>
-      <Text className='text-sm text-neutral-600'>{promptText}</Text>
+      <Text className='text-sm text-slate-500'>{promptText}</Text>
       <Link
         href={href}
         asChild>
-        <Pressable>
-          <Text className='text-sm font-semibold text-blue-600'>
+        <Pressable className='active:opacity-80'>
+          <Text className='text-sm font-bold text-indigo-600'>
             {linkText}
           </Text>
         </Pressable>

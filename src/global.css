@@ -3,3 +3,77 @@
 @import "tailwindcss/utilities.css";
 
 @import "nativewind/theme";
+
+@theme {
+  --color-primary: #4f46e5;
+  --color-primary-50: #eef2ff;
+  --color-primary-100: #e0e7ff;
+  --color-primary-200: #c7d2fe;
+  --color-primary-300: #a5b4fc;
+  --color-primary-400: #818cf8;
+  --color-primary-500: #6366f1;
+  --color-primary-600: #4f46e5;
+  --color-primary-700: #4338ca;
+  --color-primary-800: #3730a3;
+  --color-primary-900: #312e81;
+  --color-primary-foreground: #ffffff;
+
+  --color-accent: #06b6d4;
+  --color-accent-50: #ecfeff;
+  --color-accent-100: #cffafe;
+  --color-accent-200: #a5f3fc;
+  --color-accent-500: #06b6d4;
+  --color-accent-600: #0891b2;
+  --color-accent-700: #0e7490;
+  --color-accent-foreground: #ffffff;
+
+  --color-secondary: #f43f5e;
+  --color-secondary-50: #fff1f2;
+  --color-secondary-100: #ffe4e6;
+  --color-secondary-500: #f43f5e;
+  --color-secondary-600: #e11d48;
+  --color-secondary-foreground: #ffffff;
+
+  --color-amber-accent: #f59e0b;
+  --color-amber-accent-50: #fffbeb;
+  --color-amber-accent-100: #fef3c7;
+  --color-amber-accent-500: #f59e0b;
+  --color-amber-accent-600: #d97706;
+
+  --color-emerald-accent: #10b981;
+  --color-emerald-accent-50: #ecfdf5;
+  --color-emerald-accent-100: #d1fae5;
+  --color-emerald-accent-500: #10b981;
+  --color-emerald-accent-600: #059669;
+
+  --color-background: #f8fafc;
+  --color-background-subtle: #f1f5f9;
+  --color-foreground: #0f172a;
+  --color-foreground-muted: #64748b;
+  --color-foreground-subtle: #94a3b8;
+
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+
+  --color-border: #e2e8f0;
+  --color-border-subtle: #f1f5f9;
+  --color-input: #e2e8f0;
+  --color-ring: #6366f1;
+
+  --color-destructive: #ef4444;
+  --color-destructive-50: #fef2f2;
+  --color-destructive-100: #fee2e2;
+  --color-destructive-600: #dc2626;
+  --color-destructive-foreground: #ffffff;
+
+  --color-success: #10b981;
+  --color-success-50: #ecfdf5;
+  --color-success-foreground: #ffffff;
+
+  --color-warning: #f59e0b;
+  --color-warning-50: #fffbeb;
+  --color-warning-foreground: #ffffff;
+}

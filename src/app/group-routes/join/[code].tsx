@@ -31,22 +31,22 @@ export default function JoinGroupRouteScreen() {
   }, [supabase, code, router]);
 
   return (
-    <View className='flex-1 items-center justify-center gap-4 bg-neutral-50 p-6'>
+    <View className='flex-1 items-center justify-center gap-4 bg-slate-50 p-6'>
       <Stack.Screen options={{ title: 'Dołączanie' }} />
       {error ? (
         <>
           <Ionicons
             name='alert-circle-outline'
             size={40}
-            color='#dc2626'
+            color='#e11d48'
           />
-          <Text className='text-center text-base text-neutral-700'>
+          <Text className='text-center text-sm font-medium text-slate-700'>
             {error}
           </Text>
           <Pressable
             onPress={() => router.replace('/(tabs)/together')}
-            className='rounded-xl bg-blue-600 px-5 py-3 active:bg-blue-700'>
-            <Text className='text-sm font-semibold text-white'>
+            className='rounded-xl bg-indigo-600 px-5 py-3 shadow-xs active:bg-indigo-700 active:scale-[0.99]'>
+            <Text className='text-sm font-bold text-white'>
               Wróć do Razem
             </Text>
           </Pressable>
@@ -55,9 +55,9 @@ export default function JoinGroupRouteScreen() {
         <>
           <ActivityIndicator
             size='large'
-            color='#2563eb'
+            color='#4f46e5'
           />
-          <Text className='text-base text-neutral-700'>Dołączanie…</Text>
+          <Text className='text-sm font-medium text-slate-600'>Dołączanie…</Text>
         </>
       )}
     </View>

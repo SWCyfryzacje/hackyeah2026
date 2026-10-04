@@ -269,11 +269,11 @@ export default function RouteScreen() {
 
       <Pressable
         onPress={goToMe}
-        className='absolute top-21 right-4 z-10 size-10 items-center justify-center rounded-full bg-white shadow-lg'>
+        className='absolute top-21 right-4 z-10 size-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white shadow-md active:scale-95'>
         <Ionicons
           name='locate'
-          size={24}
-          color='#2563eb'
+          size={22}
+          color='#4f46e5'
         />
       </Pressable>
 
@@ -303,14 +303,14 @@ export default function RouteScreen() {
 
         <Polyline
           coordinates={route?.coords ?? []}
-          strokeWidth={route ? 4 : 0}
-          strokeColor={route ? '#2563eb' : 'transparent'}
+          strokeWidth={route ? 5 : 0}
+          strokeColor={route ? '#4f46e5' : 'transparent'}
         />
 
         <Polyline
           coordinates={loop?.coords ?? []}
-          strokeWidth={loop ? 4 : 0}
-          strokeColor={loop ? '#16a34a' : 'transparent'}
+          strokeWidth={loop ? 5 : 0}
+          strokeColor={loop ? '#10b981' : 'transparent'}
         />
 
         <RouteObstacleOverlays {...obstacles} />

@@ -7,7 +7,6 @@ import SafeView, { TAB_SCREEN_EDGES } from '@/components/safe-view';
 import LocationModal from '@/components/location-modal';
 import useLocationPermission from '@/hooks/useLocationPermission';
 import MapView from '@/components/map-view';
-import { StatusBar } from 'expo-status-bar';
 import useNearbyMonuments from '@/hooks/useNearbyMonuments';
 import { MonumentMarkers } from '@/components/monument-marker';
 import MonumentLevelPicker from '@/components/monument-level-picker';
@@ -34,7 +33,7 @@ export default function Map() {
 
   return (
     <SafeView
-      className='flex-1 items-center bg-amber-50'
+      className='flex-1 items-center bg-slate-50'
       edges={TAB_SCREEN_EDGES}>
       <LocationModal
         visible={visibility}
@@ -42,16 +41,16 @@ export default function Map() {
         onLater={onLater}
       />
 
-      <MonumentLevelPicker className='z-10 mx-10 mt-10' />
-      <MapLayerToggles className='absolute top-44 left-4 z-10' />
+      <MonumentLevelPicker className='z-10 mx-6 mt-4' />
+      <MapLayerToggles className='absolute top-42 left-4 z-10' />
 
       <Pressable
         onPress={goToMe}
-        className='absolute top-44 right-4 z-10 size-10 items-center justify-center rounded-full bg-white shadow-lg'>
+        className='absolute top-42 right-4 z-10 size-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white shadow-md active:scale-95'>
         <Ionicons
           name='locate'
-          size={24}
-          color='#2563eb'
+          size={22}
+          color='#4f46e5'
         />
       </Pressable>
 

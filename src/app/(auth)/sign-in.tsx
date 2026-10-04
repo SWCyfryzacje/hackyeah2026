@@ -124,7 +124,7 @@ export default function SignIn() {
     );
 
   return (
-    <SafeView className='flex-1 bg-amber-50'>
+    <SafeView className='flex-1 bg-slate-50'>
       <KeyboardAvoidingView
         className='flex-1'
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>

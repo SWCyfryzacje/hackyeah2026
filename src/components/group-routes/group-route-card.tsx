@@ -45,24 +45,24 @@ export default function GroupRouteCard({ route, onPress }: Props) {
   return (
     <Pressable
       onPress={onPress}
-      className={`gap-2 rounded-2xl border p-4 shadow-sm active:opacity-90 ${
-        live ? 'border-green-300 bg-green-50' : 'border-neutral-200 bg-white'
+      className={`gap-2.5 rounded-3xl border p-5 shadow-xs active:scale-[0.99] ${
+        live ? 'border-emerald-300 bg-emerald-50/70' : 'border-slate-200/80 bg-white'
       }`}>
       <View className='flex-row items-start justify-between gap-3'>
         <Text
-          className='flex-1 text-base font-bold text-neutral-900'
+          className='flex-1 text-base font-bold text-slate-900'
           numberOfLines={2}>
           {route.title}
         </Text>
         <View className='flex-row items-center gap-1.5'>
           {route.visibility === 'private' && (
-            <View className='flex-row items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5'>
+            <View className='flex-row items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5'>
               <Ionicons
                 name='lock-closed'
                 size={10}
-                color='#525252'
+                color='#64748b'
               />
-              <Text className='text-xs font-semibold text-neutral-600'>
+              <Text className='text-xs font-semibold text-slate-600'>
                 Prywatna
               </Text>
             </View>
@@ -71,7 +71,7 @@ export default function GroupRouteCard({ route, onPress }: Props) {
         </View>
       </View>
 
-      <View className='gap-1'>
+      <View className='gap-1.5'>
         <InfoRow
           icon='time-outline'
           text={formatTimeRange(route.plannedStart, route.plannedEnd)}

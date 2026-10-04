@@ -19,7 +19,6 @@ import {
   RefreshControl,
   ScrollView,
 } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 
 export default function Settings() {
   const { signOut } = useAuth();
@@ -241,7 +240,7 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
 
   return (
     <SafeView
-      className='flex-1 bg-neutral-50'
+      className='flex-1 bg-slate-50'
       edges={TAB_SCREEN_EDGES}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -254,6 +253,7 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
+              tintColor='#4f46e5'
             />
           }>
           {/* Header Title */}

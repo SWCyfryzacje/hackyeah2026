@@ -109,7 +109,7 @@ export default function SignUp() {
     );
 
   return (
-    <SafeView className='flex-1 bg-amber-50'>
+    <SafeView className='flex-1 bg-slate-50'>
       <KeyboardAvoidingView
         className='flex-1'
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -120,8 +120,8 @@ export default function SignUp() {
           showsVerticalScrollIndicator={false}>
           <View className='mx-auto w-full max-w-md gap-6'>
             <AuthHeader
-              title='Create your Account'
-              subtitle='Sign up to start'
+              title='Create Account'
+              subtitle='Sign up to get started'
             />
 
             <SignForm

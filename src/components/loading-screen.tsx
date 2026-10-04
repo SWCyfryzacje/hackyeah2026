@@ -7,15 +7,15 @@ type Props = {
 
 export default function LoadingScreen({ message }: Props) {
   return (
-    <SafeView className='bg-background flex-1 items-center justify-center p-5'>
+    <SafeView className='flex-1 items-center justify-center bg-slate-50 p-6'>
       <ActivityIndicator
         size='large'
-        color='blue'
+        color='#4f46e5'
         className='my-4'
       />
 
       {message && (
-        <Text className='font-sans-medium text-muted-foreground text-center text-base'>
+        <Text className='text-center text-sm font-medium text-slate-500'>
           {message}
         </Text>
       )}
