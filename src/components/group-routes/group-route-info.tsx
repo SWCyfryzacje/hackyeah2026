@@ -24,7 +24,7 @@ function Row({
         size={16}
         color='#64748b'
       />
-      <Text className='flex-1 text-sm text-neutral-700'>{children}</Text>
+      <Text className='flex-1 text-sm font-medium text-slate-700'>{children}</Text>
     </View>
   );
 }
@@ -35,29 +35,29 @@ export default function GroupRouteInfo({ route }: { route: GroupRoute }) {
   const { event } = route;
 
   return (
-    <View className='gap-3'>
+    <View className='gap-3 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs'>
       <View className='gap-1.5'>
         <View className='flex-row items-center gap-2'>
           <StatusBadge status={route.status} />
           {route.visibility === 'private' && (
-            <View className='flex-row items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5'>
+            <View className='flex-row items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5'>
               <Ionicons
                 name='lock-closed'
                 size={10}
-                color='#525252'
+                color='#64748b'
               />
-              <Text className='text-xs font-semibold text-neutral-600'>
+              <Text className='text-xs font-semibold text-slate-600'>
                 Prywatna
               </Text>
             </View>
           )}
         </View>
-        <Text className='text-2xl font-bold text-neutral-900'>
+        <Text className='text-2xl font-extrabold text-slate-900'>
           {route.title}
         </Text>
       </View>
 
-      <View className='gap-1.5'>
+      <View className='gap-2 py-1'>
         <Row icon='time-outline'>
           {`Plan: ${formatTimeRange(route.plannedStart, route.plannedEnd)}`}
         </Row>
@@ -77,7 +77,7 @@ export default function GroupRouteInfo({ route }: { route: GroupRoute }) {
       {event && (
         <Pressable
           onPress={() => Linking.openURL(event.url).catch(() => {})}
-          className='flex-row items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 active:opacity-80'>
+          className='flex-row items-center gap-3 rounded-2xl border border-amber-200/80 bg-amber-50/80 p-3.5 active:opacity-80'>
           <Ionicons
             name='ticket'
             size={20}
@@ -85,7 +85,7 @@ export default function GroupRouteInfo({ route }: { route: GroupRoute }) {
           />
           <View className='flex-1'>
             <Text
-              className='text-sm font-bold text-amber-900'
+              className='text-sm font-bold text-amber-950'
               numberOfLines={2}>
               {event.title}
             </Text>
@@ -106,7 +106,7 @@ export default function GroupRouteInfo({ route }: { route: GroupRoute }) {
       )}
 
       {route.description ? (
-        <Text className='text-sm leading-5 text-neutral-700'>
+        <Text className='text-sm leading-5 text-slate-600'>
           {route.description}
         </Text>
       ) : null}

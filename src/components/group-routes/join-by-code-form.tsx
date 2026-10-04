@@ -40,11 +40,11 @@ export default function JoinByCodeForm({ onJoined }: Props) {
   };
 
   return (
-    <View className='gap-2 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm'>
-      <Text className='text-sm font-bold text-neutral-900'>Dołącz kodem</Text>
+    <View className='gap-2.5 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs'>
+      <Text className='text-xs font-bold uppercase tracking-wider text-slate-700'>Dołącz kodem</Text>
       <View className='flex-row gap-2'>
         <TextInput
-          className='h-12 flex-1 rounded-xl border border-neutral-300 bg-white pl-4 text-base font-semibold tracking-widest text-neutral-900'
+          className='h-12 flex-1 rounded-xl border border-slate-200 bg-white pl-4 text-base font-bold tracking-widest text-slate-900 shadow-xs'
           value={code}
           onChangeText={(t) => {
             setCode(
@@ -56,7 +56,7 @@ export default function JoinByCodeForm({ onJoined }: Props) {
             setError(null);
           }}
           placeholder='np. K7QX2M'
-          placeholderTextColor='#9ca3af'
+          placeholderTextColor='#94a3b8'
           autoCapitalize='characters'
           autoCorrect={false}
           maxLength={CODE_LENGTH}
@@ -66,7 +66,7 @@ export default function JoinByCodeForm({ onJoined }: Props) {
         <Pressable
           onPress={onJoin}
           disabled={!canJoin}
-          className={`h-12 items-center justify-center rounded-xl bg-blue-600 px-5 active:bg-blue-700 ${
+          className={`h-12 items-center justify-center rounded-xl bg-indigo-600 px-5 active:bg-indigo-700 shadow-xs active:scale-[0.99] ${
             canJoin ? '' : 'opacity-50'
           }`}>
           {busy ? (
@@ -76,7 +76,7 @@ export default function JoinByCodeForm({ onJoined }: Props) {
           )}
         </Pressable>
       </View>
-      {error && <Text className='text-xs text-red-500'>{error}</Text>}
+      {error && <Text className='text-xs font-medium text-rose-500'>{error}</Text>}
     </View>
   );
 }

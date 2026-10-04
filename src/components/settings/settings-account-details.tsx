@@ -23,11 +23,11 @@ export default function SettingsAccountDetails({
 
   return (
     <View className='mt-6 px-5'>
-      <Text className='mb-2.5 text-xs font-bold tracking-wider text-neutral-400 uppercase'>
+      <Text className='mb-2.5 text-xs font-bold tracking-wider text-slate-500 uppercase'>
         Account & Security
       </Text>
 
-      <View className='gap-3.5 rounded-3xl border border-neutral-200/80 bg-white p-5 shadow-sm'>
+      <View className='gap-3.5 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs'>
         {/* Email */}
         <View className='flex-row items-center justify-between'>
           <View className='flex-row items-center gap-2.5'>
@@ -36,23 +36,23 @@ export default function SettingsAccountDetails({
               size={18}
               color='#64748b'
             />
-            <Text className='text-xs font-medium text-neutral-600'>Email</Text>
+            <Text className='text-xs font-medium text-slate-600'>Email</Text>
           </View>
           <View className='flex-row items-center gap-1.5'>
             <Text
-              className='text-xs font-semibold text-neutral-900'
+              className='text-xs font-bold text-slate-900'
               numberOfLines={1}>
               {email}
             </Text>
             <Ionicons
               name='checkmark-circle'
               size={14}
-              color='#16a34a'
+              color='#10b981'
             />
           </View>
         </View>
 
-        <View className='h-px bg-neutral-100' />
+        <View className='h-px bg-slate-100' />
 
         {/* Clerk User ID */}
         <View className='flex-row items-center justify-between'>
@@ -62,18 +62,18 @@ export default function SettingsAccountDetails({
               size={18}
               color='#64748b'
             />
-            <Text className='text-xs font-medium text-neutral-600'>
+            <Text className='text-xs font-medium text-slate-600'>
               Clerk User ID
             </Text>
           </View>
           <Text
-            className='font-mono text-xs font-medium text-neutral-500'
+            className='font-mono text-xs font-medium text-slate-500'
             numberOfLines={1}>
             {userId ? `${userId.slice(0, 14)}...` : 'N/A'}
           </Text>
         </View>
 
-        <View className='h-px bg-neutral-100' />
+        <View className='h-px bg-slate-100' />
 
         {/* Joined Date */}
         <View className='flex-row items-center justify-between'>
@@ -83,9 +83,9 @@ export default function SettingsAccountDetails({
               size={18}
               color='#64748b'
             />
-            <Text className='text-xs font-medium text-neutral-600'>Joined</Text>
+            <Text className='text-xs font-medium text-slate-600'>Joined</Text>
           </View>
-          <Text className='text-xs font-medium text-neutral-700'>
+          <Text className='text-xs font-semibold text-slate-700'>
             {formattedDate}
           </Text>
         </View>

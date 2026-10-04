@@ -42,11 +42,11 @@ export default function GroupRouteScreen() {
 
   if (loading && !route) {
     return (
-      <View className='flex-1 items-center justify-center bg-neutral-50'>
+      <View className='flex-1 items-center justify-center bg-slate-50'>
         <Stack.Screen options={{ title: 'Trasa' }} />
         <ActivityIndicator
           size='large'
-          color='#2563eb'
+          color='#4f46e5'
         />
       </View>
     );
@@ -54,20 +54,20 @@ export default function GroupRouteScreen() {
 
   if (!route) {
     return (
-      <View className='flex-1 items-center justify-center gap-4 bg-neutral-50 p-6'>
+      <View className='flex-1 items-center justify-center gap-4 bg-slate-50 p-6'>
         <Stack.Screen options={{ title: 'Trasa' }} />
         <Ionicons
           name='alert-circle-outline'
           size={40}
           color='#64748b'
         />
-        <Text className='text-center text-base text-neutral-700'>
+        <Text className='text-center text-sm font-medium text-slate-700'>
           {error ?? 'Nie znaleziono trasy lub nie masz do niej dostępu.'}
         </Text>
         <Pressable
           onPress={goToList}
-          className='rounded-xl bg-blue-600 px-5 py-3 active:bg-blue-700'>
-          <Text className='text-sm font-semibold text-white'>
+          className='rounded-xl bg-indigo-600 px-5 py-3 shadow-xs active:bg-indigo-700 active:scale-[0.99]'>
+          <Text className='text-sm font-bold text-white'>
             Wróć do Razem
           </Text>
         </Pressable>
@@ -78,11 +78,11 @@ export default function GroupRouteScreen() {
   const isMember = myRole != null;
 
   return (
-    <View className='flex-1 bg-neutral-50'>
+    <View className='flex-1 bg-slate-50'>
       <Stack.Screen
         options={{
           title: route.title,
-          headerTitleStyle: { fontSize: 20, color: 'black' },
+          headerTitleStyle: { fontSize: 18, fontWeight: '700', color: '#0f172a' },
         }}
       />
       <ScrollView
@@ -94,6 +94,7 @@ export default function GroupRouteScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
+            tintColor='#4f46e5'
           />
         }>
         <View className='h-1/2'>

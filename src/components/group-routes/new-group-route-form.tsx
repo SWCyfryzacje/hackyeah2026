@@ -38,7 +38,7 @@ type Props = {
 };
 
 const INPUT_CLASS =
-  'h-12 w-full rounded-xl border border-neutral-300 bg-white px-4 text-base text-neutral-900';
+  'h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-900 shadow-xs';
 
 function Field({
   label,
@@ -51,9 +51,9 @@ function Field({
 }) {
   return (
     <View className='gap-1.5'>
-      <Text className='text-sm font-medium text-neutral-700'>{label}</Text>
+      <Text className='text-xs font-semibold uppercase tracking-wider text-slate-600'>{label}</Text>
       {children}
-      {error ? <Text className='text-xs text-red-500'>{error}</Text> : null}
+      {error ? <Text className='text-xs font-medium text-rose-500'>{error}</Text> : null}
     </View>
   );
 }
@@ -96,13 +96,13 @@ export default function NewGroupRouteForm({ draft, onCreated }: Props) {
 
   return (
     <View className='gap-4'>
-      <View className='flex-row items-center gap-2 rounded-xl bg-blue-50 p-3'>
+      <View className='flex-row items-center gap-2 rounded-2xl bg-indigo-50 p-3.5 border border-indigo-100'>
         <Ionicons
           name='walk'
           size={18}
-          color='#2563eb'
+          color='#4f46e5'
         />
-        <Text className='text-sm font-semibold text-blue-700'>
+        <Text className='text-sm font-bold text-indigo-700'>
           Trasa: {formatRouteSize(draft.distanceM, draft.durationS)}
           {draft.stops.length > 0
             ? ` · ${formatStops(draft.stops.length)}`

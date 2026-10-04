@@ -13,12 +13,12 @@ export default function ChoiceChip({ label, selected, onPress }: Props) {
       onPress={onPress}
       className={`flex-1 items-center rounded-xl border py-2.5 ${
         selected
-          ? 'border-blue-600 bg-blue-600'
-          : 'border-neutral-300 bg-white active:bg-neutral-100'
+          ? 'border-indigo-600 bg-indigo-600 shadow-xs'
+          : 'border-slate-200 bg-white active:bg-slate-50'
       }`}>
       <Text
-        className={`text-sm font-semibold ${
-          selected ? 'text-white' : 'text-neutral-700'
+        className={`text-sm font-bold ${
+          selected ? 'text-white' : 'text-slate-700'
         }`}>
         {label}
       </Text>

@@ -20,10 +20,10 @@ export default function SettingsActionButtons({
       <Pressable
         onPress={onSave}
         disabled={isSaving || !hasChanges}
-        className={`flex-row items-center justify-center gap-2 rounded-2xl px-4 py-3.5 shadow-sm ${
+        className={`h-12 flex-row items-center justify-center gap-2 rounded-xl px-4 shadow-xs ${
           hasChanges && !isSaving
-            ? 'bg-blue-600 active:bg-blue-700'
-            : 'bg-neutral-300 opacity-70'
+            ? 'bg-indigo-600 active:bg-indigo-700 active:scale-[0.99]'
+            : 'bg-slate-200 opacity-60'
         }`}>
         {isSaving ? (
           <ActivityIndicator
@@ -48,8 +48,8 @@ export default function SettingsActionButtons({
         <Pressable
           onPress={onReset}
           disabled={isSaving}
-          className='items-center justify-center rounded-2xl border border-neutral-200 bg-white px-4 py-3 active:bg-neutral-100'>
-          <Text className='text-xs font-semibold text-neutral-600'>
+          className='h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 active:bg-slate-50'>
+          <Text className='text-xs font-bold text-slate-600'>
             Discard Changes
           </Text>
         </Pressable>

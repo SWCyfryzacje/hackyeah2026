@@ -12,10 +12,10 @@ export default function SettingsHeader({
 }: SettingsHeaderProps) {
   return (
     <View className='px-5 pt-4 pb-2'>
-      <Text className='text-3xl font-extrabold tracking-tight text-neutral-900'>
+      <Text className='text-3xl font-extrabold tracking-tight text-slate-900'>
         {title}
       </Text>
-      <Text className='mt-0.5 text-sm font-medium text-neutral-500'>
+      <Text className='mt-0.5 text-xs font-medium text-slate-500'>
         {subtitle}
       </Text>
     </View>

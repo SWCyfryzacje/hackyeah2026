@@ -9,28 +9,28 @@ const VARIANTS: Record<
   { box: string; text: string; icon: string; spinner: string }
 > = {
   primary: {
-    box: 'bg-blue-600 active:bg-blue-700',
+    box: 'bg-indigo-600 active:bg-indigo-700 shadow-xs active:scale-[0.99]',
     text: 'text-white',
     icon: '#ffffff',
     spinner: '#ffffff',
   },
   success: {
-    box: 'bg-green-600 active:bg-green-700',
+    box: 'bg-emerald-600 active:bg-emerald-700 shadow-xs active:scale-[0.99]',
     text: 'text-white',
     icon: '#ffffff',
     spinner: '#ffffff',
   },
   danger: {
-    box: 'border border-red-300 bg-white active:bg-red-50',
-    text: 'text-red-600',
-    icon: '#dc2626',
-    spinner: '#dc2626',
+    box: 'border border-rose-200 bg-rose-50 active:bg-rose-100',
+    text: 'text-rose-600',
+    icon: '#e11d48',
+    spinner: '#e11d48',
   },
   neutral: {
-    box: 'border border-neutral-300 bg-white active:bg-neutral-100',
-    text: 'text-neutral-800',
-    icon: '#262626',
-    spinner: '#262626',
+    box: 'border border-slate-200 bg-white active:bg-slate-50',
+    text: 'text-slate-800',
+    icon: '#0f172a',
+    spinner: '#0f172a',
   },
 };
 
@@ -68,7 +68,7 @@ export default function ActionButton({
             size={18}
             color={v.icon}
           />
-          <Text className={`text-base font-semibold ${v.text}`}>{label}</Text>
+          <Text className={`text-sm font-bold ${v.text}`}>{label}</Text>
         </>
       )}
     </Pressable>

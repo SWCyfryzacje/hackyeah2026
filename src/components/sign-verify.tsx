@@ -38,7 +38,7 @@ export default function SignVerify({
   const code = watch('code') || '';
 
   return (
-    <SafeView className='flex-1 bg-amber-50'>
+    <SafeView className='flex-1 bg-slate-50'>
       <KeyboardAvoidingView
         className='flex-1'
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -48,28 +48,33 @@ export default function SignVerify({
           keyboardShouldPersistTaps='handled'
           showsVerticalScrollIndicator={false}>
           <View className='w-full max-w-md mx-auto gap-6'>
-            <View className='items-center gap-2'>
-              <Text className='text-3xl font-bold text-neutral-900'>Verify your identity</Text>
-              <Text className='text-center text-sm text-neutral-600'>
-                We sent a verification code to {email}
+            <View className='items-center gap-1.5'>
+              <Text className='text-center text-3xl font-extrabold tracking-tight text-slate-900'>
+                Verify your identity
+              </Text>
+              <Text className='text-center text-sm font-medium text-slate-500'>
+                We sent a verification code to{' '}
+                <Text className='font-semibold text-slate-700'>{email}</Text>
               </Text>
             </View>
 
-            <View className='w-full rounded-2xl bg-white p-6 shadow-sm border border-neutral-100'>
+            <View className='w-full rounded-3xl bg-white p-6 shadow-sm border border-slate-200/80'>
               <View className='gap-4'>
                 <View className='gap-1.5'>
-                  <Text className='text-sm font-medium text-neutral-700'>Verification Code</Text>
+                  <Text className='text-xs font-semibold uppercase tracking-wider text-slate-600'>
+                    Verification Code
+                  </Text>
                   <Controller
                     control={control}
                     name='code'
                     render={({ field: { onChange, onBlur, value } }) => (
                       <TextInput
-                        className='h-12 w-full rounded-xl border border-neutral-300 bg-white px-4 text-base text-neutral-900 text-center tracking-widest'
+                        className='h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-center text-lg font-bold tracking-widest text-slate-900 shadow-xs'
                         value={value}
                         onChangeText={onChange}
                         onBlur={onBlur}
                         placeholder='Enter 6-digit code'
-                        placeholderTextColor='#9ca3af'
+                        placeholderTextColor='#94a3b8'
                         keyboardType='number-pad'
                         autoComplete='one-time-code'
                         maxLength={6}
@@ -77,18 +82,18 @@ export default function SignVerify({
                     )}
                   />
                   {errors?.email && (
-                    <Text className='text-xs text-red-500'>{errors.email}</Text>
+                    <Text className='text-xs font-medium text-rose-500'>{errors.email}</Text>
                   )}
                   {zodErrors.code && !errors?.email && (
-                    <Text className='text-xs text-red-500'>{zodErrors.code.message}</Text>
+                    <Text className='text-xs font-medium text-rose-500'>{zodErrors.code.message}</Text>
                   )}
                 </View>
 
                 <Pressable
-                  className={`mt-2 items-center justify-center rounded-xl bg-blue-600 py-3.5 px-4 active:bg-blue-700 ${code.length < 6 || fetchStatus === 'fetching' ? 'opacity-50' : ''}`}
+                  className={`mt-2 h-12 items-center justify-center rounded-xl bg-indigo-600 px-4 active:bg-indigo-700 shadow-sm ${code.length < 6 || fetchStatus === 'fetching' ? 'opacity-60' : 'active:scale-[0.99]'}`}
                   onPress={handleSubmit(onVerify)}
                   disabled={!getValues().code || fetchStatus === 'fetching'}>
-                  <Text className='text-base font-semibold text-white'>
+                  <Text className='text-sm font-bold text-white'>
                     {code.length === 6 && fetchStatus === 'fetching'
                       ? 'Verifying...'
                       : 'Verify'}
@@ -96,10 +101,10 @@ export default function SignVerify({
                 </Pressable>
 
                 <Pressable
-                  className='items-center justify-center rounded-xl border border-neutral-300 py-3 px-4 active:bg-neutral-100'
+                  className='h-12 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/50 px-4 active:bg-slate-100'
                   onPress={() => codeResend()}
                   disabled={fetchStatus === 'fetching'}>
-                  <Text className='text-sm font-semibold text-neutral-700'>
+                  <Text className='text-sm font-semibold text-slate-700'>
                     Resend Code
                   </Text>
                 </Pressable>

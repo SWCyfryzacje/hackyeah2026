@@ -100,7 +100,7 @@ export default function StartNavigationButton({
     <Pressable
       onPress={handlePress}
       disabled={disabled}
-      className={`flex-row items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 active:bg-emerald-700 ${
+      className={`h-11 flex-row items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 active:bg-emerald-700 active:scale-[0.99] shadow-xs ${
         disabled ? 'opacity-40' : ''
       }`}>
       <Ionicons
@@ -108,7 +108,7 @@ export default function StartNavigationButton({
         size={16}
         color='#ffffff'
       />
-      <Text className='text-sm font-semibold text-white'>
+      <Text className='text-sm font-bold text-white'>
         Rozpocznij nawigację
       </Text>
     </Pressable>

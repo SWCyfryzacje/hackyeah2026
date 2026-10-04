@@ -37,27 +37,27 @@ export default function MonumentRouteModal({
       transparent
       animationType='fade'
       onRequestClose={onClose}>
-      <View className='flex-1 justify-end bg-black/60 sm:justify-center sm:p-6'>
+      <View className='flex-1 justify-end bg-slate-900/60 sm:justify-center sm:p-6 backdrop-blur-sm'>
         <Pressable
           className='flex-1'
           onPress={onClose}
         />
-        <View className='overflow-hidden rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl'>
+        <View className='overflow-hidden rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl border border-slate-100'>
           {/* Header */}
-          <View className='flex-row items-center justify-between border-b border-neutral-100 pb-4'>
+          <View className='flex-row items-center justify-between border-b border-slate-100 pb-4'>
             <View className='flex-row items-center gap-2.5'>
-              <View className='size-9 items-center justify-center rounded-xl bg-blue-100'>
+              <View className='size-10 items-center justify-center rounded-2xl bg-indigo-50'>
                 <Ionicons
                   name='compass-outline'
                   size={20}
-                  color='#2563eb'
+                  color='#4f46e5'
                 />
               </View>
               <View>
-                <Text className='text-lg font-bold text-neutral-900'>
+                <Text className='text-lg font-extrabold text-slate-900'>
                   Zaplanuj trasę
                 </Text>
-                <Text className='text-xs text-neutral-500'>
+                <Text className='text-xs text-slate-500'>
                   Wybierz rodzaj trasy do zabytku
                 </Text>
               </View>
@@ -65,7 +65,7 @@ export default function MonumentRouteModal({
 
             <Pressable
               onPress={onClose}
-              className='size-8 items-center justify-center rounded-full bg-neutral-100 active:bg-neutral-200'>
+              className='size-8 items-center justify-center rounded-full bg-slate-100 active:bg-slate-200'>
               <Ionicons
                 name='close'
                 size={18}
@@ -75,7 +75,7 @@ export default function MonumentRouteModal({
           </View>
 
           {/* Monument Preview Card */}
-          <View className='mt-4 flex-row items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50/70 p-3'>
+          <View className='mt-4 flex-row items-center gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/70 p-3'>
             {hasImage ? (
               <Image
                 source={{ uri: monument.imageUrl! }}
@@ -96,7 +96,7 @@ export default function MonumentRouteModal({
 
             <View className='flex-1'>
               <Text
-                className='text-sm font-bold text-neutral-900'
+                className='text-sm font-bold text-slate-900'
                 numberOfLines={1}>
                 {monument.name}
               </Text>
@@ -106,11 +106,11 @@ export default function MonumentRouteModal({
                   size={12}
                   color='#64748b'
                 />
-                <Text className='text-xs font-medium text-neutral-600'>
+                <Text className='text-xs font-medium text-slate-600'>
                   {formatDistance(monument.distanceM)} od Ciebie
                 </Text>
                 {monument.kind && (
-                  <Text className='text-xs font-semibold text-neutral-400 capitalize'>
+                  <Text className='text-xs font-semibold text-slate-400 capitalize'>
                     • {monument.kind}
                   </Text>
                 )}
@@ -120,7 +120,7 @@ export default function MonumentRouteModal({
 
           {/* Route Type Selection (Single choice: One Way vs Loop) */}
           <View className='mt-5'>
-            <Text className='mb-2.5 text-xs font-bold tracking-wider text-neutral-500 uppercase'>
+            <Text className='mb-2.5 text-xs font-bold tracking-wider text-slate-600 uppercase'>
               Typ trasy
             </Text>
             <View className='flex-row gap-3'>
@@ -129,13 +129,13 @@ export default function MonumentRouteModal({
                 onPress={() => setSelectedType('loop')}
                 className={`flex-1 rounded-2xl border p-3.5 ${
                   selectedType === 'loop'
-                    ? 'border-blue-600 bg-blue-50/70 shadow-sm'
-                    : 'border-neutral-200 bg-neutral-50 active:bg-neutral-100'
+                    ? 'border-indigo-600 bg-indigo-50/70 shadow-xs'
+                    : 'border-slate-200 bg-slate-50 active:bg-slate-100'
                 }`}>
                 <View className='flex-row items-center justify-between'>
                   <View
                     className={`size-8 items-center justify-center rounded-lg ${
-                      selectedType === 'loop' ? 'bg-blue-600' : 'bg-neutral-200'
+                      selectedType === 'loop' ? 'bg-indigo-600' : 'bg-slate-200'
                     }`}>
                     <Ionicons
                       name='sync-outline'
@@ -147,19 +147,19 @@ export default function MonumentRouteModal({
                     <Ionicons
                       name='checkmark-circle'
                       size={18}
-                      color='#2563eb'
+                      color='#4f46e5'
                     />
                   )}
                 </View>
                 <Text
                   className={`mt-2.5 font-bold ${
                     selectedType === 'loop'
-                      ? 'text-blue-900'
-                      : 'text-neutral-800'
+                      ? 'text-indigo-950'
+                      : 'text-slate-800'
                   }`}>
                   Pętla
                 </Text>
-                <Text className='mt-0.5 text-[11px] text-neutral-500'>
+                <Text className='mt-0.5 text-[11px] text-slate-500'>
                   Start i meta u Ciebie, trasa przez zabytek
                 </Text>
               </Pressable>
@@ -169,15 +169,15 @@ export default function MonumentRouteModal({
                 onPress={() => setSelectedType('one_way')}
                 className={`flex-1 rounded-2xl border p-3.5 ${
                   selectedType === 'one_way'
-                    ? 'border-blue-600 bg-blue-50/70 shadow-sm'
-                    : 'border-neutral-200 bg-neutral-50 active:bg-neutral-100'
+                    ? 'border-indigo-600 bg-indigo-50/70 shadow-xs'
+                    : 'border-slate-200 bg-slate-50 active:bg-slate-100'
                 }`}>
                 <View className='flex-row items-center justify-between'>
                   <View
                     className={`size-8 items-center justify-center rounded-lg ${
                       selectedType === 'one_way'
-                        ? 'bg-blue-600'
-                        : 'bg-neutral-200'
+                        ? 'bg-indigo-600'
+                        : 'bg-slate-200'
                     }`}>
                     <Ionicons
                       name='arrow-forward-outline'
@@ -189,19 +189,19 @@ export default function MonumentRouteModal({
                     <Ionicons
                       name='checkmark-circle'
                       size={18}
-                      color='#2563eb'
+                      color='#4f46e5'
                     />
                   )}
                 </View>
                 <Text
                   className={`mt-2.5 font-bold ${
                     selectedType === 'one_way'
-                      ? 'text-blue-900'
-                      : 'text-neutral-800'
+                      ? 'text-indigo-950'
+                      : 'text-slate-800'
                   }`}>
                   W jedną stronę
                 </Text>
-                <Text className='mt-0.5 text-[11px] text-neutral-500'>
+                <Text className='mt-0.5 text-[11px] text-slate-500'>
                   Trasa bezpośrednio do wybranego celu
                 </Text>
               </Pressable>
@@ -212,13 +212,13 @@ export default function MonumentRouteModal({
           <View className='mt-7'>
             <Pressable
               onPress={handleConfirm}
-              className='flex-row items-center justify-center gap-2 rounded-2xl bg-blue-600 py-3.5 shadow-md active:bg-blue-700'>
+              className='h-12 flex-row items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 shadow-sm active:bg-indigo-700 active:scale-[0.99]'>
               <Ionicons
                 name='sparkles'
                 size={18}
                 color='#ffffff'
               />
-              <Text className='text-base font-bold text-white'>
+              <Text className='text-sm font-bold text-white'>
                 Generuj trasę
               </Text>
             </Pressable>

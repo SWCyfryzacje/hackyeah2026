@@ -57,27 +57,27 @@ export default function RoutePreferencesModal({
       transparent
       animationType='fade'
       onRequestClose={onClose}>
-      <View className='flex-1 justify-end bg-black/60 sm:justify-center sm:p-6'>
+      <View className='flex-1 justify-end bg-slate-900/60 sm:justify-center sm:p-6 backdrop-blur-sm'>
         <Pressable
           className='flex-1'
           onPress={onClose}
         />
-        <View className='overflow-hidden rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl'>
+        <View className='overflow-hidden rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl border border-slate-100'>
           {/* Header */}
-          <View className='flex-row items-center justify-between border-b border-neutral-100 pb-4'>
+          <View className='flex-row items-center justify-between border-b border-slate-100 pb-4'>
             <View className='flex-row items-center gap-2.5'>
-              <View className='size-9 items-center justify-center rounded-xl bg-blue-100'>
+              <View className='size-10 items-center justify-center rounded-2xl bg-indigo-50'>
                 <Ionicons
                   name='options-outline'
                   size={20}
-                  color='#2563eb'
+                  color='#4f46e5'
                 />
               </View>
               <View>
-                <Text className='text-lg font-bold text-neutral-900'>
+                <Text className='text-lg font-extrabold text-slate-900'>
                   Generator trasy
                 </Text>
-                <Text className='text-xs text-neutral-500'>
+                <Text className='text-xs text-slate-500'>
                   Dostosuj preferencje generowania
                 </Text>
               </View>
@@ -85,7 +85,7 @@ export default function RoutePreferencesModal({
 
             <Pressable
               onPress={onClose}
-              className='size-8 items-center justify-center rounded-full bg-neutral-100 active:bg-neutral-200'>
+              className='size-8 items-center justify-center rounded-full bg-slate-100 active:bg-slate-200'>
               <Ionicons
                 name='close'
                 size={18}
@@ -96,7 +96,7 @@ export default function RoutePreferencesModal({
 
           {/* Section: Route Type */}
           <View className='mt-5'>
-            <Text className='mb-2.5 text-xs font-bold tracking-wider text-neutral-500 uppercase'>
+            <Text className='mb-2.5 text-xs font-bold tracking-wider text-slate-600 uppercase'>
               Typ trasy
             </Text>
             <View className='flex-row gap-3'>
@@ -104,32 +104,32 @@ export default function RoutePreferencesModal({
                 onPress={() => setSelectedType('loop')}
                 className={`flex-1 rounded-2xl border p-3.5 ${
                   selectedType === 'loop'
-                    ? 'border-blue-600 bg-blue-50/70'
-                    : 'border-neutral-200 bg-neutral-50 active:bg-neutral-100'
+                    ? 'border-indigo-600 bg-indigo-50/70 shadow-xs'
+                    : 'border-slate-200 bg-slate-50 active:bg-slate-100'
                 }`}>
                 <View className='flex-row items-center justify-between'>
                   <Ionicons
                     name='sync-outline'
                     size={20}
-                    color={selectedType === 'loop' ? '#2563eb' : '#64748b'}
+                    color={selectedType === 'loop' ? '#4f46e5' : '#64748b'}
                   />
                   {selectedType === 'loop' && (
                     <Ionicons
                       name='checkmark-circle'
                       size={18}
-                      color='#2563eb'
+                      color='#4f46e5'
                     />
                   )}
                 </View>
                 <Text
-                  className={`mt-2 font-bold ${
+                  className={`mt-2 text-sm font-bold ${
                     selectedType === 'loop'
-                      ? 'text-blue-900'
-                      : 'text-neutral-800'
+                      ? 'text-indigo-950'
+                      : 'text-slate-800'
                   }`}>
                   Pętla
                 </Text>
-                <Text className='mt-0.5 text-[11px] text-neutral-500'>
+                <Text className='mt-0.5 text-[11px] text-slate-500'>
                   Start i meta w tym samym punkcie
                 </Text>
               </Pressable>
@@ -138,32 +138,32 @@ export default function RoutePreferencesModal({
                 onPress={() => setSelectedType('one_way')}
                 className={`flex-1 rounded-2xl border p-3.5 ${
                   selectedType === 'one_way'
-                    ? 'border-blue-600 bg-blue-50/70'
-                    : 'border-neutral-200 bg-neutral-50 active:bg-neutral-100'
+                    ? 'border-indigo-600 bg-indigo-50/70 shadow-xs'
+                    : 'border-slate-200 bg-slate-50 active:bg-slate-100'
                 }`}>
                 <View className='flex-row items-center justify-between'>
                   <Ionicons
                     name='arrow-forward-outline'
                     size={20}
-                    color={selectedType === 'one_way' ? '#2563eb' : '#64748b'}
+                    color={selectedType === 'one_way' ? '#4f46e5' : '#64748b'}
                   />
                   {selectedType === 'one_way' && (
                     <Ionicons
                       name='checkmark-circle'
                       size={18}
-                      color='#2563eb'
+                      color='#4f46e5'
                     />
                   )}
                 </View>
                 <Text
-                  className={`mt-2 font-bold ${
+                  className={`mt-2 text-sm font-bold ${
                     selectedType === 'one_way'
-                      ? 'text-blue-900'
-                      : 'text-neutral-800'
+                      ? 'text-indigo-950'
+                      : 'text-slate-800'
                   }`}>
                   W jedną stronę
                 </Text>
-                <Text className='mt-0.5 text-[11px] text-neutral-500'>
+                <Text className='mt-0.5 text-[11px] text-slate-500'>
                   Trasa do ciekawego celu w okolicy
                 </Text>
               </Pressable>
@@ -172,7 +172,7 @@ export default function RoutePreferencesModal({
 
           {/* Section: Distance Range */}
           <View className='mt-5'>
-            <Text className='mb-2.5 text-xs font-bold tracking-wider text-neutral-500 uppercase'>
+            <Text className='mb-2.5 text-xs font-bold tracking-wider text-slate-600 uppercase'>
               Dystans
             </Text>
             <View className='flex-row gap-2'>
@@ -186,20 +186,20 @@ export default function RoutePreferencesModal({
                     onPress={() => setSelectedPreset(preset)}
                     className={`flex-1 items-center justify-center rounded-xl border py-2.5 px-1 ${
                       isSelected
-                        ? 'border-blue-600 bg-blue-600 shadow-sm'
-                        : 'border-neutral-200 bg-neutral-50 active:bg-neutral-100'
+                        ? 'border-indigo-600 bg-indigo-600 shadow-xs'
+                        : 'border-slate-200 bg-slate-50 active:bg-slate-100'
                     }`}>
                     {preset.tag && (
                       <Text
                         className={`text-[11px] font-semibold ${
-                          isSelected ? 'text-blue-100' : 'text-neutral-500'
+                          isSelected ? 'text-indigo-100' : 'text-slate-500'
                         }`}>
                         {preset.tag}
                       </Text>
                     )}
                     <Text
                       className={`text-sm font-bold ${
-                        isSelected ? 'text-white' : 'text-neutral-800'
+                        isSelected ? 'text-white' : 'text-slate-800'
                       }`}>
                       {preset.label}
                     </Text>
@@ -211,7 +211,7 @@ export default function RoutePreferencesModal({
 
           {/* Section: Travel Mode */}
           <View className='mt-5'>
-            <Text className='mb-2.5 text-xs font-bold tracking-wider text-neutral-500 uppercase'>
+            <Text className='mb-2.5 text-xs font-bold tracking-wider text-slate-600 uppercase'>
               Sposób podróży
             </Text>
             <View className='flex-row gap-3'>
@@ -219,19 +219,19 @@ export default function RoutePreferencesModal({
                 onPress={() => setSelectedProfile('walking')}
                 className={`flex-1 flex-row items-center justify-center gap-2 rounded-xl border py-3 ${
                   selectedProfile === 'walking'
-                    ? 'border-blue-600 bg-blue-50/70'
-                    : 'border-neutral-200 bg-neutral-50 active:bg-neutral-100'
+                    ? 'border-indigo-600 bg-indigo-50/70 shadow-xs'
+                    : 'border-slate-200 bg-slate-50 active:bg-slate-100'
                 }`}>
                 <Ionicons
                   name='walk-outline'
                   size={18}
-                  color={selectedProfile === 'walking' ? '#2563eb' : '#64748b'}
+                  color={selectedProfile === 'walking' ? '#4f46e5' : '#64748b'}
                 />
                 <Text
                   className={`text-sm font-bold ${
                     selectedProfile === 'walking'
-                      ? 'text-blue-900'
-                      : 'text-neutral-700'
+                      ? 'text-indigo-950'
+                      : 'text-slate-700'
                   }`}>
                   Pieszo
                 </Text>
@@ -241,19 +241,19 @@ export default function RoutePreferencesModal({
                 onPress={() => setSelectedProfile('driving')}
                 className={`flex-1 flex-row items-center justify-center gap-2 rounded-xl border py-3 ${
                   selectedProfile === 'driving'
-                    ? 'border-blue-600 bg-blue-50/70'
-                    : 'border-neutral-200 bg-neutral-50 active:bg-neutral-100'
+                    ? 'border-indigo-600 bg-indigo-50/70 shadow-xs'
+                    : 'border-slate-200 bg-slate-50 active:bg-slate-100'
                 }`}>
                 <Ionicons
                   name='car-outline'
                   size={18}
-                  color={selectedProfile === 'driving' ? '#2563eb' : '#64748b'}
+                  color={selectedProfile === 'driving' ? '#4f46e5' : '#64748b'}
                 />
                 <Text
                   className={`text-sm font-bold ${
                     selectedProfile === 'driving'
-                      ? 'text-blue-900'
-                      : 'text-neutral-700'
+                      ? 'text-indigo-950'
+                      : 'text-slate-700'
                   }`}>
                   Samochodem
                 </Text>
@@ -265,13 +265,13 @@ export default function RoutePreferencesModal({
           <View className='mt-7'>
             <Pressable
               onPress={handleGenerate}
-              className='flex-row items-center justify-center gap-2 rounded-2xl bg-blue-600 py-3.5 shadow-md active:bg-blue-700'>
+              className='h-12 flex-row items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 shadow-sm active:bg-indigo-700 active:scale-[0.99]'>
               <Ionicons
                 name='sparkles'
                 size={18}
                 color='#ffffff'
               />
-              <Text className='text-base font-bold text-white'>
+              <Text className='text-sm font-bold text-white'>
                 Generuj trasę
               </Text>
             </Pressable>

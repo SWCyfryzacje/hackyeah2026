@@ -20,17 +20,17 @@ export default function MessageBubble({ message }: Props) {
 
   return (
     <View
-      className={`max-w-[80%] gap-0.5 rounded-2xl px-3 py-2 ${mine ? 'self-end rounded-br-sm bg-blue-600' : 'self-start rounded-bl-sm bg-neutral-100'}`}>
+      className={`max-w-[80%] gap-1 rounded-3xl px-4 py-2.5 ${mine ? 'self-end rounded-br-sm bg-indigo-600 shadow-xs' : 'self-start rounded-bl-sm bg-slate-100 border border-slate-200/60'}`}>
       <Text
-        className={`text-xs font-semibold ${mine ? 'text-blue-100' : 'text-neutral-600'}`}>
+        className={`text-xs font-bold ${mine ? 'text-indigo-100' : 'text-slate-600'}`}>
         {mine ? 'Ty' : message.nick}
       </Text>
       <Text
-        className={`text-[15px] ${mine ? 'text-white' : 'text-neutral-900'}`}>
+        className={`text-sm leading-5 font-medium ${mine ? 'text-white' : 'text-slate-900'}`}>
         {message.body}
       </Text>
       <Text
-        className={`self-end text-[11px] ${mine ? 'text-blue-100' : 'text-neutral-400'}`}>
+        className={`self-end text-[10px] font-semibold ${mine ? 'text-indigo-200' : 'text-slate-400'}`}>
         {formatTime(message.createdAt)}
       </Text>
     </View>
