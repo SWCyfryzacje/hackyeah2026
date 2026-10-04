@@ -10,6 +10,7 @@ type RouteControlPanelProps = {
   isError?: boolean;
   disabled?: boolean;
   loopOptions?: LoopPreset[];
+  showLoopSelector?: boolean;
   onSelectLoop: (preset: LoopPreset) => void;
   onReset: () => void;
 };
@@ -20,6 +21,7 @@ export default function RouteControlPanel({
   isError = false,
   disabled = false,
   loopOptions = DEFAULT_LOOP_OPTIONS,
+  showLoopSelector = true,
   onSelectLoop,
   onReset,
 }: RouteControlPanelProps) {
@@ -32,18 +34,22 @@ export default function RouteControlPanel({
         {statusText}
       </Text>
 
-      <LoopSelector
-        options={loopOptions}
-        disabled={disabled}
-        onSelect={onSelectLoop}
-      />
+      {showLoopSelector && (
+        <LoopSelector
+          options={loopOptions}
+          disabled={disabled}
+          onSelect={onSelectLoop}
+        />
+      )}
 
       {children}
 
       <Pressable
         className='items-center justify-center rounded-xl bg-neutral-200 py-2.5 active:bg-neutral-300'
         onPress={onReset}>
-        <Text className='text-sm font-semibold text-neutral-800'>Reset</Text>
+        <Text className='text-sm font-semibold text-neutral-800'>
+          Wyczyść trase
+        </Text>
       </Pressable>
     </View>
   );

@@ -70,8 +70,10 @@ export function useRouteCalculation({
   const [baseLoop, setBaseLoop] = useState<BaseLoop | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isGeneratingRoute, setIsGeneratingRoute] = useState(false);
 
   const loopAbortRef = useRef<AbortController | null>(null);
+  const prevWaypointsRef = useRef<LatLng[]>([]);
 
   const loop: LoopResult | null = useMemo(
     () =>
@@ -109,11 +111,18 @@ export function useRouteCalculation({
       return;
     }
 
+    const waypointsChanged = prevWaypointsRef.current !== waypoints;
+    prevWaypointsRef.current = waypoints;
+    const isNewRoute = waypointsChanged;
+
     let active = true;
     const ctrl = new AbortController();
 
     (async () => {
       setLoading(true);
+      if (isNewRoute) {
+        setIsGeneratingRoute(true);
+      }
       setError(null);
 
       try {
@@ -128,7 +137,10 @@ export function useRouteCalculation({
         setError(e instanceof Error ? e.message : 'Route calculation failed');
         setRoute(null);
       } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setLoading(false);
+          setIsGeneratingRoute(false);
+        }
       }
     })();
 
@@ -187,10 +199,12 @@ export function useRouteCalculation({
       loopAbortRef.current = ctrl;
 
       setLoading(true);
+      setIsGeneratingRoute(true);
       setError(null);
       setRoute(null);
       setDetourRoute(null);
       setWaypoints([]);
+      prevWaypointsRef.current = [];
       setBaseLoop(null);
 
       try {
@@ -229,6 +243,7 @@ export function useRouteCalculation({
       } finally {
         if (loopAbortRef.current === ctrl) {
           setLoading(false);
+          setIsGeneratingRoute(false);
         }
       }
     },
@@ -250,15 +265,18 @@ export function useRouteCalculation({
     setBaseLoop(null);
     setDetourRoute(null);
     setWaypoints([]);
+    prevWaypointsRef.current = [];
     setRoute(null);
     setError(null);
     setLoading(false);
+    setIsGeneratingRoute(false);
   }, []);
 
   const activeRoute = loop || route;
 
   const getStatusText = useCallback(() => {
-    if (loading) return loop || baseLoop ? 'Generating loop...' : 'Calculating route...';
+    if (isGeneratingRoute) return loop || baseLoop ? 'Generating loop...' : 'Calculating route...';
+    if (loading) return 'Updating route...';
     if (error) return error;
 
     if (activeRoute) {
@@ -279,6 +297,7 @@ export function useRouteCalculation({
 
     return 'No route found';
   }, [
+    isGeneratingRoute,
     loading,
     loop,
     baseLoop,
@@ -297,6 +316,7 @@ export function useRouteCalculation({
     activeRoute,
     error,
     loading,
+    isGeneratingRoute,
     statusText: getStatusText(),
     maxWaypoints,
     generateLoop,

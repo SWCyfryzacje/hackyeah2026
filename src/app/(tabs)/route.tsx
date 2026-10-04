@@ -16,6 +16,7 @@ import {
   type RouteStop,
 } from '@/hooks/useRouteCalculation';
 import RouteControlPanel from '@/components/route/route-control-panel';
+import RouteLoadingOverlay from '@/components/route/route-loading-overlay';
 import { DEFAULT_LOOP_OPTIONS } from '@/constants/map';
 import useMonumentSuggestions from '@/hooks/useMonumentSuggestions';
 import {
@@ -52,6 +53,7 @@ export default function RouteScreen() {
     activeRoute,
     error,
     loading,
+    isGeneratingRoute,
     statusText,
     maxWaypoints,
     generateLoop,
@@ -195,13 +197,13 @@ export default function RouteScreen() {
 
         <Polyline
           coordinates={route?.coords ?? []}
-          strokeWidth={route ? 5 : 0}
+          strokeWidth={route ? 4 : 0}
           strokeColor={route ? '#2563eb' : 'transparent'}
         />
 
         <Polyline
           coordinates={loop?.coords ?? []}
-          strokeWidth={loop ? 5 : 0}
+          strokeWidth={loop ? 4 : 0}
           strokeColor={loop ? '#16a34a' : 'transparent'}
         />
       </MapView>
@@ -211,6 +213,7 @@ export default function RouteScreen() {
         isError={!!error}
         disabled={loading || !start}
         loopOptions={DEFAULT_LOOP_OPTIONS}
+        showLoopSelector={!activeRoute}
         onSelectLoop={(preset) => {
           setMonumentStops([]);
           monuments.clear();
@@ -227,6 +230,12 @@ export default function RouteScreen() {
           stops={monumentStops}
         />
       </RouteControlPanel>
+
+      <RouteLoadingOverlay
+        loading={isGeneratingRoute}
+        hasRoute={Boolean(activeRoute)}
+        loadingMessage={statusText}
+      />
     </View>
   );
 }
