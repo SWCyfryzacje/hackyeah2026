@@ -16,6 +16,30 @@ function normalizeLongitude(lon: number): number {
   return ((lon + 540) % 360) - 180;
 }
 
+export function haversineDistance(a: LatLng, b: LatLng): number {
+  const lat1 = toRad(a.latitude);
+  const lat2 = toRad(b.latitude);
+  const dLat = lat2 - lat1;
+  const dLon = toRad(normalizeLongitude(b.longitude - a.longitude));
+  const sinDLat2 = Math.sin(dLat / 2);
+  const sinDLon2 = Math.sin(dLon / 2);
+  const aVal =
+    sinDLat2 * sinDLat2 +
+    Math.cos(lat1) * Math.cos(lat2) * sinDLon2 * sinDLon2;
+  return 2 * EARTH_RADIUS_M * Math.asin(Math.min(1, Math.sqrt(aVal)));
+}
+
+export function initialBearing(a: LatLng, b: LatLng): number {
+  const lat1 = toRad(a.latitude);
+  const lat2 = toRad(b.latitude);
+  const dLon = toRad(normalizeLongitude(b.longitude - a.longitude));
+  const y = Math.sin(dLon) * Math.cos(lat2);
+  const x =
+    Math.cos(lat1) * Math.sin(lat2) -
+    Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+  return (Math.atan2(y, x) + TAU) % TAU;
+}
+
 /**
  * Accurate destination point on a sphere.
  *
@@ -374,6 +398,13 @@ export type OneWayOptions = {
 export type OneWayResult = Route & {
   destination: LatLng & { name?: string; description?: string; id?: number };
   monument?: Monument;
+};
+
+export type LoopThroughPointOptions = {
+  start: LatLng;
+  via: LatLng & { name?: string; description?: string; id?: number };
+  profile?: RouteProfile;
+  signal?: AbortSignal;
 };
 
 export async function loopOfLength({
@@ -853,4 +884,142 @@ export async function oneWayOfLength({
       });
     });
   });
+}
+
+/**
+ * Generate a closed loop route that specifically passes through a specified waypoint/monument.
+ * Evaluates diverse geometry configurations to minimize overlapping road segments.
+ */
+export async function loopThroughPoint({
+  start,
+  via,
+  profile = 'walking',
+  signal,
+}: LoopThroughPointOptions): Promise<LoopResult> {
+  const dist = haversineDistance(start, via);
+  const bearing = initialBearing(start, via);
+
+  if (dist < 50) {
+    return loopOfLength({
+      start,
+      targetMeters: 3000,
+      profile,
+      signal,
+    });
+  }
+
+  const mid = offset(start, dist * 0.5, bearing);
+
+  // Diverse candidate configurations ensuring a natural loop passing through via
+  const candidateConfigurations: LatLng[][] = [
+    // 1. Clockwise triangle / polygon
+    [
+      start,
+      offset(mid, dist * 0.45, bearing - Math.PI / 2),
+      via,
+      offset(mid, dist * 0.45, bearing + Math.PI / 2),
+      start,
+    ],
+    // 2. Counter-clockwise triangle / polygon
+    [
+      start,
+      offset(mid, dist * 0.45, bearing + Math.PI / 2),
+      via,
+      offset(mid, dist * 0.45, bearing - Math.PI / 2),
+      start,
+    ],
+    // 3. Out via point, curved back on right
+    [
+      start,
+      via,
+      offset(mid, dist * 0.55, bearing + Math.PI / 2),
+      start,
+    ],
+    // 4. Out via point, curved back on left
+    [
+      start,
+      via,
+      offset(mid, dist * 0.55, bearing - Math.PI / 2),
+      start,
+    ],
+    // 5. Curved out on right, back via point
+    [
+      start,
+      offset(mid, dist * 0.55, bearing + Math.PI / 2),
+      via,
+      start,
+    ],
+    // 6. Curved out on left, back via point
+    [
+      start,
+      offset(mid, dist * 0.55, bearing - Math.PI / 2),
+      via,
+      start,
+    ],
+    // 7. Wide arc around start and via
+    [
+      start,
+      offset(start, dist * 0.8, bearing - Math.PI / 3),
+      via,
+      offset(start, dist * 0.8, bearing + Math.PI / 3),
+      start,
+    ],
+    // 8. Tighter arc
+    [
+      start,
+      offset(mid, dist * 0.3, bearing - Math.PI / 2),
+      via,
+      offset(mid, dist * 0.3, bearing + Math.PI / 2),
+      start,
+    ],
+  ];
+
+  type ScoredCandidate = LoopResult & {
+    score: number;
+    overlap: number;
+  };
+
+  const promises = candidateConfigurations.map(async (pts) => {
+    const r = await routeBetween(pts, signal, undefined, profile);
+    const overlap = reusedRoadRatio(r.coords);
+    const areaRatio = enclosedAreaRatio(r.coords, r.distance);
+    const score = overlap * 3 - areaRatio * 0.5;
+    return {
+      coords: r.coords,
+      distance: r.distance,
+      duration: r.duration,
+      bearing,
+      ring: pts.slice(1, -1),
+      score,
+      overlap,
+    };
+  });
+
+  const settled = await Promise.allSettled(promises);
+  const valid: ScoredCandidate[] = settled
+    .filter(
+      (res): res is PromiseFulfilledResult<ScoredCandidate> =>
+        res.status === 'fulfilled'
+    )
+    .map((res) => res.value);
+
+  if (valid.length > 0) {
+    valid.sort((a, b) => a.score - b.score);
+    return valid[0];
+  }
+
+  // Fallback direct loop
+  const fallbackRoute = await routeBetween(
+    [start, via, start],
+    signal,
+    undefined,
+    profile
+  );
+  return {
+    coords: fallbackRoute.coords,
+    distance: fallbackRoute.distance,
+    duration: fallbackRoute.duration,
+    bearing,
+    ring: [via],
+  };
 }

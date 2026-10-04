@@ -63,7 +63,7 @@ export default function RouteControlPanel({
           className='items-center justify-center rounded-xl bg-neutral-200 py-2.5 active:bg-neutral-300'
           onPress={onReset}>
           <Text className='text-sm font-semibold text-neutral-800'>
-            Wyczyść trasę
+            Wyczyść
           </Text>
         </Pressable>
       )}

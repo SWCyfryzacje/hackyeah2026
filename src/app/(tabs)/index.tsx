@@ -26,19 +26,26 @@ import {
 import { useSupabase } from '@/lib/supabase';
 import { fetchMonumentsNear, type Monument } from '@/utils/monuments';
 import { formatDistance } from '@/components/monument-marker';
+import MonumentRouteModal from '@/components/route/monument-route-modal';
+import type { RouteType } from '@/hooks/useRouteCalculation';
 
 // Default Kraków coordinates if user location is not yet ready
 const DEFAULT_COORDS = { latitude: 50.0614, longitude: 19.9366 };
 
-function MonumentCard({ monument }: { monument: Monument }) {
-  const router = useRouter();
+function MonumentCard({
+  monument,
+  onPress,
+}: {
+  monument: Monument;
+  onPress?: () => void;
+}) {
   const [imageError, setImageError] = useState(false);
 
   const hasImage = Boolean(monument.imageUrl) && !imageError;
 
   return (
     <Pressable
-      onPress={() => router.push('/(tabs)/map')}
+      onPress={onPress}
       className='w-64 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm active:opacity-90'>
       {hasImage ? (
         <View className='relative h-32 w-full overflow-hidden bg-neutral-100'>
@@ -120,7 +127,7 @@ function MonumentCard({ monument }: { monument: Monument }) {
 
         <View className='mt-3 flex-row items-center justify-between border-t border-neutral-100 pt-2'>
           <Text className='text-[11px] font-semibold text-blue-600'>
-            Pokaż na mapie
+            Zaplanuj trasę
           </Text>
           <Ionicons
             name='arrow-forward'
@@ -154,6 +161,28 @@ export default function Home() {
   const [locationLoading, setLocationLoading] = useState(false);
   const [nearbyMonuments, setNearbyMonuments] = useState<Monument[]>([]);
   const [monumentsLoading, setMonumentsLoading] = useState(false);
+  const [selectedMonumentForRoute, setSelectedMonumentForRoute] =
+    useState<Monument | null>(null);
+
+  const handleSelectMonumentRouteType = useCallback(
+    (type: RouteType) => {
+      if (!selectedMonumentForRoute) return;
+      const target = selectedMonumentForRoute;
+      setSelectedMonumentForRoute(null);
+      router.push({
+        pathname: '/(tabs)/route',
+        params: {
+          targetLat: target.latitude.toString(),
+          targetLng: target.longitude.toString(),
+          targetName: target.name,
+          targetDescription: target.description ?? '',
+          targetType: type,
+          targetMonumentId: target.id.toString(),
+        },
+      });
+    },
+    [selectedMonumentForRoute, router]
+  );
 
   // Time-appropriate greeting
   const greeting = useMemo(() => {
@@ -643,6 +672,7 @@ export default function Home() {
                 <MonumentCard
                   key={monument.id}
                   monument={monument}
+                  onPress={() => setSelectedMonumentForRoute(monument)}
                 />
               ))}
             </ScrollView>
@@ -876,6 +906,13 @@ export default function Home() {
           </View>
         </View>
       </ScrollView>
+
+      <MonumentRouteModal
+        visible={Boolean(selectedMonumentForRoute)}
+        monument={selectedMonumentForRoute}
+        onClose={() => setSelectedMonumentForRoute(null)}
+        onConfirm={handleSelectMonumentRouteType}
+      />
     </SafeView>
   );
 }
