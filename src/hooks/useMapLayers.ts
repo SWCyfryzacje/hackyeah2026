@@ -4,7 +4,8 @@ export type MapLayer = 'monuments' | 'events' | 'recreation';
 export type MapLayers = Record<MapLayer, boolean>;
 
 // Shared across screens (map tab and route tab), kept in memory for the session.
-let layers: MapLayers = { monuments: true, events: true, recreation: true };
+// Events and recreation start hidden; users switch them on from the layer card.
+let layers: MapLayers = { monuments: true, events: false, recreation: false };
 const listeners = new Set<() => void>();
 
 function setLayer(layer: MapLayer, visible: boolean) {

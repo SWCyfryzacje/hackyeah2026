@@ -5,6 +5,7 @@ import {
   RefreshControl,
   ScrollView,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
@@ -25,6 +26,8 @@ export default function GroupRouteScreen() {
   const { route, participants, myRole, loading, error, refresh } =
     useGroupRoute(id);
   const [refreshing, setRefreshing] = useState(false);
+  // Percent heights don't resolve inside a ScrollView, so size the map from the window
+  const { height: windowHeight } = useWindowDimensions();
 
   // Creator's device shares its position while the route is live
   const sharing = useLocationSharing({
@@ -97,7 +100,7 @@ export default function GroupRouteScreen() {
             tintColor='#4f46e5'
           />
         }>
-        <View className='h-1/2'>
+        <View style={{ height: windowHeight / 2 }}>
           <GroupRouteMap
             route={route}
             showLive={isMember && route.status === 'live'}

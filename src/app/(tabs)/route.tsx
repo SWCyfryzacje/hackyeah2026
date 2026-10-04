@@ -36,10 +36,7 @@ import {
 import MapLayerToggles, { MapLayerGate } from '@/components/map-layer-toggles';
 import { MAX_ROUTE_DAYS_AHEAD } from '@/components/group-routes/new-group-route-schema';
 import useRecreationSuggestions from '@/hooks/useRecreationSuggestions';
-import {
-  RecreationSuggestionList,
-  RecreationSuggestionMarkers,
-} from '@/components/recreation-suggestions';
+import { RecreationSuggestionMarkers } from '@/components/recreation-suggestions';
 import StartNavigationButton from '@/components/route/start-navigation-button';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
@@ -336,7 +333,6 @@ export default function RouteScreen() {
         }}>
         <MonumentSuggestionList {...monuments} />
         <EventSuggestionList {...events} />
-        <RecreationSuggestionList {...recreation} />
         {activeRoute && (
           <CreateGroupRouteButton
             route={activeRoute}

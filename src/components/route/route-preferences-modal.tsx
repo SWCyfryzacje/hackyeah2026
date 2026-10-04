@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { RouteProfile, RouteType } from '@/hooks/useRouteCalculation';
 import {
   DEFAULT_ROUTE_DISTANCE_OPTIONS,
@@ -40,6 +41,8 @@ export default function RoutePreferencesModal({
   const [selectedProfile, setSelectedProfile] = useState<RouteProfile>(
     initialPreferences?.profile ?? 'walking'
   );
+  // Keep the sheet above the system navigation bar (edge-to-edge on Android)
+  const { bottom } = useSafeAreaInsets();
 
   const handleGenerate = () => {
     onConfirm({
@@ -62,7 +65,9 @@ export default function RoutePreferencesModal({
           className='flex-1'
           onPress={onClose}
         />
-        <View className='overflow-hidden rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl border border-slate-100'>
+        <View
+          className='overflow-hidden rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl border border-slate-100'
+          style={{ paddingBottom: 24 + bottom }}>
           {/* Header */}
           <View className='flex-row items-center justify-between border-b border-slate-100 pb-4'>
             <View className='flex-row items-center gap-2.5'>
