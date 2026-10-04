@@ -66,10 +66,8 @@ export default function GroupRouteScreen() {
         </Text>
         <Pressable
           onPress={goToList}
-          className='rounded-xl bg-indigo-600 px-5 py-3 shadow-xs active:bg-indigo-700 active:scale-[0.99]'>
-          <Text className='text-sm font-bold text-white'>
-            Wróć do Razem
-          </Text>
+          className='rounded-xl bg-indigo-600 px-5 py-3 shadow-xs active:scale-[0.99] active:bg-indigo-700'>
+          <Text className='text-sm font-bold text-white'>Wróć do Razem</Text>
         </Pressable>
       </View>
     );
@@ -82,13 +80,25 @@ export default function GroupRouteScreen() {
       <Stack.Screen
         options={{
           title: route.title,
-          headerTitleStyle: { fontSize: 18, fontWeight: '700', color: '#0f172a' },
+          headerTitleStyle: {
+            fontSize: 18,
+            fontWeight: '700',
+            color: '#0f172a',
+          },
         }}
       />
+
+      <View className='h-72 w-full'>
+        <GroupRouteMap
+          route={route}
+          showLive={isMember && route.status === 'live'}
+        />
+      </View>
+
       <ScrollView
+        className='flex-1'
         contentContainerStyle={{
           paddingBottom: 40,
-          gap: 20,
         }}
         refreshControl={
           <RefreshControl
@@ -97,14 +107,7 @@ export default function GroupRouteScreen() {
             tintColor='#4f46e5'
           />
         }>
-        <View className='h-1/2'>
-          <GroupRouteMap
-            route={route}
-            showLive={isMember && route.status === 'live'}
-          />
-        </View>
-
-        <View className='flex gap-4 px-4'>
+        <View className='flex gap-4 p-4'>
           <GroupRouteInfo route={route} />
 
           <GroupRouteActions
