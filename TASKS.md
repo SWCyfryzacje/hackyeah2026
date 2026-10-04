@@ -91,6 +91,7 @@ Pliki:
 |---|---|---|---|---|
 | I1 | Merge T1–T4 do `teammates`, `tsc` + `lint` | T1–T4 | czysto | ✅ `tsc`: 0 błędów w `src/` (jedyne błędy to lokalne, nieśledzone Edge Functions Deno w `supabase/functions/`); `lint`: 0 błędów, 1 zastane ostrzeżenie (`sign-verify.tsx`) |
 | I2 | Scenariusz demo na 2 urządzeniach/kontach (tworzenie → dołączenie → start → marker → czat → koniec) | I1 | opisany wynik w tym pliku | ⬜ wymaga 2 urządzeń — do wykonania przez użytkownika (patrz niżej) |
+| I3 | Branch `teammates-dev` = `teammates` + `dev` (`cf6694b`): merge bez konfliktów; przywrócony `useProfileSync()` w `src/app/_layout.tsx` (usunięty na dev w `6a4f9ce` — bez niego `create_group_route` rzuca „Brak profilu użytkownika”); zakładka Razem bez własnego `StatusBar`, `GroupRouteMap` na wrapperze `map-view` (`cleanLightStyle`) | I1 | `tsc` 0 błędów w `src/`, `lint` 0 błędów | ✅ lint: 4 nowe ostrzeżenia z dev (nieużywany import `StatusBar`); do zgłoszenia autorowi dev: przywrócić `useProfileSync()` też na `dev` |
 
 ### I2 — scenariusz demo (do przejścia na 2 urządzeniach / 2 kontach Clerk)
 1. `npx expo start --clear` (czyści typy tras i cache Metro).
