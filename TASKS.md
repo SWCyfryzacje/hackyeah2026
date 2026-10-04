@@ -84,7 +84,7 @@ Pliki:
 | ID | Task | Kryterium ukończenia | Status |
 |---|---|---|---|
 | T4.1 | Skrypt testów w `begin … rollback` (symulacja 3 użytkowników przez `set local role authenticated` + `request.jwt.claims`): nie-uczestnik nie widzi pozycji/czatu/trasy prywatnej, uczestnik nie może startować/wysyłać pozycji, brak pisania po zakończeniu, limit 500 | skrypt gotowy; **uruchomienie tylko po zgodzie użytkownika** | ✅ `518a776` — uruchomiony za zgodą (rollback): **171/173 PASS**; brak danych testowych po przebiegu |
-| T4.2 | Poprawka znaleziska T4 (9.6b, 9.7b): check treści wiadomości liczył długość po `btrim()` (tylko spacje) → przechodziły wiadomości 10 001 znaków ze spacjami i same `\t\n`. Migracja `20261004090200_group_routes_message_body_check.sql` (lider) | migracja zastosowana, testy 9.6b/9.7b PASS | ⛔ czeka na zgodę użytkownika na zastosowanie |
+| T4.2 | Poprawka znaleziska T4 (9.6b, 9.7b): check treści wiadomości liczył długość po `btrim()` (tylko spacje) → przechodziły wiadomości 10 001 znaków ze spacjami i same `\t\n`. Migracja `20261004090200_group_routes_message_body_check.sql` (lider) | migracja zastosowana, testy 9.6b/9.7b PASS | ✅ zastosowana przez MCP za zgodą; ponowny przebieg testów: **173/173 PASS** (rollback, brak danych testowych) |
 
 ## Faza 2c — integracja (lider)
 | ID | Task | Zależy od | Kryterium ukończenia | Status |
