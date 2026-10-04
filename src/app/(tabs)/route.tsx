@@ -5,7 +5,7 @@ import React, {
   useState,
   type ComponentProps,
 } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import RNMapView, { Marker, Polyline, type LatLng } from 'react-native-maps';
 import * as Location from 'expo-location';
 import LocationModal from '@/components/location-modal';
@@ -24,6 +24,7 @@ import {
   MonumentSuggestionMarkers,
 } from '@/components/monument-suggestions';
 import CreateGroupRouteButton from '@/components/group-routes/create-group-route-button';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function RouteScreen() {
   const { granted, visibility, onAllow, onLater } = useLocationPermission();
@@ -132,6 +133,18 @@ export default function RouteScreen() {
     addWaypoint(e.nativeEvent.coordinate);
   };
 
+  const goToMe = async () => {
+    try {
+      const { coords } = await Location.getCurrentPositionAsync({});
+      mapRef.current?.animateCamera({
+        center: { latitude: coords.latitude, longitude: coords.longitude },
+        zoom: 16,
+      });
+    } catch (e) {
+      console.warn('Location error:', e instanceof Error ? e.message : e);
+    }
+  };
+
   return (
     <View className='flex-1'>
       <LocationModal
@@ -139,6 +152,16 @@ export default function RouteScreen() {
         onAllow={onAllow}
         onLater={onLater}
       />
+
+      <Pressable
+        onPress={goToMe}
+        className='absolute top-21 right-4 z-10 size-10 items-center justify-center rounded-full bg-white shadow-lg'>
+        <Ionicons
+          name='locate'
+          size={24}
+          color='#2563eb'
+        />
+      </Pressable>
 
       <MapView
         ref={mapRef}
