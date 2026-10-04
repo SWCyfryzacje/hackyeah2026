@@ -44,7 +44,7 @@ export default function JoinByCodeForm({ onJoined }: Props) {
       <Text className='text-sm font-bold text-neutral-900'>Dołącz kodem</Text>
       <View className='flex-row gap-2'>
         <TextInput
-          className='h-12 flex-1 rounded-xl border border-neutral-300 bg-white px-4 text-base font-semibold tracking-widest text-neutral-900'
+          className='h-12 flex-1 rounded-xl border border-neutral-300 bg-white pl-4 text-base font-semibold tracking-widest text-neutral-900'
           value={code}
           onChangeText={(t) => {
             setCode(
