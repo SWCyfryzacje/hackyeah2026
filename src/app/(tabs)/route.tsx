@@ -27,6 +27,7 @@ import {
   MonumentSuggestionMarkers,
 } from '@/components/monument-suggestions';
 import CreateGroupRouteButton from '@/components/group-routes/create-group-route-button';
+import StartNavigationButton from '@/components/route/start-navigation-button';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 
@@ -76,6 +77,7 @@ export default function RouteScreen() {
     isGeneratingRoute,
     statusText,
     maxWaypoints,
+    profile,
     generateRoute,
     generateLoop,
     generateLoopThroughPoint,
@@ -292,6 +294,16 @@ export default function RouteScreen() {
           <CreateGroupRouteButton
             route={activeRoute}
             stops={monumentStops}
+          />
+        )}
+        {activeRoute && (
+          <StartNavigationButton
+            start={start}
+            route={activeRoute}
+            loop={loop}
+            waypoints={waypoints}
+            stops={monumentStops}
+            profile={profile}
           />
         )}
       </RouteControlPanel>
