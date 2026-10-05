@@ -1,35 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { LatLng } from 'react-native-maps';
 import type { Route } from '@/utils/oneWayRoute';
+import { Monument, MonumentRow } from '@/types/monuments';
 
 // Max points sent to monuments_along_route; OSRM overview=full can return thousands.
 const MAX_ROUTE_POINTS = 300;
-
-export type Monument = {
-  id: number;
-  name: string;
-  kind: string;
-  description: string | null;
-  imageUrl: string | null;
-  score: number;
-  latitude: number;
-  longitude: number;
-  distanceM: number; // from the user (near) or from the route (along route)
-  routeFraction?: number; // 0..1 position along the route
-};
-
-type MonumentRow = {
-  id: number;
-  name: string;
-  kind: string;
-  description: string | null;
-  image_url: string | null;
-  score: number;
-  latitude: number;
-  longitude: number;
-  distance_m: number;
-  route_fraction?: number;
-};
 
 const normalizeImageUrl = (url: string | null | undefined): string | null => {
   if (!url) return null;

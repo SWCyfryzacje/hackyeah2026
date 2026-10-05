@@ -5,6 +5,7 @@ import { tokenCache } from '@clerk/expo/token-cache';
 import LoadingScreen from '@/components/loading-screen';
 import useProfileSync from '@/hooks/useProfileSync';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -17,6 +18,10 @@ if (!publishableKey) {
 function RootLayoutContent() {
   const { isLoaded: authLoaded } = useAuth();
   useProfileSync();
+
+  useEffect(() => {
+    if (authLoaded) SplashScreen.hideAsync();
+  }, [authLoaded]);
 
   if (!authLoaded) return <LoadingScreen />;
 
