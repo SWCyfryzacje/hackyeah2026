@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "njord",
-    "slug": "expo-template",
+    "slug": "njord",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -19,8 +19,7 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false,
-      "package": "pl.swc.njord"
+      "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
